@@ -1,0 +1,35 @@
+{
+  "name": "Resource",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "file_size": {
+      "type": "string"
+    },
+    "tag": {
+      "type": "string",
+      "enum": [
+        "Competition",
+        "Curriculum",
+        "Practice",
+        "IEO",
+        "Workshops"
+      ]
+    },
+    "public": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
