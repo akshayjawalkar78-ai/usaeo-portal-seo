@@ -1,0 +1,44 @@
+{
+  "name": "Ranking",
+  "type": "object",
+  "properties": {
+    "student_name": {
+      "type": "string"
+    },
+    "school": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number"
+    },
+    "rank": {
+      "type": "number"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "qualifiers",
+        "finals"
+      ],
+      "default": "qualifiers"
+    },
+    "year": {
+      "type": "string",
+      "default": "2026"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "student_name",
+    "school",
+    "score",
+    "rank",
+    "stage"
+  ]
+}
