@@ -1,0 +1,20 @@
+{
+  "name": "ChapterAnnouncement",
+  "type": "object",
+  "properties": {
+    "chapter_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "chapter_id",
+    "title",
+    "body"
+  ]
+}
