@@ -1,0 +1,45 @@
+{
+  "name": "Chapter",
+  "type": "object",
+  "properties": {
+    "school": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "founder_name": {
+      "type": "string"
+    },
+    "founder_email": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "member_count": {
+      "type": "number",
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "invite_code": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "school",
+    "city",
+    "state"
+  ]
+}
