@@ -75,14 +75,14 @@ export default function Chapters() {
         </div>
       </section>
 
-      {/* MAP SECTION */}
+      {/* MAP + ACTIVE CHAPTERS */}
       <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Chapter Map</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Active Chapters</p>
             <h2 className="font-serif text-3xl text-foreground">Find chapters near you</h2>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm" style={{ height: 440 }}>
+          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10" style={{ height: 440 }}>
             <MapContainer
               center={[38.5, -96]}
               zoom={4}
@@ -105,16 +105,6 @@ export default function Chapters() {
                 </Marker>
               ))}
             </MapContainer>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Active Chapters Grid */}
-      <section className="py-20 px-5 border-t border-border">
-        <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeUp()} className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Active Chapters</p>
-            <h2 className="font-serif text-3xl text-foreground">Click a chapter to learn more</h2>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {chapters.map((c, i) => (

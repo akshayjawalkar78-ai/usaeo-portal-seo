@@ -464,23 +464,21 @@ export default function Home() {
 
       {/* ── CTA ── */}
       <section className="py-24 md:py-32 bg-orange-500">
-        <div className="max-w-4xl mx-auto px-5">
-          <motion.div {...fadeUp()} className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="font-serif text-4xl md:text-5xl text-white mb-5 leading-tight">
-                Ready to compete?
-              </h2>
-              <p className="text-lg text-white/80 leading-relaxed">
-                Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
+        <div className="max-w-2xl mx-auto px-5 text-center">
+          <motion.div {...fadeUp()} className="flex flex-col items-center gap-6">
+            <h2 className="font-serif text-4xl md:text-5xl text-white leading-tight">
+              Ready to compete?
+            </h2>
+            <p className="text-lg text-white/80 leading-relaxed max-w-lg">
+              Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
+            </p>
+            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
               <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-white text-primary rounded-full font-semibold hover:bg-white/90 transition-colors text-base">
+                className="inline-flex items-center justify-center gap-2 w-full px-7 py-4 bg-white text-primary rounded-full font-semibold hover:bg-white/90 transition-colors text-base">
                 Register Now — Free <ArrowRight className="w-4 h-4" />
               </a>
               <a href="mailto:info@usaeo.org"
-                className="text-sm text-white/70 hover:text-white transition-colors text-center">
+                className="text-sm text-white/70 hover:text-white transition-colors">
                 Questions? Email info@usaeo.org →
               </a>
             </div>
