@@ -6,7 +6,7 @@ module.exports = {
     extend: {
       fontFamily: {
         inter: ['var(--font-inter)', 'sans-serif'],
-        serif: ['var(--font-serif)', 'serif'],
+        serif: ['var(--font-inter)', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

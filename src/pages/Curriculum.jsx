@@ -67,7 +67,7 @@ export default function Curriculum() {
                 <div className="p-6 md:p-8">
                   <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="flex items-start gap-5 flex-1">
-                      <span className="font-serif text-4xl text-orange-100 leading-none flex-shrink-0">{unit.n}</span>
+                      <span className="font-serif text-4xl text-orange-300 leading-none flex-shrink-0">{unit.n}</span>
                       <div>
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="font-semibold text-foreground text-lg">{unit.title}</h3>

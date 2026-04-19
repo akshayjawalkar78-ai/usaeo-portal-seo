@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, MapPin, Users, X, ExternalLink } from 'lucide-react';
+import { ArrowRight, MapPin, Users, X, ExternalLink, Calendar, BookOpen, Mic2, Trophy, Radio } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
 
-// Fix default Leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -14,12 +13,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const orangeIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const orangeIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:hsl(24,95%,53%);border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+  popupAnchor: [0, -10],
 });
 
 const fadeUp = (delay = 0) => ({
@@ -39,6 +38,14 @@ const chapters = [
   { school: 'Montgomery Blair High School', city: 'Silver Spring, MD', members: 19, lat: 39.0415, lng: -77.0009, founded: 'Dec 2024', focus: 'Econometrics, data science' },
   { school: 'Lynbrook High School', city: 'San Jose, CA', members: 21, lat: 37.3508, lng: -121.9961, founded: 'Feb 2025', focus: 'Competition strategy, IEO prep' },
   { school: 'River Hill High School', city: 'Clarksville, MD', members: 14, lat: 39.1774, lng: -76.9247, founded: 'Mar 2025', focus: 'Economics outreach, mentorship' },
+];
+
+const founderActions = [
+  { icon: Calendar, action: 'Host weekly or bi-weekly economics meetings' },
+  { icon: BookOpen, action: 'Run study sessions using USAEO curriculum' },
+  { icon: Mic2, action: 'Invite guest speakers from academia & industry' },
+  { icon: Trophy, action: 'Organize local mock competition rounds' },
+  { icon: Radio, action: 'Spread USAEO awareness at your school' },
 ];
 
 export default function Chapters() {
@@ -75,7 +82,7 @@ export default function Chapters() {
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Chapter Map</p>
             <h2 className="font-serif text-3xl text-foreground">Find chapters near you</h2>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="rounded-2xl overflow-hidden border border-border shadow-sm" style={{ height: 440 }}>
+          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm" style={{ height: 440 }}>
             <MapContainer
               center={[38.5, -96]}
               zoom={4}
@@ -99,6 +106,40 @@ export default function Chapters() {
               ))}
             </MapContainer>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Active Chapters Grid */}
+      <section className="py-20 px-5 border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Active Chapters</p>
+            <h2 className="font-serif text-3xl text-foreground">Click a chapter to learn more</h2>
+          </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {chapters.map((c, i) => (
+              <motion.div key={c.school} {...fadeUp(i * 0.06)}>
+                <button onClick={() => setSelected(c)}
+                  className="w-full text-left bg-white border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all duration-200 group">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">{c.school}</h3>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+                        <MapPin className="w-3 h-3" /> {c.city}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{c.focus}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1.5 rounded-full flex-shrink-0">
+                      <Users className="w-3 h-3" /> {c.members}
+                    </div>
+                  </div>
+                </button>
+              </motion.div>
+            ))}
+          </div>
+          <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
+            Showing {chapters.length} active chapters · More joining every week
+          </motion.p>
         </div>
       </section>
 
@@ -138,16 +179,10 @@ export default function Chapters() {
             <div className="bg-white border border-border rounded-2xl p-6">
               <h3 className="font-semibold text-foreground mb-4">What chapter founders do</h3>
               <div className="space-y-3">
-                {[
-                  { icon: '📅', action: 'Host weekly or bi-weekly economics meetings' },
-                  { icon: '📚', action: 'Run study sessions using USAEO curriculum' },
-                  { icon: '🎙️', action: 'Invite guest speakers from academia & industry' },
-                  { icon: '🏆', action: 'Organize local mock competition rounds' },
-                  { icon: '📡', action: 'Spread USAEO awareness at your school' },
-                ].map((item) => (
-                  <div key={item.action} className="flex items-start gap-3">
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="text-sm text-muted-foreground">{item.action}</span>
+                {founderActions.map(({ icon: Icon, action }) => (
+                  <div key={action} className="flex items-start gap-3">
+                    <Icon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">{action}</span>
                   </div>
                 ))}
               </div>
@@ -157,40 +192,6 @@ export default function Chapters() {
               <p className="text-sm text-muted-foreground">Applications are open year-round. Chapters can be founded at any public or private high school in the US.</p>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Active Chapters Grid */}
-      <section className="py-20 px-5">
-        <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeUp()} className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Active Chapters</p>
-            <h2 className="font-serif text-3xl text-foreground">Click a chapter to learn more</h2>
-          </motion.div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {chapters.map((c, i) => (
-              <motion.div key={c.school} {...fadeUp(i * 0.06)}>
-                <button onClick={() => setSelected(c)}
-                  className="w-full text-left bg-white border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all duration-200 group">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">{c.school}</h3>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                        <MapPin className="w-3 h-3" /> {c.city}
-                      </div>
-                      <p className="text-xs text-muted-foreground">{c.focus}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1.5 rounded-full flex-shrink-0">
-                      <Users className="w-3 h-3" /> {c.members}
-                    </div>
-                  </div>
-                </button>
-              </motion.div>
-            ))}
-          </div>
-          <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
-            Showing {chapters.length} active chapters · More joining every week
-          </motion.p>
         </div>
       </section>
 

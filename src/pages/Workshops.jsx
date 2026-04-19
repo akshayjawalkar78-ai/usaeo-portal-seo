@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Calendar, Clock, Users, ChevronDown, ChevronUp, Video, BookOpen } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, Users, ChevronDown, ChevronUp, Video, BookOpen, BarChart2, Building2, Globe2, Gamepad2, TrendingUp, Trophy, Brain, Scale, GraduationCap, FileText, Star } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
@@ -165,7 +165,7 @@ export default function Workshops() {
                   <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full flex-shrink-0">{w.tag}</span>
                   <div>
                     <div className="text-sm font-medium text-foreground">{w.title}</div>
-                    <div className="text-xs text-muted-foreground">{w.attendees} attended · ⭐ {w.rating}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">{w.attendees} attended · <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {w.rating}</div>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground flex-shrink-0 ml-4">{w.date}</span>
@@ -182,14 +182,18 @@ export default function Workshops() {
             <h2 className="font-serif text-3xl text-foreground mb-6">What we cover</h2>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { topic: 'Microeconomics', icon: '📊' }, { topic: 'Macroeconomics', icon: '🏛️' },
-                { topic: 'International Trade', icon: '🌍' }, { topic: 'Game Theory', icon: '♟️' },
-                { topic: 'Data Analysis', icon: '📈' }, { topic: 'Competition Prep', icon: '🏆' },
-                { topic: 'Behavioral Econ', icon: '🧠' }, { topic: 'Economic Policy', icon: '⚖️' },
-              ].map((t) => (
-                <div key={t.topic} className="flex items-center gap-3 bg-muted/50 border border-border rounded-xl px-4 py-3">
-                  <span className="text-lg">{t.icon}</span>
-                  <span className="text-sm font-medium text-foreground">{t.topic}</span>
+                { topic: 'Microeconomics', icon: BarChart2 },
+                { topic: 'Macroeconomics', icon: Building2 },
+                { topic: 'International Trade', icon: Globe2 },
+                { topic: 'Game Theory', icon: Gamepad2 },
+                { topic: 'Data Analysis', icon: TrendingUp },
+                { topic: 'Competition Prep', icon: Trophy },
+                { topic: 'Behavioral Econ', icon: Brain },
+                { topic: 'Economic Policy', icon: Scale },
+              ].map(({ topic, icon: Icon }) => (
+                <div key={topic} className="flex items-center gap-3 bg-muted/50 border border-border rounded-xl px-4 py-3">
+                  <Icon className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm font-medium text-foreground">{topic}</span>
                 </div>
               ))}
             </div>
@@ -198,16 +202,16 @@ export default function Workshops() {
             <h2 className="font-serif text-3xl text-foreground mb-6">Why attend?</h2>
             <div className="space-y-4">
               {[
-                { emoji: '📚', title: 'Competition-aligned content', desc: 'Every session is specifically designed to build skills tested in USAEO and IEO competitions.' },
-                { emoji: '🎓', title: 'Expert instructors', desc: 'Led by professional economists, PhD students, and former Olympiad competitors from top universities.' },
-                { emoji: '🤝', title: 'Interactive format', desc: 'Live Q&A, problem-solving breakouts, and real-time polls keep sessions engaging and effective.' },
-                { emoji: '📝', title: 'Practice materials', desc: 'All attendees receive problem sets, slide decks, and additional reading recommendations.' },
-              ].map((item) => (
-                <div key={item.title} className="flex gap-4">
-                  <span className="text-xl flex-shrink-0">{item.emoji}</span>
+                { icon: BookOpen, title: 'Competition-aligned content', desc: 'Every session is specifically designed to build skills tested in USAEO and IEO competitions.' },
+                { icon: GraduationCap, title: 'Expert instructors', desc: 'Led by professional economists, PhD students, and former Olympiad competitors from top universities.' },
+                { icon: Users, title: 'Interactive format', desc: 'Live Q&A, problem-solving breakouts, and real-time polls keep sessions engaging and effective.' },
+                { icon: FileText, title: 'Practice materials', desc: 'All attendees receive problem sets, slide decks, and additional reading recommendations.' },
+              ].map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="flex gap-4">
+                  <Icon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-foreground text-sm mb-1">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    <h3 className="font-semibold text-foreground text-sm mb-1">{title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
