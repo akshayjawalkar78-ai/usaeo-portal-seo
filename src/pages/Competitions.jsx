@@ -16,21 +16,18 @@ const phases = [
     n: '01', status: 'upcoming', badge: 'Feb 28, 2026 · Virtual',
     title: 'National Qualifiers',
     desc: 'A two-hour virtual exam with multiple-choice and short-answer questions. Students choose their session: 11 AM ET or 6 PM ET. Top scorers advance to the National Finals.',
-    details: ['2-hour virtual exam', 'Multiple choice + short answer', 'Two session options', 'Top scorers advance'],
     cta: { label: 'Register Free', href: 'https://usaeo.org/register' },
   },
   {
     n: '02', status: 'future', badge: 'May 2026 · In-Person',
     title: 'National Finals',
     desc: 'An intensive in-person competition featuring a comprehensive written examination and real-world case study analysis. Top students form the USA national team.',
-    details: ['In-person format', 'Written exam + case study', 'National team selection', 'Top students qualify for IEO'],
     cta: { label: 'Learn More', href: 'https://usaeo.org/register' },
   },
   {
     n: '03', status: 'future', badge: 'Summer 2026 · Global',
     title: 'International Economics Olympiad',
     desc: 'The national team represents the USA at the IEO, competing against the world\'s top young economists from 50+ countries on a global stage.',
-    details: ['Represent the USA', '50+ countries compete', 'International recognition', 'Networking with global peers'],
     cta: { label: 'About the IEO', to: '/competitions/ieo' },
   },
 ];
@@ -72,11 +69,6 @@ export default function Competitions() {
                     </div>
                     <h2 className="font-serif text-3xl text-foreground mb-3">{phase.title}</h2>
                     <p className="text-muted-foreground leading-relaxed mb-6 max-w-2xl">{phase.desc}</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                      {phase.details.map((d) => (
-                        <div key={d} className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">{d}</div>
-                      ))}
-                    </div>
                     {phase.cta.href ? (
                       <a href={phase.cta.href} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">

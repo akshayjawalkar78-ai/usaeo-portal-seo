@@ -48,12 +48,12 @@ export default function Curriculum() {
 
       <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeUp()} className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-16">
-            {[['100%', 'Free'], ['6', 'Units'], ['30+', 'Hours'], ['Self-paced', 'Learn anywhere'], ['Competition-aligned', 'USAEO syllabus'], ['Beginner-friendly', 'No prior knowledge']].map(([v, l], i) => (
-              <motion.div key={l} {...fadeUp(i * 0.06)} className="text-center p-4 bg-muted/30 rounded-xl border border-border">
-                <div className="font-serif text-2xl text-primary mb-1">{v}</div>
-                <div className="text-xs text-muted-foreground">{l}</div>
-              </motion.div>
+          <motion.div {...fadeUp()} className="flex flex-wrap gap-10 mb-16">
+            {[['100%', 'Free'], ['6', 'Units'], ['30+', 'Hours of content'], ['Self-paced', 'Learn anywhere'], ['Beginner-friendly', 'No prior knowledge needed']].map(([v, l]) => (
+              <div key={l}>
+                <div className="font-serif text-3xl text-primary mb-1">{v}</div>
+                <div className="text-sm text-muted-foreground">{l}</div>
+              </div>
             ))}
           </motion.div>
 
@@ -69,13 +69,15 @@ export default function Curriculum() {
                     <div className="flex items-start gap-5 flex-1">
                       <span className="font-serif text-4xl text-orange-300 leading-none flex-shrink-0">{unit.n}</span>
                       <div>
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-3">
                           <h3 className="font-semibold text-foreground text-lg">{unit.title}</h3>
-                          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">{unit.hrs}</span>
+                          <span className="text-xs text-muted-foreground">{unit.hrs}</span>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="space-y-1">
                           {unit.topics.map((t) => (
-                            <span key={t} className="text-xs text-muted-foreground bg-muted/50 border border-border px-2.5 py-1 rounded-full">{t}</span>
+                            <div key={t} className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="w-1 h-1 rounded-full bg-primary/40 flex-shrink-0" />{t}
+                            </div>
                           ))}
                         </div>
                       </div>

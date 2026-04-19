@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Calendar, Clock, Users, ChevronDown, ChevronUp, Video, BookOpen, BarChart2, Building2, Globe2, Gamepad2, TrendingUp, Trophy, Brain, Scale, GraduationCap, FileText, Star } from 'lucide-react';
+import { ArrowRight, Clock, Users, ChevronDown, ChevronUp, Video, BookOpen, GraduationCap, FileText, Star } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
@@ -88,8 +88,7 @@ export default function Workshops() {
                       <div className="text-xs text-muted-foreground">{w.time}</div>
                     </div>
                     <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="text-xs font-semibold text-muted-foreground bg-muted px-2.5 py-1 rounded-full">{w.tag}</span>
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
                         <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{w.duration}</span>
                         <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{w.attendees} registered</span>
                       </div>
@@ -161,12 +160,9 @@ export default function Workshops() {
           <div className="grid md:grid-cols-2 gap-4">
             {past.map((w, i) => (
               <motion.div key={w.title} {...fadeUp(i * 0.07)} className="flex items-center justify-between bg-white border border-border rounded-xl px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full flex-shrink-0">{w.tag}</span>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{w.title}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">{w.attendees} attended · <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {w.rating}</div>
-                  </div>
+                <div>
+                  <div className="text-sm font-medium text-foreground">{w.title}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">{w.attendees} attended · <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> {w.rating}</div>
                 </div>
                 <span className="text-xs text-muted-foreground flex-shrink-0 ml-4">{w.date}</span>
               </motion.div>
@@ -180,20 +176,11 @@ export default function Workshops() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
           <motion.div {...fadeUp()}>
             <h2 className="font-serif text-3xl text-foreground mb-6">What we cover</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { topic: 'Microeconomics', icon: BarChart2 },
-                { topic: 'Macroeconomics', icon: Building2 },
-                { topic: 'International Trade', icon: Globe2 },
-                { topic: 'Game Theory', icon: Gamepad2 },
-                { topic: 'Data Analysis', icon: TrendingUp },
-                { topic: 'Competition Prep', icon: Trophy },
-                { topic: 'Behavioral Econ', icon: Brain },
-                { topic: 'Economic Policy', icon: Scale },
-              ].map(({ topic, icon: Icon }) => (
-                <div key={topic} className="flex items-center gap-3 bg-muted/50 border border-border rounded-xl px-4 py-3">
-                  <Icon className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm font-medium text-foreground">{topic}</span>
+            <div className="space-y-3">
+              {['Microeconomics', 'Macroeconomics', 'International Trade', 'Game Theory', 'Data Analysis', 'Competition Prep', 'Behavioral Economics', 'Economic Policy'].map((topic) => (
+                <div key={topic} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                  <span className="text-sm text-foreground">{topic}</span>
                 </div>
               ))}
             </div>

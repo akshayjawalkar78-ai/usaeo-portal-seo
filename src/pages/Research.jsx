@@ -109,26 +109,20 @@ export default function Research() {
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="space-y-4">
             <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-56 border border-border" />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-4">
               {[
-                { emoji: '🎓', title: 'Mentorship', desc: 'Direct 1:1 with professional economists' },
-                { emoji: '📄', title: 'Published', desc: 'Real academic publication with ISSN' },
-                { emoji: '🔗', title: 'Network', desc: 'Join a community of student researchers' },
+                { title: 'Mentorship', desc: 'Direct 1:1 with professional economists' },
+                { title: 'Published', desc: 'Real academic publication with ISSN' },
+                { title: 'Network', desc: 'Join a community of student researchers' },
               ].map((b) => (
-                <div key={b.title} className="bg-muted/50 border border-border rounded-xl p-4 text-center">
-                  <span className="text-xl mb-2 block">{b.emoji}</span>
-                  <div className="font-semibold text-foreground text-xs mb-1">{b.title}</div>
-                  <div className="text-xs text-muted-foreground leading-tight">{b.desc}</div>
+                <div key={b.title} className="flex items-start gap-3 py-3 border-b border-border last:border-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                  <div>
+                    <div className="font-semibold text-foreground text-sm mb-0.5">{b.title}</div>
+                    <div className="text-sm text-muted-foreground">{b.desc}</div>
+                  </div>
                 </div>
               ))}
-            </div>
-            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-              <p className="text-sm font-semibold text-primary mb-2">Research areas we support</p>
-              <div className="flex flex-wrap gap-2">
-                {['Macroeconomics', 'Labor', 'Environment', 'Development', 'Finance', 'Behavioral', 'Trade', 'Health'].map((t) => (
-                  <span key={t} className="text-xs bg-white border border-orange-200 text-foreground px-2.5 py-1 rounded-full">{t}</span>
-                ))}
-              </div>
             </div>
           </motion.div>
         </div>
@@ -170,11 +164,8 @@ export default function Research() {
                 <button className="w-full text-left p-6 md:p-8" onClick={() => setExpanded(expanded === i ? null : i)}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {p.tags.map((t) => (
-                          <span key={t} className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">{t}</span>
-                        ))}
-                        <span className="text-xs text-primary bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">{p.year}</span>
+                      <div className="mb-2">
+                        <span className="text-xs text-muted-foreground">{p.year}</span>
                       </div>
                       <h3 className="font-semibold text-foreground text-base md:text-lg leading-snug mb-2">{p.title}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
