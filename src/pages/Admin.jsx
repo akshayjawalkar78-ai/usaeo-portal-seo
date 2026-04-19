@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
-  Users, Menu, Eye, EyeOff, Upload
+  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -15,6 +15,8 @@ const navItems = [
   { label: 'Resources', id: 'resources', icon: FileText },
   { label: 'Rankings', id: 'rankings', icon: BarChart2 },
   { label: 'Chapters', id: 'chapters', icon: School },
+  { label: 'Competition', id: 'competition', icon: Trophy },
+  { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
 ];
 
 function Modal({ title, onClose, children }) {
@@ -85,6 +87,8 @@ export default function Admin() {
   const [resources, setResources] = useState([]);
   const [rankings, setRankings] = useState([]);
   const [chapters, setChapters] = useState([]);
+  const [competitionEvents, setCompetitionEvents] = useState([]);
+  const [curriculumUnits, setCurriculumUnits] = useState([]);
   const [chapterMembers, setChapterMembers] = useState({});
   const [chapterAnns, setChapterAnns] = useState({});
   const [selectedChapter, setSelectedChapter] = useState(null);
@@ -96,14 +100,17 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
-    const [a, w, r, rk, ch] = await Promise.all([
+    const [a, w, r, rk, ch, ce, cu] = await Promise.all([
       base44.entities.Announcement.list('-created_date'),
       base44.entities.Workshop.list('-created_date'),
       base44.entities.Resource.list(),
       base44.entities.Ranking.list('rank'),
       base44.entities.Chapter.list(),
+      base44.entities.CompetitionEvent.list('order'),
+      base44.entities.CurriculumUnit.list('order'),
     ]);
     setAnnouncements(a); setWorkshops(w); setResources(r); setRankings(rk); setChapters(ch);
+    setCompetitionEvents(ce); setCurriculumUnits(cu);
   };
 
   useEffect(() => { loadAll(); }, []);
@@ -130,6 +137,8 @@ export default function Admin() {
       ranking: base44.entities.Ranking,
       chapter: base44.entities.Chapter,
       chapterAnn: base44.entities.ChapterAnnouncement,
+      competitionEvent: base44.entities.CompetitionEvent,
+      curriculumUnit: base44.entities.CurriculumUnit,
     };
     const entity = entityMap[type];
     if (data?.id) await entity.update(data.id, form);
@@ -162,6 +171,8 @@ export default function Admin() {
     { label: 'Resources', value: resources.length, id: 'resources' },
     { label: 'Active Chapters', value: chapters.filter(c => c.status === 'active').length, id: 'chapters' },
     { label: 'Rankings', value: rankings.length, id: 'rankings' },
+    { label: 'Timeline Events', value: competitionEvents.length, id: 'competition' },
+    { label: 'Curriculum Units', value: curriculumUnits.length, id: 'curriculum' },
   ];
 
   const navigate = (id) => { setActive(id); setSidebarOpen(false); };
@@ -260,6 +271,21 @@ export default function Admin() {
                 <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
                 <Field label="Body" type="textarea" rows={4} value={form.body} onChange={v => setForm(p => ({ ...p, body: v }))} />
               </>}
+              {modal.type === 'competitionEvent' && <>
+                <Field label="Phase (e.g. Registration Opens)" value={form.phase} onChange={v => setForm(p => ({ ...p, phase: v }))} />
+                <Field label="Date (e.g. Sep 2025)" value={form.date} onChange={v => setForm(p => ({ ...p, date: v }))} />
+                <Field label="Status" type="select" value={form.status} onChange={v => setForm(p => ({ ...p, status: v }))}
+                  options={[{ value: 'done', label: 'Done' }, { value: 'current', label: 'Current' }, { value: 'future', label: 'Future' }]} />
+                <Field label="Order (sort position)" type="number" value={form.order} onChange={v => setForm(p => ({ ...p, order: parseInt(v) }))} />
+              </>}
+              {modal.type === 'curriculumUnit' && <>
+                <Field label="Unit Number (e.g. 01)" value={form.unit_number} onChange={v => setForm(p => ({ ...p, unit_number: v }))} />
+                <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
+                <Field label="Topics (comma-separated)" value={form.topics} onChange={v => setForm(p => ({ ...p, topics: v }))} />
+                <Field label="Hours (e.g. 4–6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
+                <Field label="URL" value={form.url} onChange={v => setForm(p => ({ ...p, url: v }))} />
+                <Field label="Order (sort position)" type="number" value={form.order} onChange={v => setForm(p => ({ ...p, order: parseInt(v) }))} />
+              </>}
               <div className="flex justify-end gap-3 pt-2">
                 <button onClick={() => setModal(null)} className="px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">Cancel</button>
                 <button onClick={handleSave} disabled={saving}
@@ -312,6 +338,8 @@ export default function Admin() {
                     { label: 'Upload Resource', action: () => { navigate('resources'); openCreate('resource', { public: false }); } },
                     { label: 'Add Ranking Entry', action: () => { navigate('rankings'); openCreate('ranking', { visible: true, stage: 'qualifiers', year: '2026' }); } },
                     { label: 'Add Chapter', action: () => { navigate('chapters'); openCreate('chapter', { status: 'active' }); } },
+                    { label: 'Add Timeline Event', action: () => { navigate('competition'); openCreate('competitionEvent', { status: 'future', order: competitionEvents.length + 1 }); } },
+                    { label: 'Add Curriculum Unit', action: () => { navigate('curriculum'); openCreate('curriculumUnit', { order: curriculumUnits.length + 1, url: 'https://usaeo.org/curriculum' }); } },
                   ].map(q => (
                     <button key={q.label} onClick={q.action}
                       className="flex items-center gap-2 px-4 py-3 border border-border rounded-xl text-sm text-foreground hover:border-primary/30 hover:bg-muted/30 transition-all text-left">
@@ -540,6 +568,63 @@ export default function Admin() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ── COMPETITION ── */}
+          {active === 'competition' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">Competition Timeline</h2>
+                <button onClick={() => openCreate('competitionEvent', { status: 'future', order: competitionEvents.length + 1 })}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                  <Plus className="w-3.5 h-3.5" /> Add event
+                </button>
+              </div>
+              <div className="bg-white rounded-2xl border border-border divide-y divide-border">
+                {competitionEvents.length === 0 && <p className="p-6 text-sm text-muted-foreground">No timeline events yet.</p>}
+                {competitionEvents.map(e => (
+                  <div key={e.id} className="flex items-center gap-4 p-4">
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${e.status === 'done' ? 'bg-green-500' : e.status === 'current' ? 'bg-primary' : 'bg-border'}`} />
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-foreground">{e.phase}</p>
+                      <p className="text-xs text-muted-foreground">{e.date} · order {e.order}</p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${e.status === 'done' ? 'bg-green-50 text-green-700 border border-green-200' : e.status === 'current' ? 'bg-orange-50 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{e.status}</span>
+                    <button onClick={() => openEdit('competitionEvent', e)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteTarget({ entity: base44.entities.CompetitionEvent, id: e.id, label: e.phase })}
+                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── CURRICULUM ── */}
+          {active === 'curriculum' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">Curriculum Units</h2>
+                <button onClick={() => openCreate('curriculumUnit', { order: curriculumUnits.length + 1, url: 'https://usaeo.org/curriculum' })}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                  <Plus className="w-3.5 h-3.5" /> Add unit
+                </button>
+              </div>
+              <div className="bg-white rounded-2xl border border-border divide-y divide-border">
+                {curriculumUnits.length === 0 && <p className="p-6 text-sm text-muted-foreground">No curriculum units yet.</p>}
+                {curriculumUnits.map(u => (
+                  <div key={u.id} className="flex items-center gap-4 p-4">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs text-foreground flex-shrink-0">{u.unit_number}</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-foreground">{u.title}</p>
+                      <p className="text-xs text-muted-foreground">{u.topics}{u.hours ? ` · ${u.hours}` : ''}</p>
+                    </div>
+                    <button onClick={() => openEdit('curriculumUnit', u)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setDeleteTarget({ entity: base44.entities.CurriculumUnit, id: u.id, label: u.title })}
+                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
