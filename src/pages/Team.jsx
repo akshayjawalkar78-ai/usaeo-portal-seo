@@ -19,39 +19,44 @@ const roles = [
   { title: 'Mentorship & Advising', desc: 'Serve as a mentor or academic advisor for students, chapters, or the research program.' },
 ];
 
-// TODO: Replace placeholder data with real team members
+// TODO: Replace placeholder data (names, roles, photos) with real team members
 const members = [
-  { name: 'Alex Chen', role: 'Executive Director', dept: 'Leadership', isExec: true },
-  { name: 'Priya Sharma', role: 'Director of Programs', dept: 'Programs', isExec: true },
-  { name: 'Marcus Williams', role: 'Director of Competitions', dept: 'Competitions', isExec: true },
-  { name: 'Sofia Reyes', role: 'Director of Outreach', dept: 'Marketing', isExec: true },
-  { name: 'Jordan Kim', role: 'Director of Technology', dept: 'Technology', isExec: true },
-  { name: 'Aisha Patel', role: 'Director of Partnerships', dept: 'Partnerships', isExec: true },
-  { name: 'Tyler Brooks', role: 'Curriculum Lead', dept: 'Content', isExec: false },
-  { name: 'Emma Liu', role: 'Workshop Coordinator', dept: 'Programs', isExec: false },
-  { name: 'Noah Osei', role: 'Research Program Lead', dept: 'Research', isExec: false },
-  { name: 'Isabella Torres', role: 'Chapter Program Lead', dept: 'Chapters', isExec: false },
-  { name: 'Ethan Park', role: 'Software Engineer', dept: 'Technology', isExec: false },
-  { name: 'Maya Johnson', role: 'Social Media Manager', dept: 'Marketing', isExec: false },
-  { name: 'Lucas Fernandez', role: 'Graphic Designer', dept: 'Design', isExec: false },
-  { name: 'Zoe Chang', role: 'Sponsorship Associate', dept: 'Partnerships', isExec: false },
-  { name: 'Ryan Mitchell', role: 'Competition Coordinator', dept: 'Competitions', isExec: false },
+  { name: 'Alex Chen', role: 'Executive Director', dept: 'Leadership', isExec: true, photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
+  { name: 'Priya Sharma', role: 'Director of Programs', dept: 'Programs', isExec: true, photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80' },
+  { name: 'Marcus Williams', role: 'Director of Competitions', dept: 'Competitions', isExec: true, photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80' },
+  { name: 'Sofia Reyes', role: 'Director of Outreach', dept: 'Marketing', isExec: true, photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80' },
+  { name: 'Jordan Kim', role: 'Director of Technology', dept: 'Technology', isExec: true, photo: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&q=80' },
+  { name: 'Aisha Patel', role: 'Director of Partnerships', dept: 'Partnerships', isExec: true, photo: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80' },
+  { name: 'Tyler Brooks', role: 'Curriculum Lead', dept: 'Content', isExec: false, photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80' },
+  { name: 'Emma Liu', role: 'Workshop Coordinator', dept: 'Programs', isExec: false, photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80' },
+  { name: 'Noah Osei', role: 'Research Program Lead', dept: 'Research', isExec: false, photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80' },
+  { name: 'Isabella Torres', role: 'Chapter Program Lead', dept: 'Chapters', isExec: false, photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80' },
+  { name: 'Ethan Park', role: 'Software Engineer', dept: 'Technology', isExec: false, photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80' },
+  { name: 'Maya Johnson', role: 'Social Media Manager', dept: 'Marketing', isExec: false, photo: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&q=80' },
+  { name: 'Lucas Fernandez', role: 'Graphic Designer', dept: 'Design', isExec: false, photo: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&q=80' },
+  { name: 'Zoe Chang', role: 'Sponsorship Associate', dept: 'Partnerships', isExec: false, photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
+  { name: 'Ryan Mitchell', role: 'Competition Coordinator', dept: 'Competitions', isExec: false, photo: 'https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?w=400&q=80' },
 ];
 
 const execs = members.filter((m) => m.isExec);
 const generalMembers = members.filter((m) => !m.isExec);
 
 function MemberCard({ member, delay = 0 }) {
-  const initials = member.name.split(' ').map((n) => n[0]).join('');
   return (
     <motion.div {...fadeUp(delay)}
-      className="bg-white border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
-      <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center mb-3">
-        <span className="text-sm font-semibold text-primary">{initials}</span>
+      className="bg-white border border-border rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-sm transition-all duration-200">
+      <div className="aspect-[4/5] overflow-hidden bg-muted">
+        <img
+          src={member.photo}
+          alt={member.name}
+          className="w-full h-full object-cover object-top grayscale hover:grayscale-0 transition-all duration-500"
+        />
       </div>
-      <p className="font-semibold text-foreground text-sm">{member.name}</p>
-      <p className="text-xs text-primary mt-0.5">{member.role}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{member.dept}</p>
+      <div className="px-4 py-3">
+        <p className="font-semibold text-foreground text-sm">{member.name}</p>
+        <p className="text-xs text-primary mt-0.5">{member.role}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{member.dept}</p>
+      </div>
     </motion.div>
   );
 }
