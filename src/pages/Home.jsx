@@ -14,10 +14,12 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
-const orangeIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+const orangeIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:14px;height:14px;border-radius:50%;background:hsl(24,95%,53%);border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>',
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+  popupAnchor: [0, -10],
 });
 
 const fadeUp = (delay = 0) => ({
@@ -173,7 +175,7 @@ export default function Home() {
               ].map((step, i) => (
                 <motion.div key={step.n} {...fadeUp(i * 0.1)} className="py-8">
                   <div className="flex gap-6">
-                    <span className="font-serif text-5xl text-orange-100 leading-none flex-shrink-0 w-12 text-right">{step.n}</span>
+                    <span className="font-serif text-5xl text-orange-300 leading-none flex-shrink-0 w-12 text-right">{step.n}</span>
                     <div>
                       <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{step.date}</p>
                       <h3 className="font-semibold text-foreground text-lg mb-3">{step.title}</h3>
@@ -252,20 +254,29 @@ export default function Home() {
       {/* ── PARTNERS ── */}
       <section className="py-20 border-t border-b border-border bg-white">
         <div className="max-w-6xl mx-auto px-5">
-          <motion.div {...fadeUp()} className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Partners & Sponsors</p>
-            <p className="text-sm text-muted-foreground">Organizations that share our commitment to economics education</p>
-          </motion.div>
+          <div className="grid md:grid-cols-2 gap-16 items-start mb-12">
+            <motion.div {...fadeUp()}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Partners & Sponsors</p>
+              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
+                Organizations that share<br /><em>our mission</em>
+              </h2>
+            </motion.div>
+            <motion.div {...fadeUp(0.1)} className="pt-2 md:pt-4">
+              <p className="text-base text-muted-foreground leading-relaxed">
+                The USAEO is supported by organizations committed to economics education and student opportunity.
+              </p>
+            </motion.div>
+          </div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
             {partners.map((p, i) => (
               <motion.a key={p.name} {...fadeUp(i * 0.04)}
                 href={p.url} target="_blank" rel="noopener noreferrer"
-                className="group flex items-center justify-center p-5 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-16">
-                <img src={p.logo} alt={p.name} className="h-6 w-auto max-w-[80px] object-contain grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 transition-all duration-300" />
+                className="group flex items-center justify-center p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
+                <img src={p.logo} alt={p.name} className="h-8 w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
               </motion.a>
             ))}
             <motion.a {...fadeUp(0.36)} href="mailto:info@usaeo.org"
-              className="flex items-center justify-center p-5 border border-dashed border-border rounded-xl hover:border-primary/40 transition-all duration-200 h-16">
+              className="flex items-center justify-center p-6 border border-dashed border-border rounded-xl hover:border-primary/40 transition-all duration-200 h-20">
               <span className="text-sm text-muted-foreground">+ Partner</span>
             </motion.a>
           </div>
@@ -305,7 +316,7 @@ export default function Home() {
           </div>
 
           {/* Map */}
-          <motion.div {...fadeUp(0.1)} className="rounded-2xl overflow-hidden border border-border shadow-sm mb-10" style={{ height: 400 }}>
+          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10" style={{ height: 400 }}>
             <MapContainer center={[38.5, -96]} zoom={4} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

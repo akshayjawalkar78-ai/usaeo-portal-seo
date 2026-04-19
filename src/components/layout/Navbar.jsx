@@ -25,20 +25,18 @@ function DropdownMenu({ links, onClose }) {
       exit={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.15 }}
       className="absolute top-full left-0 w-56 bg-white border border-border rounded-xl shadow-lg overflow-hidden z-50"
-      style={{ marginTop: '-4px', paddingTop: '4px' }}
+      style={{ marginTop: '4px' }}
     >
-      <div className="rounded-xl overflow-hidden border border-border">
-        {links.map((link) => (
-          <Link
-            key={link.label}
-            to={link.to}
-            onClick={onClose}
-            className="block px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary transition-colors"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
+      {links.map((link) => (
+        <Link
+          key={link.label}
+          to={link.to}
+          onClick={onClose}
+          className="block px-4 py-2.5 text-sm text-foreground hover:bg-muted hover:text-primary transition-colors"
+        >
+          {link.label}
+        </Link>
+      ))}
     </motion.div>
   );
 }

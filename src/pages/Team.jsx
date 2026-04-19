@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
@@ -19,7 +19,46 @@ const roles = [
   { title: 'Mentorship & Advising', desc: 'Serve as a mentor or academic advisor for students, chapters, or the research program.' },
 ];
 
+// TODO: Replace placeholder data with real team members
+const members = [
+  { name: 'Alex Chen', role: 'Executive Director', dept: 'Leadership', isExec: true },
+  { name: 'Priya Sharma', role: 'Director of Programs', dept: 'Programs', isExec: true },
+  { name: 'Marcus Williams', role: 'Director of Competitions', dept: 'Competitions', isExec: true },
+  { name: 'Sofia Reyes', role: 'Director of Outreach', dept: 'Marketing', isExec: true },
+  { name: 'Jordan Kim', role: 'Director of Technology', dept: 'Technology', isExec: true },
+  { name: 'Aisha Patel', role: 'Director of Partnerships', dept: 'Partnerships', isExec: true },
+  { name: 'Tyler Brooks', role: 'Curriculum Lead', dept: 'Content', isExec: false },
+  { name: 'Emma Liu', role: 'Workshop Coordinator', dept: 'Programs', isExec: false },
+  { name: 'Noah Osei', role: 'Research Program Lead', dept: 'Research', isExec: false },
+  { name: 'Isabella Torres', role: 'Chapter Program Lead', dept: 'Chapters', isExec: false },
+  { name: 'Ethan Park', role: 'Software Engineer', dept: 'Technology', isExec: false },
+  { name: 'Maya Johnson', role: 'Social Media Manager', dept: 'Marketing', isExec: false },
+  { name: 'Lucas Fernandez', role: 'Graphic Designer', dept: 'Design', isExec: false },
+  { name: 'Zoe Chang', role: 'Sponsorship Associate', dept: 'Partnerships', isExec: false },
+  { name: 'Ryan Mitchell', role: 'Competition Coordinator', dept: 'Competitions', isExec: false },
+];
+
+const execs = members.filter((m) => m.isExec);
+const generalMembers = members.filter((m) => !m.isExec);
+
+function MemberCard({ member, delay = 0 }) {
+  const initials = member.name.split(' ').map((n) => n[0]).join('');
+  return (
+    <motion.div {...fadeUp(delay)}
+      className="bg-white border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
+      <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center mb-3">
+        <span className="text-sm font-semibold text-primary">{initials}</span>
+      </div>
+      <p className="font-semibold text-foreground text-sm">{member.name}</p>
+      <p className="text-xs text-primary mt-0.5">{member.role}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{member.dept}</p>
+    </motion.div>
+  );
+}
+
 export default function Team() {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <PageLayout>
       <section className="pt-20 pb-16 px-5 border-b border-border">
@@ -57,8 +96,64 @@ export default function Team() {
         </div>
       </section>
 
+      {/* Team Member Grid */}
+      <section className="py-20 px-5 bg-muted/30 border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">The Team</p>
+            <h2 className="font-serif text-3xl text-foreground">Meet the people behind USAEO</h2>
+          </motion.div>
+
+          {/* Executive grid — always visible */}
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {execs.map((m, i) => (
+              <MemberCard key={m.name} member={m} delay={i * 0.06} />
+            ))}
+          </div>
+
+          {/* Expandable general members */}
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                  {generalMembers.map((m, i) => (
+                    <motion.div
+                      key={m.name}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <MemberCard member={m} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Toggle button */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-full text-sm font-medium text-foreground hover:border-primary/40 transition-colors bg-white"
+            >
+              {expanded ? 'Show fewer' : `View all ${members.length} members`}
+              <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                <ChevronDown className="w-4 h-4" />
+              </motion.span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Open Roles */}
-      <section className="py-20 px-5 bg-muted/30">
+      <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Open Roles</p>

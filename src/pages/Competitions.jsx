@@ -58,7 +58,7 @@ export default function Competitions() {
             <motion.div key={phase.n} {...fadeUp(i * 0.1)} className="border border-border rounded-2xl overflow-hidden bg-white hover:border-primary/30 hover:shadow-md transition-all duration-200">
               <div className="p-8 md:p-10">
                 <div className="flex flex-col md:flex-row md:items-start gap-6">
-                  <span className="font-serif text-7xl text-orange-100 leading-none flex-shrink-0">{phase.n}</span>
+                  <span className="font-serif text-7xl text-orange-300 leading-none flex-shrink-0">{phase.n}</span>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <span className={`text-xs font-semibold px-3 py-1 rounded-full ${phase.status === 'upcoming' ? 'bg-orange-50 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>
