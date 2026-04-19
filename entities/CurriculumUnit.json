@@ -1,0 +1,30 @@
+{
+  "name": "CurriculumUnit",
+  "type": "object",
+  "properties": {
+    "unit_number": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "topics": {
+      "type": "string"
+    },
+    "hours": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "unit_number",
+    "title",
+    "order"
+  ]
+}

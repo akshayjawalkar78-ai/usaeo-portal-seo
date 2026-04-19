@@ -18,24 +18,6 @@ const navItems = [
   { label: 'Chapters', id: 'chapters', icon: School },
 ];
 
-const timeline = [
-  { phase: 'Registration Opens', date: 'Sep 2025', status: 'done' },
-  { phase: 'Study Materials Released', date: 'Oct 2025', status: 'done' },
-  { phase: 'Workshop Series Begins', date: 'Nov 2025', status: 'done' },
-  { phase: 'National Qualifiers', date: 'Feb 28, 2026', status: 'done' },
-  { phase: 'National Finals', date: 'May 2026', status: 'current' },
-  { phase: 'IEO Team Announced', date: 'June 2026', status: 'future' },
-  { phase: 'International Economics Olympiad', date: 'Summer 2026', status: 'future' },
-];
-
-const curriculumUnits = [
-  { n: '01', title: 'Supply, Demand & Markets', topics: 'Equilibrium, elasticity, market failures', hrs: '4–6 hrs', url: 'https://usaeo.org/curriculum' },
-  { n: '02', title: 'Consumer & Producer Theory', topics: 'Utility, budget constraints, cost curves', hrs: '5–7 hrs', url: 'https://usaeo.org/curriculum' },
-  { n: '03', title: 'Market Structures', topics: 'Competition, monopoly, game theory', hrs: '6–8 hrs', url: 'https://usaeo.org/curriculum' },
-  { n: '04', title: 'Macroeconomic Foundations', topics: 'GDP, unemployment, business cycles', hrs: '5–7 hrs', url: 'https://usaeo.org/curriculum' },
-  { n: '05', title: 'Monetary & Fiscal Policy', topics: 'Central banking, multipliers, stabilization', hrs: '5–7 hrs', url: 'https://usaeo.org/curriculum' },
-  { n: '06', title: 'International Trade & Finance', topics: 'Comparative advantage, exchange rates', hrs: '5–7 hrs', url: 'https://usaeo.org/curriculum' },
-];
 
 export default function Dashboard() {
   const [active, setActive] = useState('overview');
@@ -47,6 +29,8 @@ export default function Dashboard() {
   const [resources, setResources] = useState([]);
   const [rankings, setRankings] = useState([]);
   const [chapters, setChapters] = useState([]);
+  const [competitionEvents, setCompetitionEvents] = useState([]);
+  const [curriculumUnits, setCurriculumUnits] = useState([]);
   const [myChapter, setMyChapter] = useState(null);
   const [chapterMembers, setChapterMembers] = useState([]);
   const [chapterAnnouncements, setChapterAnnouncements] = useState([]);
@@ -61,6 +45,8 @@ export default function Dashboard() {
     base44.entities.Resource.list().then(setResources);
     base44.entities.Ranking.filter({ visible: true }, 'rank').then(setRankings);
     base44.entities.Chapter.filter({ status: 'active' }).then(setChapters);
+    base44.entities.CompetitionEvent.list('order').then(setCompetitionEvents);
+    base44.entities.CurriculumUnit.list('order').then(setCurriculumUnits);
   }, []);
 
   const upcomingWorkshops = workshops.filter(w => w.status === 'upcoming');
@@ -122,7 +108,10 @@ export default function Dashboard() {
             </button>
           </div>
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-2">
+          <Link to="/admin" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronRight className="w-3 h-3" /> Admin Console
+          </Link>
           <Link to="/" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
             <ChevronRight className="w-3 h-3 rotate-180" /> Back to website
           </Link>
@@ -230,8 +219,9 @@ export default function Dashboard() {
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
                   <div className="space-y-6">
-                    {timeline.map((t) => (
-                      <div key={t.phase} className="relative flex gap-6 pl-12">
+                    {competitionEvents.length === 0 && <p className="text-sm text-muted-foreground">Timeline not yet published.</p>}
+                    {competitionEvents.map((t) => (
+                      <div key={t.id} className="relative flex gap-6 pl-12">
                         <div className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${t.status === 'done' ? 'bg-green-50 border-green-300' : t.status === 'current' ? 'bg-primary border-primary' : 'bg-white border-border'}`}>
                           {t.status === 'done' && <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
                           {t.status === 'current' && <span className="w-2 h-2 rounded-full bg-white" />}
@@ -416,15 +406,16 @@ export default function Dashboard() {
               <h2 className="font-semibold text-foreground mb-1">Study Curriculum</h2>
               <p className="text-sm text-muted-foreground mb-6">Six units covering the full USAEO syllabus. Free for all students at usaeo.org/curriculum.</p>
               <div className="space-y-0 divide-y divide-border">
+                {curriculumUnits.length === 0 && <p className="text-sm text-muted-foreground">Curriculum not yet published.</p>}
                 {curriculumUnits.map((u) => (
-                  <div key={u.n} className="flex items-center gap-5 py-4">
-                    <span className="font-serif text-3xl text-orange-100 w-10 flex-shrink-0 text-center leading-none">{u.n}</span>
+                  <div key={u.id} className="flex items-center gap-5 py-4">
+                    <span className="font-serif text-3xl text-orange-100 w-10 flex-shrink-0 text-center leading-none">{u.unit_number}</span>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{u.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{u.topics}</p>
                     </div>
-                    <span className="text-xs text-muted-foreground hidden md:block">{u.hrs}</span>
-                    <a href={u.url} target="_blank" rel="noopener noreferrer"
+                    <span className="text-xs text-muted-foreground hidden md:block">{u.hours}</span>
+                    <a href={u.url || 'https://usaeo.org/curriculum'} target="_blank" rel="noopener noreferrer"
                       className="text-xs font-semibold text-primary hover:underline flex-shrink-0">
                       Start →
                     </a>

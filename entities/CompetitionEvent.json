@@ -1,0 +1,31 @@
+{
+  "name": "CompetitionEvent",
+  "type": "object",
+  "properties": {
+    "phase": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "done",
+        "current",
+        "future"
+      ],
+      "default": "future"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "phase",
+    "date",
+    "status",
+    "order"
+  ]
+}
