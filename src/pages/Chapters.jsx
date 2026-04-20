@@ -135,52 +135,56 @@ export default function Chapters() {
 
       {/* Become a founder */}
       <section className="py-20 px-5 bg-muted/30">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <motion.div {...fadeUp()}>
-            <h2 className="font-serif text-4xl text-foreground leading-tight mb-6">Become a Chapter Founder</h2>
-            <div className="space-y-4 text-muted-foreground leading-relaxed mb-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="grid md:grid-cols-2 gap-16 items-start mb-16">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Start a Chapter</p>
+              <h2 className="font-serif text-4xl text-foreground leading-tight">Become a Chapter Founder</h2>
+            </div>
+            <div className="space-y-4 text-muted-foreground leading-relaxed md:pt-9">
               <p>As a Chapter Founder, you'll lead economics education at your school, organize study sessions, host competition prep workshops, and connect your peers with the nationwide USAEO network.</p>
-              <p>Chapter Founders receive exclusive resources, direct support from USAEO staff, and recognition in the national community.</p>
+              <p>Applications are open year-round. Chapters can be founded at any public or private high school in the US. Chapter Founders receive exclusive resources, direct support from USAEO staff, and recognition in the national community.</p>
             </div>
-            <div className="space-y-3 mb-8">
-              {[
-                'Lead economics education at your school',
-                'Access exclusive founder resources & curriculum',
-                'Connect with a national network of founders',
-                'Build your leadership portfolio for college apps',
-                'Earn USAEO Chapter Founder recognition',
-                'Organize local competitions and workshops',
-              ].map((b) => (
-                <div key={b} className="flex items-center gap-3 text-sm text-foreground">
-                  <div className="w-4 h-4 rounded-full bg-orange-100 border border-orange-300 flex items-center justify-center flex-shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden mb-10">
+            <motion.div {...fadeUp(0.05)} className="bg-white p-8 md:p-10">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-6">What you'll do</p>
+              <div className="space-y-5">
+                {founderActions.map(({ icon: Icon, action }) => (
+                  <div key={action} className="flex items-start gap-4">
+                    <Icon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground leading-relaxed">{action}</span>
                   </div>
-                  {b}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </motion.div>
+            <motion.div {...fadeUp(0.1)} className="bg-white p-8 md:p-10">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-6">What you'll gain</p>
+              <div className="space-y-5">
+                {[
+                  'Lead economics education at your school',
+                  'Access exclusive founder resources & curriculum',
+                  'Connect with a national network of chapter founders',
+                  'Build your leadership portfolio for college applications',
+                  'Earn USAEO Chapter Founder recognition',
+                  'Organize local competitions and community events',
+                ].map((b) => (
+                  <div key={b} className="flex items-start gap-4">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                    <span className="text-sm text-foreground leading-relaxed">{b}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div {...fadeUp(0.15)}>
             <a href="https://docs.google.com/forms/d/e/1FAIpQLSe1p-OteCPs8ulvpy53dDcd5QkNfidprtc9rqGd1FITLJqA6Q/viewform"
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Apply as Chapter Founder <ArrowRight className="w-4 h-4" />
             </a>
-          </motion.div>
-          <motion.div {...fadeUp(0.1)} className="space-y-4">
-            <div className="bg-white border border-border rounded-2xl p-6">
-              <h3 className="font-semibold text-foreground mb-4">What chapter founders do</h3>
-              <div className="space-y-3">
-                {founderActions.map(({ icon: Icon, action }) => (
-                  <div key={action} className="flex items-start gap-3">
-                    <Icon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-muted-foreground">{action}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-              <p className="text-sm font-semibold text-primary mb-2">Ready to start?</p>
-              <p className="text-sm text-muted-foreground">Applications are open year-round. Chapters can be founded at any public or private high school in the US.</p>
-            </div>
           </motion.div>
         </div>
       </section>

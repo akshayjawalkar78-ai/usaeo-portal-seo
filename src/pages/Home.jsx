@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, MapPin, Users } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -49,6 +49,27 @@ const faqs = [
   { q: 'Can I start a chapter at my school?', a: 'Yes. Chapter Founder applications are open year-round. Chapters can be founded at any public or private US high school.' },
   { q: 'Do I need a teacher or sponsor to register?', a: 'No. Students register individually at usaeo.org. You do not need school sponsorship, a teacher nomination, or any prior affiliation with USAEO.' },
 ];
+
+const principles = [
+  { title: 'Academic excellence', body: 'We set a high standard for economic reasoning, testing theory, data analysis, and real-world problem solving across all competition stages. Students leave the USAEO with analytical skills that extend well beyond economics.' },
+  { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler — from any state, any school, any background.' },
+  { title: 'Global perspective', body: "By fielding a national team at the IEO, we connect America's best young economists with their counterparts from more than 50 countries — building relationships and a global outlook that extends far beyond the competition itself." },
+];
+
+function ScrollPrinciple({ item }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.75', 'end 0.25'] });
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [20, 0, 0, -20]);
+  return (
+    <motion.div ref={ref} style={{ opacity, y }} className="min-h-[45vh] flex items-center">
+      <div className="border-l border-white/20 pl-6">
+        <p className="font-semibold text-white mb-3">{item.title}</p>
+        <p className="text-sm text-white/60 leading-relaxed max-w-md">{item.body}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const [days, setDays] = useState(0);
@@ -202,7 +223,7 @@ export default function Home() {
                 Beyond the competition
               </h2>
             </motion.div>
-            <motion.div {...fadeUp(0.1)}>
+            <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
                 The competition is the core of USAEO — but the program extends well beyond exam day. Whether you're looking to study, research, connect with peers, or build something at your school, there's a place for you.
               </p>
@@ -261,7 +282,7 @@ export default function Home() {
                 Organizations that share<br /><em>our mission</em>
               </h2>
             </motion.div>
-            <motion.div {...fadeUp(0.1)} className="pt-2 md:pt-4">
+            <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
                 The USAEO is supported by organizations committed to economics education and student opportunity.
               </p>
@@ -404,10 +425,10 @@ export default function Home() {
       </section>
 
       {/* ── MISSION ── */}
-      <section className="py-28 md:py-36 bg-foreground">
+      <section className="bg-foreground overflow-hidden">
         <div className="max-w-6xl mx-auto px-5">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <motion.div {...fadeUp()}>
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            <motion.div {...fadeUp()} className="md:sticky md:top-24 py-28 md:py-36 self-start">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">Our Mission</p>
               <blockquote className="font-serif text-3xl md:text-4xl text-white leading-snug mb-6">
                 "We believe every student deserves access to world-class economics education — and the chance to prove themselves on the global stage."
@@ -416,18 +437,11 @@ export default function Home() {
                 About USAEO <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
-            <motion.div {...fadeUp(0.1)} className="space-y-6">
-              {[
-                { title: 'Academic excellence', body: 'We set a high standard for economic reasoning, testing theory, data analysis, and real-world problem solving across all competition stages.' },
-                { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is open to every US high schooler.' },
-                { title: 'Global perspective', body: 'By fielding a national team at the IEO, we connect America\'s best young economists with their counterparts from more than 50 countries — building relationships that extend beyond the competition.' },
-              ].map((item) => (
-                <div key={item.title} className="border-l border-white/20 pl-6">
-                  <p className="font-semibold text-white text-sm mb-1.5">{item.title}</p>
-                  <p className="text-sm text-white/60 leading-relaxed">{item.body}</p>
-                </div>
+            <div className="py-28 md:py-36">
+              {principles.map((item) => (
+                <ScrollPrinciple key={item.title} item={item} />
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -463,27 +477,23 @@ export default function Home() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 md:py-32 bg-orange-500">
-        <div className="max-w-2xl mx-auto px-5 text-center">
-          <motion.div {...fadeUp()} className="flex flex-col items-center gap-6">
-            <h2 className="font-serif text-4xl md:text-5xl text-white leading-tight">
-              Ready to compete?
-            </h2>
-            <p className="text-lg text-white/80 leading-relaxed max-w-lg">
-              Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
-            </p>
-            <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 w-full px-7 py-4 bg-white text-primary rounded-full font-semibold hover:bg-white/90 transition-colors text-base">
-                Register Now — Free <ArrowRight className="w-4 h-4" />
-              </a>
-              <a href="mailto:info@usaeo.org"
-                className="text-sm text-white/70 hover:text-white transition-colors">
-                Questions? Email info@usaeo.org →
-              </a>
-            </div>
-          </motion.div>
-        </div>
+      <section className="py-20 px-5 text-center border-t border-border">
+        <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-5">Ready to compete?</h2>
+          <p className="text-muted-foreground leading-relaxed mb-8 max-w-lg mx-auto">
+            Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+              Register Now — Free <ArrowRight className="w-4 h-4" />
+            </a>
+            <a href="mailto:info@usaeo.org"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
+              Email info@usaeo.org
+            </a>
+          </div>
+        </motion.div>
       </section>
 
     </PageLayout>

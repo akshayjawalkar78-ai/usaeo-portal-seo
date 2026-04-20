@@ -87,14 +87,20 @@ export default function Competitions() {
         </div>
       </section>
 
-      <section className="py-20 px-5 bg-foreground text-center">
+      <section className="py-20 px-5 text-center border-t border-border">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-white mb-5">Ready to start your journey?</h2>
-          <p className="text-white/70 mb-8">Registration is completely free for all high school students.</p>
-          <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors">
-            Register Now <ArrowRight className="w-4 h-4" />
-          </a>
+          <h2 className="font-serif text-4xl text-foreground mb-5">Ready to start your journey?</h2>
+          <p className="text-muted-foreground mb-8">Registration is completely free for all high school students.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+              Register Now — Free <ArrowRight className="w-4 h-4" />
+            </a>
+            <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
+              Study with Free Curriculum
+            </a>
+          </div>
         </motion.div>
       </section>
     </PageLayout>

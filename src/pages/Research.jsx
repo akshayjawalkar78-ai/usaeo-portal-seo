@@ -81,49 +81,37 @@ export default function Research() {
 
       {/* How it works */}
       <section className="py-20 px-5">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
-          <motion.div {...fadeUp()}>
-            <h2 className="font-serif text-4xl text-foreground leading-tight mb-8">How the program works</h2>
-            <div className="space-y-6">
-              {[
-                { n: '1', title: 'Apply & Get Matched', desc: 'Submit your research interests and a brief statement of purpose. We review applications on a rolling basis and match you with a professional economist mentor whose expertise aligns with your area of focus.', time: '~2 weeks' },
-                { n: '2', title: 'Develop Your Research', desc: 'Work one-on-one with your mentor over 3–4 months to develop a rigorous, original research paper. Regular check-ins, feedback sessions, and structured milestones keep your project on track.', time: '3–4 months' },
-                { n: '3', title: 'Peer Review Process', desc: 'Your completed paper is submitted to our editorial board of student and faculty reviewers. You\'ll receive detailed, constructive feedback and an opportunity for revision.', time: '4–6 weeks' },
-                { n: '4', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal — a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
-              ].map((s, i) => (
-                <div key={s.n} className="flex gap-5">
-                  <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center text-sm font-bold text-primary flex-shrink-0 mt-0.5">{s.n}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-foreground">{s.title}</h3>
-                      <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-2">{s.time}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="grid md:grid-cols-2 gap-16 items-center mb-16">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">How it works</p>
+              <h2 className="font-serif text-4xl text-foreground leading-tight">From application<br /><em>to publication</em></h2>
             </div>
-            <a href="mailto:info@usaeo.org" className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+            <div className="flex items-start gap-3">
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-52 border border-border" />
+            </div>
+          </motion.div>
+          <div className="grid md:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden mb-10">
+            {[
+              { n: '01', title: 'Apply & Get Matched', desc: 'Submit your research interests and a brief statement of purpose. We review applications on a rolling basis and match you with a professional economist mentor whose expertise aligns with your area of focus.', time: '~2 weeks' },
+              { n: '02', title: 'Develop Your Research', desc: 'Work one-on-one with your mentor over 3–4 months to develop a rigorous, original research paper. Regular check-ins, feedback sessions, and structured milestones keep your project on track.', time: '3–4 months' },
+              { n: '03', title: 'Peer Review Process', desc: 'Your completed paper is submitted to our editorial board of student and faculty reviewers. You\'ll receive detailed, constructive feedback and an opportunity for revision before final acceptance.', time: '4–6 weeks' },
+              { n: '04', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal — a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
+            ].map((s, i) => (
+              <motion.div key={s.n} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <span className="font-serif text-5xl text-orange-200 leading-none">{s.n}</span>
+                  <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full flex-shrink-0 mt-1">{s.time}</span>
+                </div>
+                <h3 className="font-semibold text-foreground text-lg mb-3">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+          <motion.div {...fadeUp(0.2)}>
+            <a href="mailto:info@usaeo.org" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Apply to Research Program <ArrowRight className="w-4 h-4" />
             </a>
-          </motion.div>
-          <motion.div {...fadeUp(0.1)} className="space-y-4">
-            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-56 border border-border" />
-            <div className="space-y-4">
-              {[
-                { title: 'Mentorship', desc: 'Direct 1:1 with professional economists' },
-                { title: 'Published', desc: 'Real academic publication with ISSN' },
-                { title: 'Network', desc: 'Join a community of student researchers' },
-              ].map((b) => (
-                <div key={b.title} className="flex items-start gap-3 py-3 border-b border-border last:border-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1.5" />
-                  <div>
-                    <div className="font-semibold text-foreground text-sm mb-0.5">{b.title}</div>
-                    <div className="text-sm text-muted-foreground">{b.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </motion.div>
         </div>
       </section>

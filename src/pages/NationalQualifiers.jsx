@@ -14,29 +14,71 @@ export default function NationalQualifiers() {
   return (
     <PageLayout>
       {/* Hero */}
-      <section className="pt-20 pb-20 px-5 border-b border-border bg-white">
+      <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 01 — Competition</p>
             <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6">
               National Qualifiers
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mb-8">
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
               The first stage of the USAEO competition. A two-hour virtual exam open to all US high school students — the entry point to the national stage.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white rounded-full font-medium text-sm hover:bg-foreground/85 transition-colors">
-                Register — Free <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Key details */}
-      <section className="py-20 px-5 bg-white">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-start">
+      {/* About + Image */}
+      <section className="py-20 px-5">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <motion.div {...fadeUp()}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">About the Qualifiers</p>
+            <h2 className="font-serif text-4xl text-foreground leading-tight mb-6">
+              A virtual exam<br /><em>open to all</em>
+            </h2>
+            <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <p>The National Qualifiers is a two-hour virtual exam open to any US high school student — no prior economics experience required. Students choose between an 11:00 AM or 6:00 PM ET session on February 28, 2026.</p>
+              <p>Top-scoring students across both sessions receive an invitation to the in-person National Finals. All participants receive a detailed score report and access to complete answer explanations after the exam.</p>
+              <p>The exam draws on the full USAEO curriculum, covering microeconomics, macroeconomics, international trade, and data analysis. Students who complete our free curriculum are fully prepared to compete.</p>
+            </div>
+            <div className="mt-8">
+              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+                Register — Free <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </motion.div>
+          <motion.div {...fadeUp(0.1)}>
+            <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80" alt="Student taking virtual exam" className="w-full rounded-2xl object-cover h-80 border border-border" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Key facts */}
+      <section className="py-20 px-5 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="mb-12 text-center">
+            <h2 className="font-serif text-4xl text-foreground">Exam at a glance</h2>
+          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { value: 'Feb 28', label: 'Exam date' },
+              { value: '2 hrs', label: 'Duration' },
+              { value: '2', label: 'Session options' },
+              { value: 'Free', label: 'No registration fee' },
+            ].map((s, i) => (
+              <motion.div key={s.label} {...fadeUp(i * 0.08)} className="bg-white border border-border rounded-2xl p-6 text-center">
+                <div className="font-serif text-4xl text-primary mb-2">{s.value}</div>
+                <div className="text-sm text-muted-foreground">{s.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Exam details + Topics */}
+      <section className="py-20 px-5">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Exam Details</p>
             <div className="divide-y divide-border">
@@ -58,74 +100,49 @@ export default function NationalQualifiers() {
             </div>
           </motion.div>
 
-          <motion.div {...fadeUp(0.1)} className="space-y-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">How it works</p>
-              <div className="space-y-6">
-                {[
-                  { step: '01', title: 'Register', body: 'Create a free account at usaeo.org. Registration is open to all US high school students regardless of grade, school type, or prior economics experience.' },
-                  { step: '02', title: 'Choose your session', body: 'Select the 11:00 AM or 6:00 PM ET session when you register. Both sessions cover identical material and are graded on the same scale.' },
-                  { step: '03', title: 'Prepare', body: 'Use the USAEO free curriculum — 6 units covering the full exam syllabus. Practice exams and workshops are also available to registered students.' },
-                  { step: '04', title: 'Take the exam', body: 'Log in on February 28 through the testing portal. The exam is proctored online and consists of multiple-choice and short-answer questions.' },
-                  { step: '05', title: 'Advance', body: 'Top-scoring students receive an invitation to the National Finals. All participants receive a detailed score report.' },
-                ].map((s) => (
-                  <div key={s.step} className="flex gap-5">
-                    <span className="font-serif text-3xl text-orange-100 leading-none flex-shrink-0 w-8 text-center">{s.step}</span>
-                    <div>
-                      <p className="font-semibold text-foreground text-sm mb-1">{s.title}</p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <motion.div {...fadeUp(0.1)}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Topics Covered</p>
+            <div className="grid grid-cols-1 gap-px bg-border rounded-2xl overflow-hidden">
+              {[
+                { title: 'Microeconomics', items: ['Supply and demand', 'Elasticity and consumer theory', 'Market structures and competition', 'Externalities and public goods', 'Game theory basics'] },
+                { title: 'Macroeconomics', items: ['National income accounting (GDP)', 'Unemployment and inflation', 'Aggregate demand and supply', 'Business cycle analysis', 'Monetary and fiscal policy'] },
+                { title: 'International Economics', items: ['Comparative and absolute advantage', 'Trade policy and protectionism', 'Exchange rate determination', 'Balance of payments'] },
+                { title: 'Data & Quantitative Analysis', items: ['Reading economic data tables', 'Graph interpretation', 'Index numbers and price levels', 'Applied problem solving'] },
+              ].map((section) => (
+                <div key={section.title} className="bg-white p-6">
+                  <h3 className="font-semibold text-foreground text-sm mb-3">{section.title}</h3>
+                  <ul className="space-y-1.5">
+                    {section.items.map((item) => (
+                      <li key={item} className="text-sm text-muted-foreground flex items-center gap-2.5">
+                        <span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Topics */}
-      <section className="py-20 px-5 bg-muted/30 border-t border-border">
-        <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeUp()} className="mb-12">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Topics Covered</p>
-            <h2 className="font-serif text-4xl text-foreground max-w-xl leading-tight">
-              What's on the exam
-            </h2>
-          </motion.div>
-          <div className="grid md:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden">
-            {[
-              { title: 'Microeconomics', items: ['Supply and demand', 'Elasticity and consumer theory', 'Market structures and competition', 'Externalities and public goods', 'Game theory basics'] },
-              { title: 'Macroeconomics', items: ['National income accounting (GDP)', 'Unemployment and inflation', 'Aggregate demand and supply', 'Business cycle analysis', 'Monetary and fiscal policy'] },
-              { title: 'International Economics', items: ['Comparative and absolute advantage', 'Trade policy and protectionism', 'Exchange rate determination', 'Balance of payments', 'International financial markets'] },
-              { title: 'Data & Quantitative Analysis', items: ['Reading economic data tables', 'Graph interpretation', 'Index numbers and price levels', 'Basic econometric reasoning', 'Applied problem solving'] },
-            ].map((section, i) => (
-              <motion.div key={section.title} {...fadeUp(i * 0.08)} className="bg-white p-8">
-                <h3 className="font-semibold text-foreground text-base mb-4">{section.title}</h3>
-                <ul className="space-y-2">
-                  {section.items.map((item) => (
-                    <li key={item} className="text-sm text-muted-foreground flex items-center gap-2.5">
-                      <span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-20 px-5 bg-foreground">
-        <motion.div {...fadeUp()} className="max-w-2xl mx-auto text-center">
-          <h2 className="font-serif text-4xl text-white mb-4">Register before February 28</h2>
-          <p className="text-white/70 text-base leading-relaxed mb-8">
+      <section className="py-20 px-5 text-center">
+        <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
+          <h2 className="font-serif text-4xl text-foreground mb-5">Register before February 28</h2>
+          <p className="text-muted-foreground mb-8">
             The National Qualifiers is completely free. No economics background required — our curriculum provides everything you need to compete.
           </p>
-          <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors">
-            Register Now — Free <ArrowRight className="w-4 h-4" />
-          </a>
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+              Register Now — Free <ArrowRight className="w-4 h-4" />
+            </a>
+            <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
+              Study with Free Curriculum
+            </a>
+          </div>
         </motion.div>
       </section>
     </PageLayout>
