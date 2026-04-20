@@ -79,7 +79,7 @@ export default function About() {
           <h2 className="font-serif text-4xl text-foreground mb-5">Want to get involved?</h2>
           <p className="text-muted-foreground mb-8">Whether you want to compete, volunteer, sponsor, or start a chapter — there's a place for you in the USAEO community.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Register to Compete <ArrowRight className="w-4 h-4" />
             </a>

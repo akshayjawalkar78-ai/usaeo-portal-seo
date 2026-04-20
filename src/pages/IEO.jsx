@@ -74,7 +74,7 @@ export default function IEO() {
           </motion.div>
           <div className="grid md:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden">
             {[
-              { step: '1', title: 'Register for USAEO', desc: 'Sign up completely free at usaeo.org/register' },
+              { step: '1', title: 'Register for USAEO', desc: 'Sign up completely free via the Register page' },
               { step: '2', title: 'Qualify at Nationals', desc: 'Compete in the National Qualifiers and advance to the National Finals' },
               { step: '3', title: 'Represent the USA', desc: 'Top performers at Nationals earn a spot on the IEO team' },
             ].map((s, i) => (
@@ -86,7 +86,7 @@ export default function IEO() {
             ))}
           </div>
           <motion.div {...fadeUp(0.2)} className="mt-8 text-center">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Start Your Journey <ArrowRight className="w-4 h-4" />
             </a>

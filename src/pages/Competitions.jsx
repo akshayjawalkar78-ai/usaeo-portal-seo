@@ -16,13 +16,13 @@ const phases = [
     n: '01', status: 'upcoming', badge: 'Feb 28, 2026 · Virtual',
     title: 'National Qualifiers',
     desc: 'A two-hour virtual exam with multiple-choice and short-answer questions. Students choose their session: 11 AM ET or 6 PM ET. Top scorers advance to the National Finals.',
-    cta: { label: 'Register Free', href: 'https://usaeo.org/register' },
+    cta: { label: 'Register Free', href: '/register' },
   },
   {
     n: '02', status: 'future', badge: 'May 2026 · In-Person',
     title: 'National Finals',
     desc: 'An intensive in-person competition featuring a comprehensive written examination and real-world case study analysis. Top students form the USA national team.',
-    cta: { label: 'Learn More', href: 'https://usaeo.org/register' },
+    cta: { label: 'Learn More', href: '/register' },
   },
   {
     n: '03', status: 'future', badge: 'Summer 2026 · Global',
@@ -92,7 +92,7 @@ export default function Competitions() {
           <h2 className="font-serif text-4xl text-foreground mb-5">Ready to start your journey?</h2>
           <p className="text-muted-foreground mb-8">Registration is completely free for all high school students.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Register Now — Free <ArrowRight className="w-4 h-4" />
             </a>

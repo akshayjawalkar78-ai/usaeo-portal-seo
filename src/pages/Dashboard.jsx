@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Menu, ChevronRight, School, BarChart2, X
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -20,6 +21,7 @@ const navItems = [
 
 
 export default function Dashboard() {
+  const { user: authUser, profile } = useAuth();
   const [active, setActive] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -57,10 +59,12 @@ export default function Dashboard() {
     setJoinError(''); setJoinSuccess('');
     const chapter = chapters.find(c => c.invite_code?.toLowerCase() === joinCode.trim().toLowerCase());
     if (!chapter) { setJoinError('Invalid invite code. Check with your chapter founder.'); return; }
-    const user = await base44.auth.me();
-    const existing = await base44.entities.ChapterMember.filter({ chapter_id: chapter.id, user_email: user.email });
+    if (!authUser) { setJoinError('You must be logged in.'); return; }
+    const email = authUser.email;
+    const fullName = profile?.full_name || '';
+    const existing = await base44.entities.ChapterMember.filter({ chapter_id: chapter.id, user_email: email });
     if (existing.length > 0) { setJoinError('You are already a member of this chapter.'); return; }
-    await base44.entities.ChapterMember.create({ chapter_id: chapter.id, user_email: user.email, user_name: user.full_name, role: 'member', status: 'active' });
+    await base44.entities.ChapterMember.create({ chapter_id: chapter.id, user_email: email, user_name: fullName, role: 'member', status: 'active' });
     await base44.entities.Chapter.update(chapter.id, { member_count: (chapter.member_count || 0) + 1 });
     setMyChapter(chapter);
     setJoinSuccess(`Successfully joined ${chapter.school} chapter!`);
@@ -135,7 +139,7 @@ export default function Dashboard() {
               {navItems.find(n => n.id === active)?.label ?? 'Dashboard'}
             </h1>
           </div>
-          <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+          <a href="/register"
             className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
             Register <ArrowRight className="w-3 h-3" />
           </a>
@@ -182,7 +186,7 @@ export default function Dashboard() {
                     <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Next milestone</p>
                     <h3 className="font-serif text-2xl text-white mb-1">National Finals</h3>
                     <p className="text-sm text-white/60 mb-4">May 2026 · In-person</p>
-                    <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+                    <a href="/register"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                       Register <ArrowRight className="w-3 h-3" />
                     </a>
@@ -326,7 +330,7 @@ export default function Dashboard() {
                           Download
                         </a>
                       ) : (
-                        <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+                        <a href="/register"
                           className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary">
                           <Lock className="w-3 h-3" /> Register to access
                         </a>
@@ -364,7 +368,7 @@ export default function Dashboard() {
                             Join Zoom
                           </a>
                         ) : (
-                          <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+                          <a href="/register"
                             className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 border border-border text-foreground rounded-full text-xs font-medium hover:border-foreground transition-colors">
                             RSVP
                           </a>

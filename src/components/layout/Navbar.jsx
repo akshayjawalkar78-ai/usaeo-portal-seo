@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 const competitionsLinks = [
   { label: 'Overview', to: '/competitions' },
@@ -46,6 +47,13 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, profile, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -102,14 +110,38 @@ export default function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-2">
-            <Link to="/dashboard"
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-              className="px-4 py-1.5 text-sm bg-foreground text-white rounded-full font-medium hover:bg-foreground/85 transition-colors">
-              Register
-            </a>
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard"
+                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin"
+                    className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Admin
+                  </Link>
+                )}
+                <span className="px-2 text-sm text-muted-foreground hidden lg:inline">
+                  {profile?.full_name || profile?.email}
+                </span>
+                <button onClick={handleLogout}
+                  className="px-4 py-1.5 text-sm bg-foreground text-white rounded-full font-medium hover:bg-foreground/85 transition-colors">
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login"
+                  className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Log in
+                </Link>
+                <Link to="/register"
+                  className="px-4 py-1.5 text-sm bg-foreground text-white rounded-full font-medium hover:bg-foreground/85 transition-colors">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -145,10 +177,30 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-4 flex flex-col gap-3">
-                <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
-                  className="w-full text-center py-3 bg-primary text-white rounded-full font-medium">
-                  Register Now — Free
-                </a>
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/dashboard" className="w-full text-center py-3 border border-border rounded-full font-medium text-foreground">
+                      Dashboard
+                    </Link>
+                    {isAdmin && (
+                      <Link to="/admin" className="w-full text-center py-3 border border-border rounded-full font-medium text-foreground">
+                        Admin
+                      </Link>
+                    )}
+                    <button onClick={handleLogout} className="w-full text-center py-3 bg-foreground text-white rounded-full font-medium">
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="w-full text-center py-3 border border-border rounded-full font-medium text-foreground">
+                      Log in
+                    </Link>
+                    <Link to="/register" className="w-full text-center py-3 bg-primary text-white rounded-full font-medium">
+                      Register Now — Free
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

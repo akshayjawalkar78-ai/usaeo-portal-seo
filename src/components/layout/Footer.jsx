@@ -22,7 +22,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2.5">
               <Link to="/competitions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Competitions</Link>
               <Link to="/competitions/ieo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">IEO</Link>
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Register</a>
+              <a href="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Register</a>
               <a href="https://usaeo.org/testing" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Testing Portal</a>
             </div>
           </div>
