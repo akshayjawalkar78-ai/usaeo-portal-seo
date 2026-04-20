@@ -425,9 +425,9 @@ export default function Home() {
       </section>
 
       {/* ── MISSION ── */}
-      <section className="bg-foreground overflow-hidden">
+      <section className="bg-foreground">
         <div className="max-w-6xl mx-auto px-5">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
+          <div className="grid md:grid-cols-2 gap-16">
             <motion.div {...fadeUp()} className="md:sticky md:top-24 py-28 md:py-36 self-start">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">Our Mission</p>
               <blockquote className="font-serif text-3xl md:text-4xl text-white leading-snug mb-6">
