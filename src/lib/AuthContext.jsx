@@ -27,9 +27,10 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single();
       if (error) {
-        console.error('Failed to load profile:', error);
+        console.error('[auth] loadProfile error:', JSON.stringify(error));
         setProfile(null);
       } else {
+        console.log('[auth] profile loaded:', data);
         setProfile(data);
       }
     } catch (e) {
