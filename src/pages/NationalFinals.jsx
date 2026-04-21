@@ -42,7 +42,7 @@ export default function NationalFinals() {
               <p>USAEO provides a dedicated Finals preparation workshop series in April and May, covering advanced topics and case study methodology. All recordings are available to qualified students through the student portal.</p>
             </div>
             <div className="mt-8">
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              <a href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
                 Register for Qualifiers to advance <ArrowRight className="w-4 h-4" />
               </a>
@@ -149,7 +149,7 @@ export default function NationalFinals() {
             Register for the National Qualifiers on February 28. Top scorers advance automatically — registration is completely free.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Register for Qualifiers <ArrowRight className="w-4 h-4" />
             </a>

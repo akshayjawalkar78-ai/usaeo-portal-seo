@@ -110,7 +110,7 @@ export default function Workshops() {
                       <span className="font-medium text-foreground">Instructor:</span> {w.instructor}
                     </p>
                   </div>
-                  <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+                  <a href="/register"
                     className="self-start inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition-colors">
                     Register Free <ArrowRight className="w-4 h-4" />
                   </a>

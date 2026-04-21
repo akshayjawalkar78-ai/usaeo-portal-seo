@@ -42,7 +42,7 @@ export default function NationalQualifiers() {
               <p>The exam draws on the full USAEO curriculum, covering microeconomics, macroeconomics, international trade, and data analysis. Students who complete our free curriculum are fully prepared to compete.</p>
             </div>
             <div className="mt-8">
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              <a href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
                 Register — Free <ArrowRight className="w-4 h-4" />
               </a>
@@ -134,7 +134,7 @@ export default function NationalQualifiers() {
             The National Qualifiers is completely free. No economics background required — our curriculum provides everything you need to compete.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Register Now — Free <ArrowRight className="w-4 h-4" />
             </a>

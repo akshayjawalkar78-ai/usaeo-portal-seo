@@ -114,7 +114,7 @@ export default function Home() {
             </motion.p>
 
             <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-3">
-              <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+              <a href="/register"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-foreground text-white rounded-full font-medium hover:bg-foreground/85 transition-colors">
                 Register — it's free <ArrowRight className="w-4 h-4" />
               </a>
@@ -484,7 +484,7 @@ export default function Home() {
             Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://usaeo.org/register" target="_blank" rel="noopener noreferrer"
+            <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Register Now — Free <ArrowRight className="w-4 h-4" />
             </a>

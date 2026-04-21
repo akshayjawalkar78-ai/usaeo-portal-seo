@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: usaeo-portal
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_BASE44_APP_ID
+        sync: false
+      - key: VITE_BASE44_FUNCTIONS_VERSION
+        sync: false
+      - key: VITE_BASE44_APP_BASE_URL
+        value: https://base44.app
