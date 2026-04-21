@@ -72,7 +72,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('signOut error:', e);
+    }
+    // Force-clear local state regardless of server response
+    setSession(null);
+    setUser(null);
     setProfile(null);
   };
 

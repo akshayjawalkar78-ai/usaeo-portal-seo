@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -22,6 +22,17 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
+import Unauthorized from './pages/Unauthorized';
+
+// Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
+function CodeRedirect({ element }) {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  if (params.has('code') && location.pathname !== '/auth/callback') {
+    return <Navigate to={`/auth/callback${location.search}`} replace />;
+  }
+  return element;
+}
 
 function App() {
   return (
@@ -30,7 +41,7 @@ function App() {
         <Router>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<CodeRedirect element={<Home />} />} />
             <Route path="/about" element={<About />} />
             <Route path="/competitions" element={<Competitions />} />
             <Route path="/competitions/ieo" element={<IEO />} />
@@ -45,6 +56,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
             {/* Authed */}
             <Route element={<ProtectedRoute />}>

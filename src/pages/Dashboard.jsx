@@ -105,7 +105,7 @@ export default function Dashboard() {
             <a href="https://usaeo.org/testing" target="_blank" rel="noopener noreferrer"
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
               <ExternalLink className="w-4 h-4 flex-shrink-0" /> Testing Portal
-            </a>
+            </Link>
             <button onClick={() => navigate('chapters')}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-left">
               <School className="w-4 h-4 flex-shrink-0" /> Chapter Portal
@@ -139,10 +139,10 @@ export default function Dashboard() {
               {navItems.find(n => n.id === active)?.label ?? 'Dashboard'}
             </h1>
           </div>
-          <a href="/register"
+          <Link to="/register"
             className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
             Register <ArrowRight className="w-3 h-3" />
-          </a>
+          </Link>
         </header>
 
         <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto">
@@ -186,10 +186,10 @@ export default function Dashboard() {
                     <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Next milestone</p>
                     <h3 className="font-serif text-2xl text-white mb-1">National Finals</h3>
                     <p className="text-sm text-white/60 mb-4">May 2026 · In-person</p>
-                    <a href="/register"
+                    <Link to="/register"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                       Register <ArrowRight className="w-3 h-3" />
-                    </a>
+                    </Link>
                   </div>
                   <div className="bg-white rounded-2xl border border-border p-5">
                     <p className="font-semibold text-foreground text-sm mb-3">Quick links</p>
@@ -328,12 +328,12 @@ export default function Dashboard() {
                         <a href={r.file_url} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
                           Download
-                        </a>
+                        </Link>
                       ) : (
-                        <a href="/register"
+                        <Link to="/register"
                           className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary">
                           <Lock className="w-3 h-3" /> Register to access
-                        </a>
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -366,12 +366,12 @@ export default function Dashboard() {
                           <a href={w.zoom_link} target="_blank" rel="noopener noreferrer"
                             className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                             Join Zoom
-                          </a>
+                          </Link>
                         ) : (
-                          <a href="/register"
+                          <Link to="/register"
                             className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 border border-border text-foreground rounded-full text-xs font-medium hover:border-foreground transition-colors">
                             RSVP
-                          </a>
+                          </Link>
                         )}
                       </div>
                     </div>
@@ -392,7 +392,7 @@ export default function Dashboard() {
                           <a href={w.recording_url} target="_blank" rel="noopener noreferrer"
                             className="text-xs font-semibold text-primary hover:underline">
                             Watch recording →
-                          </a>
+                          </Link>
                         ) : (
                           <span className="text-xs text-muted-foreground">Recording pending</span>
                         )}
@@ -422,7 +422,7 @@ export default function Dashboard() {
                     <a href={u.url || 'https://usaeo.org/curriculum'} target="_blank" rel="noopener noreferrer"
                       className="text-xs font-semibold text-primary hover:underline flex-shrink-0">
                       Start →
-                    </a>
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -530,7 +530,7 @@ export default function Dashboard() {
                     target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                     Apply to start a chapter <ArrowRight className="w-3 h-3" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

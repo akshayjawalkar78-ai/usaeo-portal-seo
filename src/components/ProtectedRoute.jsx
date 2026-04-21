@@ -18,7 +18,7 @@ export default function ProtectedRoute({ requireRole }) {
   }
 
   if (requireRole && profile?.role !== requireRole) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;
