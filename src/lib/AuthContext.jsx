@@ -8,12 +8,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Separate flag so ProtectedRoute can still gate role-only routes
+  // true while a profile fetch is in-flight
   const [isProfileLoading, setIsProfileLoading] = useState(false);
+  // true once at least one profile fetch has completed (success or fail)
+  const [profileAttempted, setProfileAttempted] = useState(false);
 
   const loadProfile = useCallback(async (userId) => {
     if (!userId) {
       setProfile(null);
+      setProfileAttempted(true);
       return;
     }
     setIsProfileLoading(true);
@@ -34,23 +37,34 @@ export const AuthProvider = ({ children }) => {
       setProfile(null);
     } finally {
       setIsProfileLoading(false);
+      setProfileAttempted(true);
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      // Unblock routing immediately — profile loads async in background
-      setIsLoading(false);
-      if (session?.user) loadProfile(session.user.id);
-    }).catch((e) => {
-      console.error('getSession error:', e);
-      if (mounted) setIsLoading(false);
-    });
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          // Load profile before unblocking routing so role check has data
+          await loadProfile(session.user.id);
+        } else {
+          setProfileAttempted(true);
+        }
+      } catch (e) {
+        console.error('getSession error:', e);
+        if (mounted) setProfileAttempted(true);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -59,6 +73,7 @@ export const AuthProvider = ({ children }) => {
         loadProfile(session.user.id);
       } else {
         setProfile(null);
+        setProfileAttempted(true);
       }
     });
 
@@ -87,7 +102,7 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      // scope:'local' clears localStorage only — no network call, never hangs
+      // scope:'local' = clears localStorage only, no network call, never hangs
       await supabase.auth.signOut({ scope: 'local' });
     } catch (e) {
       console.error('signOut error:', e);
@@ -95,6 +110,7 @@ export const AuthProvider = ({ children }) => {
     setSession(null);
     setUser(null);
     setProfile(null);
+    setProfileAttempted(false);
   };
 
   const isAuthenticated = !!session?.user;
@@ -109,6 +125,7 @@ export const AuthProvider = ({ children }) => {
       isAdmin,
       isLoading,
       isProfileLoading,
+      profileAttempted,
       signUp,
       signIn,
       signOut,

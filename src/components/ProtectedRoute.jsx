@@ -8,20 +8,20 @@ const Fallback = () => (
 );
 
 export default function ProtectedRoute({ requireRole }) {
-  const { isAuthenticated, isLoading, isProfileLoading, profile } = useAuth();
+  const { isAuthenticated, isLoading, isProfileLoading, profileAttempted, profile } = useAuth();
   const location = useLocation();
 
-  // Wait for auth check
+  // Wait for auth check to complete
   if (isLoading) return <Fallback />;
 
-  // Not logged in → login
+  // Not logged in → send to login
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role-gated route: wait for profile before deciding
+  // Role-gated route: wait until profile fetch has finished at least once
   if (requireRole) {
-    if (isProfileLoading) return <Fallback />;
+    if (!profileAttempted || isProfileLoading) return <Fallback />;
     if (profile?.role !== requireRole) {
       return <Navigate to="/unauthorized" replace />;
     }
