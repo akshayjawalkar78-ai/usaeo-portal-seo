@@ -1,6 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const socialLinks = [
+  { label: 'Instagram', href: 'https://www.instagram.com/usaolympiad/' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/usa-economics-olympiad' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@usaeconolympiad' },
+];
+
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-white">
@@ -12,7 +18,7 @@ export default function Footer() {
               <span className="font-inter font-semibold text-foreground text-sm">USAEO</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              The United States Economics Olympiad — the premier national competition for high school economists. Free, open, and mission-driven.
+              USA Economics Olympiad — the premier national competition for high school economists. Free, open, and mission-driven. A registered 501(c)(3) nonprofit organization.
             </p>
             <a href="mailto:info@usaeo.org" className="text-sm text-primary mt-4 block hover:underline">info@usaeo.org</a>
           </div>
@@ -21,9 +27,9 @@ export default function Footer() {
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4">Compete</h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/competitions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Competitions</Link>
-              <Link to="/competitions/ieo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">IEO</Link>
-              <a href="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Register</a>
-              <a href="https://usaeo.org/testing" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Testing Portal</a>
+              <Link to="/competitions/quiz-bowl" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Quiz Bowl</Link>
+              <Link to="/competitions/essay" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Essay Competition</Link>
+              <Link to="/competitions/finals" className="text-sm text-muted-foreground hover:text-foreground transition-colors">National Finals</Link>
             </div>
           </div>
 
@@ -48,10 +54,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} United States Economics Olympiad. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} USA Economics Olympiad. All rights reserved. 501(c)(3) nonprofit.</p>
           <div className="flex items-center gap-5">
-            {['Instagram', 'LinkedIn', 'TikTok'].map((s) => (
-              <a key={s} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{s}</a>
+            {socialLinks.map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{s.label}</a>
             ))}
           </div>
         </div>

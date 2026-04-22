@@ -6,9 +6,9 @@ import { useAuth } from '@/lib/AuthContext';
 
 const competitionsLinks = [
   { label: 'Overview', to: '/competitions' },
-  { label: 'National Qualifiers', to: '/competitions/qualifiers' },
+  { label: 'Quiz Bowl', to: '/competitions/quiz-bowl' },
+  { label: 'Essay Competition', to: '/competitions/essay' },
   { label: 'National Finals', to: '/competitions/finals' },
-  { label: 'International Economics Olympiad', to: '/competitions/ieo' },
 ];
 
 const programsLinks = [
@@ -164,7 +164,8 @@ export default function Navbar() {
               {[
                 { label: 'About', to: '/about' },
                 { label: 'Competitions', to: '/competitions' },
-                { label: 'IEO', to: '/competitions/ieo' },
+                { label: 'Quiz Bowl', to: '/competitions/quiz-bowl' },
+                { label: 'Essay Competition', to: '/competitions/essay' },
                 { label: 'Workshops', to: '/workshops' },
                 { label: 'Curriculum', to: '/curriculum' },
                 { label: 'Research', to: '/research' },

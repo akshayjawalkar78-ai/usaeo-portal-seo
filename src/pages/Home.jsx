@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight, MapPin, Users } from 'lucide-react';
+import { ArrowRight, MapPin } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -45,7 +45,7 @@ const faqs = [
   { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required — we provide all the study materials you need, completely free.' },
   { q: 'Is there a registration fee?', a: 'No. The USAEO is completely free to participate in at every stage. Our mission is to make economics education accessible to all students regardless of background.' },
   { q: 'What topics are covered?', a: 'Microeconomics, macroeconomics, international trade, data interpretation, and real-world economic analysis. The full syllabus is available to all registered students.' },
-  { q: 'How is the competition structured?', a: 'Three stages: National Qualifiers (virtual, February 28, 2026), National Finals (in-person, May 2026), and the International Economics Olympiad (Summer 2026). Each stage builds on the last.' },
+  { q: 'How is the competition structured?', a: 'Four stages: National Qualifiers (virtual, February 28, 2026), Quiz Bowl (open now), Essay Competition (open now), and National Finals (in-person, May 2026). Each stage builds on the last.' },
   { q: 'Can I start a chapter at my school?', a: 'Yes. Chapter Founder applications are open year-round. Chapters can be founded at any public or private US high school.' },
   { q: 'Do I need a teacher or sponsor to register?', a: 'No. Students register individually at usaeo.org. You do not need school sponsorship, a teacher nomination, or any prior affiliation with USAEO.' },
 ];
@@ -53,7 +53,7 @@ const faqs = [
 const principles = [
   { title: 'Academic excellence', body: 'We set a high standard for economic reasoning, testing theory, data analysis, and real-world problem solving across all competition stages. Students leave the USAEO with analytical skills that extend well beyond economics.' },
   { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler — from any state, any school, any background.' },
-  { title: 'Global perspective', body: "By fielding a national team at the IEO, we connect America's best young economists with their counterparts from more than 50 countries — building relationships and a global outlook that extends far beyond the competition itself." },
+  { title: 'Impact-driven', body: "As a 501(c)(3) nonprofit, every dollar we raise goes toward student programming: free workshops, open curriculum, and a competition infrastructure that levels the playing field for students everywhere." },
 ];
 
 function ScrollPrinciple({ item }) {
@@ -110,7 +110,7 @@ export default function Home() {
             </motion.h1>
 
             <motion.p {...fadeUp(0.1)} className="text-xl text-muted-foreground max-w-xl leading-relaxed mb-10">
-              The USAEO is a free, three-stage national competition that identifies and develops America's top young economists — and sends a team to the International Economics Olympiad.
+              The USAEO is a free national competition that identifies and develops America's top young economists — completely free, open to every US high school student, and run by a 501(c)(3) nonprofit.
             </motion.p>
 
             <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-3">
@@ -146,7 +146,7 @@ export default function Home() {
             {[
               { value: '500+', label: 'Registered students', sub: 'From 40+ states' },
               { value: '100%', label: 'Free to participate', sub: 'No fees at any stage' },
-              { value: '50+', label: 'Countries at the IEO', sub: 'Team USA competes' },
+              { value: '501(c)(3)', label: 'Registered nonprofit', sub: 'Mission-driven organization' },
               { value: '9+', label: 'Active school chapters', sub: 'And growing' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.07)}>
@@ -166,10 +166,10 @@ export default function Home() {
             <motion.div {...fadeUp()} className="md:sticky md:top-24">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">The Competition</p>
               <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight mb-6">
-                Three stages.<br /><em>One global destination.</em>
+                Four stages.<br /><em>One national champion.</em>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6 text-base">
-                The USAEO follows the same structure as international olympiad programs: a qualifying round, a national finals, and an international competition. Each stage is free to enter.
+                The USAEO runs a multi-stage competition open to all US high school students: qualifying round, Quiz Bowl, Essay Competition, and National Finals. Each stage is free to enter.
               </p>
               <p className="text-muted-foreground leading-relaxed text-base">
                 Students advance based solely on performance. There are no nominations, no fees, and no prerequisites — just a genuine open competition accessible to every US high schooler.
@@ -180,18 +180,23 @@ export default function Home() {
               {[
                 {
                   n: '01', title: 'National Qualifiers', date: 'February 28, 2026',
-                  body: 'A two-hour virtual exam open to all US high school students. Multiple-choice and short-answer questions covering the full USAEO syllabus. Choose from two sessions: 11 AM or 6 PM ET. Top scorers advance to the National Finals.',
-                  to: '/competitions/qualifiers',
+                  body: 'A two-hour virtual exam open to all US high school students covering the full USAEO syllabus. Registration is now closed — top scorers have advanced to the next rounds.',
+                  to: '/competitions',
                 },
                 {
-                  n: '02', title: 'National Finals', date: 'May 2026',
-                  body: 'An intensive in-person competition held at a US university campus. Qualified students complete a comprehensive written exam and a structured case study analysis. The top performers form Team USA.',
+                  n: '02', title: 'Quiz Bowl', date: 'Coming Soon',
+                  body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students — register now to secure your spot.',
+                  to: '/competitions/quiz-bowl',
+                },
+                {
+                  n: '03', title: 'Essay Competition', date: 'Coming Soon',
+                  body: 'Submit a research essay on an economics topic. Judged on economic reasoning, evidence quality, and clarity of argument. Open to all registered students.',
+                  to: '/competitions/essay',
+                },
+                {
+                  n: '04', title: 'National Finals', date: 'May 2026',
+                  body: 'An intensive in-person competition held at a US university campus. Top scorers from Quiz Bowl and Essay rounds compete in a written exam and case study analysis. Winners are named National Champions.',
                   to: '/competitions/finals',
-                },
-                {
-                  n: '03', title: 'International Economics Olympiad', date: 'Summer 2026',
-                  body: 'Team USA represents the country at the IEO among students from 50+ nations. The competition includes individual theory rounds, a business case challenge, and a financial literacy test. Past host countries include Lithuania, Germany, and South Korea.',
-                  to: '/competitions/ieo',
                 },
               ].map((step, i) => (
                 <motion.div key={step.n} {...fadeUp(i * 0.1)} className="py-8">
@@ -254,7 +259,7 @@ export default function Home() {
                 title: 'Chapter Program',
                 to: '/chapters',
                 body: 'Start a USAEO chapter at your high school. Chapter Founders lead weekly meetings, organize local study sessions, and connect their peers to the national competition. Active chapters exist in 15+ states.',
-                meta: '9+ active chapters · 190+ members',
+                meta: '9+ active chapters · Applications open',
               },
             ].map((p, i) => (
               <motion.div key={p.title} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10 group">
@@ -327,11 +332,10 @@ export default function Home() {
                   className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
                   View all chapters
                 </Link>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSe1p-OteCPs8ulvpy53dDcd5QkNfidprtc9rqGd1FITLJqA6Q/viewform"
-                  target="_blank" rel="noopener noreferrer"
+                <Link to="/register/chapter"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
                   Start a chapter
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
@@ -356,7 +360,7 @@ export default function Home() {
               ].map((c) => (
                 <Marker key={c.school} position={[c.lat, c.lng]} icon={orangeIcon}>
                   <Popup>
-                    <strong>{c.school}</strong><br />{c.city}<br /><span style={{ color: 'hsl(24,95%,53%)' }}>{c.members} members</span>
+                    <strong>{c.school}</strong><br />{c.city}
                   </Popup>
                 </Marker>
               ))}
@@ -375,13 +379,8 @@ export default function Home() {
             ].map((c) => (
               <div key={c.school} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
                 <p className="font-medium text-foreground text-sm mb-2">{c.school}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" /> {c.city}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Users className="w-3 h-3" /> {c.members}
-                  </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3 h-3" /> {c.city}
                 </div>
               </div>
             ))}
@@ -409,7 +408,7 @@ export default function Home() {
             {[
               { quote: 'USAEO fundamentally changed how I think about economics. The workshops were invaluable prep for both the competition and my AP coursework.', name: 'Aisha T.', school: 'Stuyvesant High School, NY', year: 'Class of 2026' },
               { quote: "I had no economics background when I registered. Six months later I was competing at the national level. The free curriculum made it genuinely possible — not just in theory.", name: 'Marcus L.', school: 'Phillips Academy, MA', year: 'Class of 2025' },
-              { quote: "Representing the US at the IEO was the most formative academic experience of my life. The community you build with 50 countries of students is unlike anything in a classroom.", name: 'Sofia R.', school: 'Lowell High School, CA', year: 'IEO 2025' },
+              { quote: "Competing at the National Finals was the most formative academic experience of my life. The community you build with students from across the country is unlike anything in a classroom.", name: 'Sofia R.', school: 'Lowell High School, CA', year: 'National Finals 2025' },
             ].map((t, i) => (
               <motion.div key={t.name} {...fadeUp(i * 0.1)} className="bg-white border border-border rounded-2xl p-8">
                 <p className="text-base text-foreground leading-relaxed mb-7 italic">"{t.quote}"</p>

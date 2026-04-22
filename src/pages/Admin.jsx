@@ -242,7 +242,7 @@ export default function Admin() {
                 <Field label="File Type (e.g. PDF, ZIP)" value={form.file_type} onChange={v => setForm(p => ({ ...p, file_type: v }))} />
                 <Field label="File Size (e.g. 1.2 MB)" value={form.file_size} onChange={v => setForm(p => ({ ...p, file_size: v }))} />
                 <Field label="Tag" type="select" value={form.tag} onChange={v => setForm(p => ({ ...p, tag: v }))}
-                  options={['Competition','Curriculum','Practice','IEO','Workshops'].map(t => ({ value: t, label: t }))} />
+                  options={['Competition','Curriculum','Practice','Quiz Bowl','Essay','Workshops'].map(t => ({ value: t, label: t }))} />
                 <Field label="Publicly accessible (no login required)" type="checkbox" value={form.public} onChange={v => setForm(p => ({ ...p, public: v }))} />
               </>}
               {modal.type === 'ranking' && <>
