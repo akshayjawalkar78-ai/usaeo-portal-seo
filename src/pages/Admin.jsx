@@ -129,24 +129,30 @@ export default function Admin() {
 
   const handleSave = async () => {
     setSaving(true);
-    const { type, data } = modal;
-    const entityMap = {
-      announcement: base44.entities.Announcement,
-      workshop: base44.entities.Workshop,
-      resource: base44.entities.Resource,
-      ranking: base44.entities.Ranking,
-      chapter: base44.entities.Chapter,
-      chapterAnn: base44.entities.ChapterAnnouncement,
-      competitionEvent: base44.entities.CompetitionEvent,
-      curriculumUnit: base44.entities.CurriculumUnit,
-    };
-    const entity = entityMap[type];
-    if (data?.id) await entity.update(data.id, form);
-    else await entity.create(form);
-    setModal(null);
-    setSaving(false);
-    await loadAll();
-    if (selectedChapter) loadChapterDetails(selectedChapter.id);
+    try {
+      const { type, data } = modal;
+      const entityMap = {
+        announcement: base44.entities.Announcement,
+        workshop: base44.entities.Workshop,
+        resource: base44.entities.Resource,
+        ranking: base44.entities.Ranking,
+        chapter: base44.entities.Chapter,
+        chapterAnn: base44.entities.ChapterAnnouncement,
+        competitionEvent: base44.entities.CompetitionEvent,
+        curriculumUnit: base44.entities.CurriculumUnit,
+      };
+      const entity = entityMap[type];
+      if (data?.id) await entity.update(data.id, form);
+      else await entity.create(form);
+      setModal(null);
+      await loadAll();
+      if (selectedChapter) loadChapterDetails(selectedChapter.id);
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Save failed: ' + (err?.message || 'Unknown error. Check console.'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -247,6 +253,7 @@ export default function Admin() {
               </>}
               {modal.type === 'ranking' && <>
                 <Field label="Student Name" value={form.student_name} onChange={v => setForm(p => ({ ...p, student_name: v }))} />
+                <Field label="Student Email (links to their dashboard)" type="email" value={form.user_email} onChange={v => setForm(p => ({ ...p, user_email: v }))} />
                 <Field label="School" value={form.school} onChange={v => setForm(p => ({ ...p, school: v }))} />
                 <Field label="State" value={form.state} onChange={v => setForm(p => ({ ...p, state: v }))} />
                 <Field label="Score" type="number" value={form.score} onChange={v => setForm(p => ({ ...p, score: parseFloat(v) }))} />

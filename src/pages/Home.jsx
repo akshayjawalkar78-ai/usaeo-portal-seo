@@ -39,6 +39,10 @@ const partners = [
   { name: 'YRI', logo: 'https://www.usaeo.org/imgs/sponsors/YRI.png', url: 'https://www.yriscience.com/' },
   { name: 'FYC', logo: 'https://www.usaeo.org/imgs/sponsors/FYC.png', url: 'https://linktr.ee/financialyouthclub' },
   { name: 'CFE', logo: 'https://www.usaeo.org/imgs/sponsors/CFE.png', url: 'https://councilfe.org/' },
+  { name: 'Youth Economy Lab', logo: null, url: 'https://www.youtheconomylab.com/' },
+  { name: 'Synthica', logo: null, url: 'https://www.synthica.org/' },
+  { name: 'A-Warded', logo: null, url: 'https://a-warded.org/' },
+  { name: 'SE Asia Econ Project', logo: null, url: 'https://seaecon.org/' },
 ];
 
 const faqs = [
@@ -298,10 +302,13 @@ export default function Home() {
               <motion.a key={p.name} {...fadeUp(i * 0.04)}
                 href={p.url} target="_blank" rel="noopener noreferrer"
                 className="group flex items-center justify-center p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
-                <img src={p.logo} alt={p.name} className="h-8 w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                {p.logo
+                  ? <img src={p.logo} alt={p.name} className="h-8 w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                  : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.name}</span>
+                }
               </motion.a>
             ))}
-            <motion.a {...fadeUp(0.36)} href="mailto:info@usaeo.org"
+            <motion.a {...fadeUp(0.56)} href="mailto:info@usaeo.org"
               className="flex items-center justify-center p-6 border border-dashed border-border rounded-xl hover:border-primary/40 transition-all duration-200 h-20">
               <span className="text-sm text-muted-foreground">+ Partner</span>
             </motion.a>

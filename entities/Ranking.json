@@ -5,6 +5,9 @@
     "student_name": {
       "type": "string"
     },
+    "user_email": {
+      "type": "string"
+    },
     "school": {
       "type": "string"
     },

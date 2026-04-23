@@ -21,7 +21,7 @@ const members = [
   { name: 'Nick Chen', role: 'Chief Development Officer (CDO)', dept: 'Development', photo: LOGO },
   { name: 'Aarjit Adhikari', role: 'Chief Information Officer (CIO)', dept: 'Technology', photo: LOGO },
   { name: 'Joseph Augustine', role: 'Chief Academic Officer (CAO)', dept: 'Academics', photo: LOGO },
-  { name: 'Radeen', role: 'Chief Revenue Officer (CRO)', dept: 'Revenue', photo: LOGO },
+  { name: 'Radeen', role: 'Chief Research Officer (CRO)', dept: 'Research', photo: LOGO },
 ];
 
 const roles = [

@@ -59,6 +59,10 @@ export default function Dashboard() {
   const upcomingWorkshops = workshops.filter(w => w.status === 'upcoming');
   const pastWorkshops = workshops.filter(w => w.status === 'past');
   const filteredRankings = rankings.filter(r => r.stage === rankStage);
+  const myRankingEntry = filteredRankings.find(r =>
+    (authUser?.email && r.user_email && r.user_email.toLowerCase() === authUser.email.toLowerCase()) ||
+    (profile?.full_name && r.student_name && r.student_name.toLowerCase() === profile.full_name.toLowerCase())
+  );
 
   const handleJoinChapter = async () => {
     setJoinError(''); setJoinSuccess('');
@@ -276,6 +280,31 @@ export default function Dashboard() {
           {active === 'rankings' && (
             <div className="space-y-5">
               <div className="bg-white rounded-2xl border border-border p-8">
+                {/* Personalized header */}
+                {myRankingEntry ? (
+                  <div className="rounded-xl bg-foreground text-white px-6 py-5 mb-6 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">Your Standing</p>
+                      <p className="font-semibold text-lg">Rank #{myRankingEntry.rank}</p>
+                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts · {myRankingEntry.stage}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">
+                      {myRankingEntry.rank}
+                    </div>
+                  </div>
+                ) : filteredRankings.length > 0 ? (
+                  <div className="rounded-xl border border-border px-6 py-5 mb-6 flex items-center justify-between gap-4 bg-muted/30">
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">You haven't been ranked yet</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">Register for Quiz Bowl or Essay to earn a ranking.</p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Link to="/register/quiz-bowl" className="text-xs font-semibold text-primary hover:underline">Quiz Bowl</Link>
+                      <span className="text-muted-foreground text-xs">·</span>
+                      <Link to="/register/essay" className="text-xs font-semibold text-primary hover:underline">Essay</Link>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="font-semibold text-foreground">Competition Rankings</h2>

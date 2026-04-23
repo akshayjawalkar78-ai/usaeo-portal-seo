@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, MapPin, X, ExternalLink, Calendar, BookOpen, Mic2, Trophy, Radio } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
+import { base44 } from '@/api/base44Client';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -29,7 +30,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const chapters = [
+const SEED_CHAPTERS = [
   { school: 'Thomas Jefferson High School', city: 'Alexandria, VA', lat: 38.8048, lng: -77.0719, founded: 'Sep 2024', focus: 'Competition prep, weekly econ talks' },
   { school: 'Stuyvesant High School', city: 'New York, NY', lat: 40.7178, lng: -74.0134, founded: 'Aug 2024', focus: 'Research, debate, competitions' },
   { school: 'Phillips Academy', city: 'Andover, MA', lat: 42.6509, lng: -71.1369, founded: 'Oct 2024', focus: 'Global economics, competition prep' },
@@ -51,6 +52,13 @@ const founderActions = [
 
 export default function Chapters() {
   const [selected, setSelected] = useState(null);
+  const [chapters, setChapters] = useState(SEED_CHAPTERS);
+
+  useEffect(() => {
+    base44.entities.Chapter.filter({ status: 'active' }).then((data) => {
+      if (data && data.length > 0) setChapters(data);
+    }).catch(() => {});
+  }, []);
 
   return (
     <PageLayout>
@@ -65,7 +73,7 @@ export default function Chapters() {
               Start a chapter at your school, lead your peers, and build a local economics community connected to the national network.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
-              {[['9+', 'Active chapters'], ['15+', 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
+              {[[`${chapters.length}+`, 'Active chapters'], ['15+', 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
