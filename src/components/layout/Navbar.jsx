@@ -46,6 +46,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [mobileExpanded, setMobileExpanded] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, profile, signOut } = useAuth();
@@ -145,7 +146,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile toggle */}
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 text-foreground">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-3 text-foreground">
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -158,25 +159,78 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white pt-14"
+            className="fixed inset-0 z-40 bg-white pt-14 overflow-y-auto"
           >
-            <div className="p-5 flex flex-col gap-1 divide-y divide-border">
-              {[
-                { label: 'About', to: '/about' },
-                { label: 'Competitions', to: '/competitions' },
-                { label: 'Quiz Bowl', to: '/competitions/quiz-bowl' },
-                { label: 'Essay Competition', to: '/competitions/essay' },
-                { label: 'Workshops', to: '/workshops' },
-                { label: 'Curriculum', to: '/curriculum' },
-                { label: 'Research', to: '/research' },
-                { label: 'Chapters', to: '/chapters' },
-                { label: 'Team', to: '/team' },
-                { label: 'Partners', to: '/partners' },
-              ].map((link) => (
-                <Link key={link.label} to={link.to} className="py-3 text-base text-foreground font-medium">
-                  {link.label}
-                </Link>
-              ))}
+            <div className="p-5 flex flex-col divide-y divide-border">
+              <Link to="/about" className="py-3.5 text-base text-foreground font-medium">About</Link>
+
+              {/* Competitions collapsible */}
+              <div>
+                <button
+                  onClick={() => setMobileExpanded(mobileExpanded === 'competitions' ? null : 'competitions')}
+                  className="w-full flex items-center justify-between py-3.5 text-base text-foreground font-medium"
+                >
+                  Competitions
+                  <motion.span animate={{ rotate: mobileExpanded === 'competitions' ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {mobileExpanded === 'competitions' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-2 pl-4 flex flex-col gap-0.5">
+                        {competitionsLinks.map((link) => (
+                          <Link key={link.label} to={link.to} className="py-2.5 text-sm text-muted-foreground hover:text-primary transition-colors">
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Programs collapsible */}
+              <div>
+                <button
+                  onClick={() => setMobileExpanded(mobileExpanded === 'programs' ? null : 'programs')}
+                  className="w-full flex items-center justify-between py-3.5 text-base text-foreground font-medium"
+                >
+                  Programs
+                  <motion.span animate={{ rotate: mobileExpanded === 'programs' ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {mobileExpanded === 'programs' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-2 pl-4 flex flex-col gap-0.5">
+                        {programsLinks.map((link) => (
+                          <Link key={link.label} to={link.to} className="py-2.5 text-sm text-muted-foreground hover:text-primary transition-colors">
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <Link to="/team" className="py-3.5 text-base text-foreground font-medium">Team</Link>
+              <Link to="/partners" className="py-3.5 text-base text-foreground font-medium">Partners</Link>
+
               <div className="pt-4 flex flex-col gap-3">
                 {isAuthenticated ? (
                   <>
@@ -198,7 +252,7 @@ export default function Navbar() {
                       Log in
                     </Link>
                     <Link to="/register" className="w-full text-center py-3 bg-primary text-white rounded-full font-medium">
-                      Register Now — Free
+                      Register
                     </Link>
                   </>
                 )}

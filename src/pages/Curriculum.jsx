@@ -73,7 +73,7 @@ export default function Curriculum() {
       <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="flex flex-wrap gap-10 mb-16 pb-16 border-b border-border">
-            {[['100%', 'Free'], ['6', 'Units'], ['30+', 'Hours of content'], ['Self-paced', 'Learn anywhere'], ['Beginner-friendly', 'No prior knowledge needed']].map(([v, l]) => (
+            {[['100%', 'Free to access'], ['6', 'Units'], ['30+', 'Hours of content'], ['0', 'Prerequisites']].map(([v, l]) => (
               <div key={l}>
                 <div className="font-serif text-3xl text-primary mb-1">{v}</div>
                 <div className="text-sm text-muted-foreground">{l}</div>
@@ -94,7 +94,7 @@ export default function Curriculum() {
                     <span className="font-serif text-5xl text-orange-200 leading-none flex-shrink-0">{unit.n}</span>
                     <div>
                       <h3 className="font-semibold text-foreground text-xl">{unit.title}</h3>
-                      <span className="text-xs text-muted-foreground">{unit.hrs} · Self-paced</span>
+                      <span className="text-xs text-muted-foreground">{unit.hrs}</span>
                     </div>
                   </div>
                   <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"

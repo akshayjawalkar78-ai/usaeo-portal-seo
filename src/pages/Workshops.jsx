@@ -13,15 +13,15 @@ const fadeUp = (delay = 0) => ({
 const upcoming = [];
 
 const past = [
-  { title: 'Introduction to Microeconomics', date: 'Mar 14, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Supply & demand, elasticity, market equilibrium' },
-  { title: 'Macroeconomics Fundamentals', date: 'Mar 18, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'GDP, inflation, unemployment, fiscal & monetary policy' },
-  { title: 'Game Theory & Strategic Thinking', date: 'Mar 21, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Nash equilibria, prisoner\'s dilemma, dominant strategies' },
-  { title: 'Market Structures Deep Dive', date: 'Mar 25, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Perfect competition, monopoly, oligopoly, pricing power' },
-  { title: 'Behavioral Economics', date: 'Mar 28, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Cognitive biases, nudges, prospect theory' },
-  { title: 'International Trade & Finance', date: 'Apr 1, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Comparative advantage, trade policy, exchange rates' },
-  { title: 'Data Analysis & Interpretation', date: 'Apr 5, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Economic data, graphs, regression basics, policy analysis' },
-  { title: 'Economic Policy & Current Events', date: 'Apr 11, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Central banking, fiscal policy, global economic trends' },
-  { title: 'Competition Prep: Essay & Quiz Bowl', date: 'Apr 15, 2026', time: '4 PM ET', instructor: 'USAEO Academic Committee', role: 'Academic Team', topic: 'Exam strategy, essay writing, practice problems' },
+  { title: 'Economics Careers & the PhD Journey', date: 'Mar 14, 2026', time: '6 PM ET', instructor: 'Atta Gyasi-Domson', role: 'PhD Student in Economics, Emory University', topic: 'Economic careers, academic pathways, PhD experience' },
+  { title: 'The Labor Market', date: 'Mar 15, 2026', time: '6 PM ET', instructor: 'Noah Yosif', role: 'Chief Economist, American Staffing Association', topic: 'Labor market trends, employment dynamics, workforce economics' },
+  { title: 'Public Policy & Academic Careers', date: 'Mar 21, 2026', time: '6 PM ET', instructor: 'Lauren Spits', role: 'Public Policy Researcher', topic: 'Academic career pathways, public policy, economics in government' },
+  { title: 'Game Theory & Applied Economics', date: 'Mar 27, 2026', time: '7 PM ET', instructor: 'Juan Sagredo', role: 'PhD (Operations Research & Financial Engineering), Princeton University', topic: 'Game theory, mechanism design, information economics' },
+  { title: 'Game Theory in Strategy', date: 'Mar 28, 2026', time: '5 PM ET', instructor: 'William Putsis', role: 'Professor of Marketing, Economics & Business Strategy, Yale SOM / UNC Kenan-Flagler', topic: 'Game theory, competitive strategy, strategic thinking' },
+  { title: 'Economics Workshop', date: 'Apr 4, 2026', time: '9 PM ET', instructor: 'Yi David Wang', role: 'Affiliate Professor, Virginia Tech; Senior Financial Sector Expert, IMF', topic: '' },
+  { title: 'Finance & Economics Research', date: 'Apr 5, 2026', time: '10 AM ET', instructor: 'Gilles Chemla', role: 'Professor of Finance, Imperial College Business School; Research Fellow, CEPR', topic: '' },
+  { title: 'Economics Workshop', date: 'Apr 11, 2026', time: '7 PM ET', instructor: 'Mohamed Ashour', role: 'Special Appointee, International Monetary Fund', topic: '' },
+  { title: 'Economics Workshop', date: 'Apr 15, 2026', time: '6 PM ET', instructor: 'Joe Tracy', role: 'Distinguished Fellow, Purdue Daniels School of Business; Former EVP, Federal Reserve Bank of Dallas', topic: '' },
 ];
 
 export default function Workshops() {
@@ -38,7 +38,7 @@ export default function Workshops() {
               Live workshops covering macroeconomics, game theory, data analysis, and competition prep — all on Zoom, all free for registered students.
             </p>
             <div className="flex flex-wrap gap-10 mt-10">
-              {[['9', 'Sessions hosted'], ['Free', 'For all registered students'], ['Live Q&A', 'Every session'], ['Recording', 'Available after']].map(([v, l]) => (
+              {[['9', 'Sessions hosted'], ['$0', 'Cost to attend'], ['9', 'Expert instructors'], ['60+', 'Min of content each']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>

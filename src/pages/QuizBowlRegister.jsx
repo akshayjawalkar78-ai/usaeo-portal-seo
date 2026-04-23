@@ -116,7 +116,7 @@ export default function QuizBowlRegister() {
 
             <button type="submit" disabled={loading}
               className="w-full py-3 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 mt-2">
-              {loading ? 'Registering...' : 'Register — Free'}
+              {loading ? 'Registering...' : 'Register'}
             </button>
             <p className="text-xs text-muted-foreground text-center">
               By registering you agree to receive emails from USAEO about this event.

@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy, BookOpen, Calendar, CalendarDays, Users, FileText, ExternalLink,
   Bell, CheckCircle, Clock, ArrowRight, Lock,
-  LayoutDashboard, Menu, ChevronRight, School, BarChart2, X
+  LayoutDashboard, Menu, ChevronRight, School, BarChart2, X, ShieldCheck, Plus, Trash2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/supabaseClient';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -22,7 +23,7 @@ const navItems = [
 
 
 export default function Dashboard() {
-  const { user: authUser, profile } = useAuth();
+  const { user: authUser, profile, isChapterAdmin, chapterAdminOf } = useAuth();
   const [active, setActive] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -42,6 +43,12 @@ export default function Dashboard() {
   const [joinSuccess, setJoinSuccess] = useState('');
   const [rankStage, setRankStage] = useState('qualifiers');
   const [myRegistrations, setMyRegistrations] = useState([]);
+  // Chapter admin state
+  const [adminChapter, setAdminChapter] = useState(null);
+  const [adminMembers, setAdminMembers] = useState([]);
+  const [pendingMembers, setPendingMembers] = useState([]);
+  const [adminAnns, setAdminAnns] = useState([]);
+  const [adminAnnForm, setAdminAnnForm] = useState({ title: '', body: '' });
 
   useEffect(() => {
     base44.entities.Announcement.filter({ published: true }, '-created_date').then(setAnnouncements);
@@ -55,6 +62,43 @@ export default function Dashboard() {
       base44.entities.EventRegistration.filter({ user_email: authUser.email }).then(setMyRegistrations);
     }
   }, [authUser?.email]);
+
+  useEffect(() => {
+    if (isChapterAdmin && chapterAdminOf.length > 0) {
+      const chapId = chapterAdminOf[0];
+      base44.entities.Chapter.filter({ id: chapId }).then(data => {
+        if (data?.[0]) setAdminChapter(data[0]);
+      }).catch(() => {});
+      loadAdminChapterData(chapId);
+    }
+  }, [isChapterAdmin, chapterAdminOf]);
+
+  const loadAdminChapterData = async (chapId) => {
+    const [members, anns] = await Promise.all([
+      base44.entities.ChapterMember.filter({ chapter_id: chapId }),
+      base44.entities.ChapterAnnouncement.filter({ chapter_id: chapId }, '-created_date'),
+    ]);
+    setAdminMembers(members.filter(m => m.status === 'active'));
+    setPendingMembers(members.filter(m => m.status === 'pending'));
+    setAdminAnns(anns);
+  };
+
+  const handleAdminAnnSubmit = async () => {
+    if (!adminAnnForm.title.trim() || !adminChapter) return;
+    await base44.entities.ChapterAnnouncement.create({
+      chapter_id: adminChapter.id,
+      title: adminAnnForm.title,
+      body: adminAnnForm.body,
+      author_email: authUser?.email,
+    });
+    setAdminAnnForm({ title: '', body: '' });
+    loadAdminChapterData(adminChapter.id);
+  };
+
+  const handleMemberRequest = async (member, approve) => {
+    await supabase.from('chapter_members').update({ status: approve ? 'active' : 'removed' }).eq('id', member.id);
+    loadAdminChapterData(adminChapter.id);
+  };
 
   const upcomingWorkshops = workshops.filter(w => w.status === 'upcoming');
   const pastWorkshops = workshops.filter(w => w.status === 'past');
@@ -73,8 +117,8 @@ export default function Dashboard() {
     const fullName = profile?.full_name || '';
     const existing = await base44.entities.ChapterMember.filter({ chapter_id: chapter.id, user_email: email });
     if (existing.length > 0) { setJoinError('You are already a member of this chapter.'); return; }
-    await base44.entities.ChapterMember.create({ chapter_id: chapter.id, user_email: email, user_name: fullName, role: 'member', status: 'active' });
-    await base44.entities.Chapter.update(chapter.id, { member_count: (chapter.member_count || 0) + 1 });
+    await base44.entities.ChapterMember.create({ chapter_id: chapter.id, user_email: email, user_name: fullName, role: 'member', status: 'pending' });
+    // member_count increments only after chapter admin approves
     setMyChapter(chapter);
     setJoinSuccess(`Successfully joined ${chapter.school} chapter!`);
     setJoinCode('');
@@ -109,6 +153,13 @@ export default function Dashboard() {
               {item.label}
             </button>
           ))}
+          {isChapterAdmin && (
+            <button onClick={() => navigate('chapter-admin')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${active === 'chapter-admin' ? 'bg-foreground text-white' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
+              <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+              Chapter Admin
+            </button>
+          )}
           <div className="pt-4">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">External</p>
             <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground cursor-not-allowed select-none">
@@ -647,6 +698,117 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── CHAPTER ADMIN ── */}
+          {active === 'chapter-admin' && isChapterAdmin && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="font-semibold text-foreground mb-1">Chapter Admin</h2>
+                <p className="text-sm text-muted-foreground">{adminChapter?.name || adminChapter?.school || 'Your chapter'}</p>
+              </div>
+
+              {/* Pending Join Requests */}
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                  Pending Requests ({pendingMembers.length})
+                </p>
+                {pendingMembers.length === 0 && <p className="text-sm text-muted-foreground">No pending requests.</p>}
+                <div className="space-y-3">
+                  {pendingMembers.map(m => (
+                    <div key={m.id} className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                        <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleMemberRequest(m, true)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                          Approve
+                        </button>
+                        <button onClick={() => handleMemberRequest(m, false)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                          Deny
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Members */}
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                  Active Members ({adminMembers.length})
+                </p>
+                {adminMembers.length === 0 && <p className="text-sm text-muted-foreground">No members yet.</p>}
+                <div className="space-y-2">
+                  {adminMembers.map(m => (
+                    <div key={m.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
+                          {m.user_name?.[0] ?? '?'}
+                        </div>
+                        <div>
+                          <p className="text-sm text-foreground">{m.user_name || m.user_email}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Post Announcement */}
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                  Post Announcement
+                </p>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Title"
+                    value={adminAnnForm.title}
+                    onChange={e => setAdminAnnForm(f => ({ ...f, title: e.target.value }))}
+                    className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  />
+                  <textarea
+                    placeholder="Body (optional)"
+                    rows={3}
+                    value={adminAnnForm.body}
+                    onChange={e => setAdminAnnForm(f => ({ ...f, body: e.target.value }))}
+                    className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
+                  />
+                  <button onClick={handleAdminAnnSubmit}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                    <Plus className="w-3.5 h-3.5" /> Post
+                  </button>
+                </div>
+              </div>
+
+              {/* Past Announcements */}
+              {adminAnns.length > 0 && (
+                <div className="bg-white rounded-2xl border border-border p-6">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                    Chapter Announcements
+                  </p>
+                  <div className="space-y-3">
+                    {adminAnns.map(a => (
+                      <div key={a.id} className="border border-border rounded-lg p-4 flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">{a.title}</p>
+                          {a.body && <p className="text-xs text-muted-foreground mt-1">{a.body}</p>}
+                        </div>
+                        <button onClick={async () => { await base44.entities.ChapterAnnouncement.delete(a.id); loadAdminChapterData(adminChapter.id); }}
+                          className="flex-shrink-0 p-1 hover:bg-red-50 rounded transition-colors text-muted-foreground hover:text-destructive">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

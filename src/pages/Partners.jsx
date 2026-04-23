@@ -11,7 +11,6 @@ const fadeUp = (delay = 0) => ({
 });
 
 const partners = [
-  { name: 'Ultra AI', logo: 'https://www.usaeo.org/imgs/sponsors/UltraAI.png', url: 'https://useultra.ai/', desc: 'AI-powered learning platform' },
   { name: 'Stellar', logo: 'https://www.usaeo.org/imgs/sponsors/Stellar.png', url: 'https://stellarlearning.app/', desc: 'Student learning tools' },
   { name: 'Crackd', logo: 'https://www.usaeo.org/imgs/sponsors/Crackd.png', url: 'https://crackd.it/', desc: 'Exam preparation platform' },
   { name: 'Launchpoint', logo: 'https://www.usaeo.org/imgs/sponsors/Launchpoint.png', url: 'https://www.launchpointhq.com/', desc: 'Student opportunity network' },
@@ -20,10 +19,10 @@ const partners = [
   { name: 'YRI', logo: 'https://www.usaeo.org/imgs/sponsors/YRI.png', url: 'https://www.yriscience.com/', desc: 'Youth research initiative' },
   { name: 'FYC', logo: 'https://www.usaeo.org/imgs/sponsors/FYC.png', url: 'https://linktr.ee/financialyouthclub', desc: 'Financial Youth Club' },
   { name: 'CFE', logo: 'https://www.usaeo.org/imgs/sponsors/CFE.png', url: 'https://councilfe.org/', desc: 'Council for Financial Education' },
-  { name: 'A-Warded', logo: null, url: '#', desc: 'Student recognition platform' },
-  { name: 'Synthica', logo: null, url: '#', desc: 'AI research tools for students' },
-  { name: 'Southeast Asian Economics Project', logo: null, url: '#', desc: 'Regional economics education' },
-  { name: 'Youth Economy Lab (YEL)', logo: null, url: '#', desc: 'Youth economics research lab' },
+  { name: 'Youth Economics Lab', logo: '/logos/yel.png', url: 'https://www.youtheconomicslab.com/', desc: 'Youth economics research lab' },
+  { name: 'Synthica', logo: '/logos/synthica.png', url: 'https://www.synthica.org/', desc: 'AI research tools for students' },
+  { name: 'A-Warded', logo: '/logos/awarded.ico', url: 'https://a-warded.org/', desc: 'Student recognition platform' },
+  { name: 'SE Asian Economics Project', logo: null, url: '#', desc: 'Regional economics education' },
 ];
 
 const tiers = [

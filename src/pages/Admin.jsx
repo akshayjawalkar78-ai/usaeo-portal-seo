@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
-  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen
+  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/supabaseClient';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -17,6 +18,7 @@ const navItems = [
   { label: 'Chapters', id: 'chapters', icon: School },
   { label: 'Competition', id: 'competition', icon: Trophy },
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
+  { label: 'Registrations', id: 'registrations', icon: ClipboardList },
 ];
 
 function Modal({ title, onClose, children }) {
@@ -89,9 +91,11 @@ export default function Admin() {
   const [chapters, setChapters] = useState([]);
   const [competitionEvents, setCompetitionEvents] = useState([]);
   const [curriculumUnits, setCurriculumUnits] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
   const [chapterMembers, setChapterMembers] = useState({});
   const [chapterAnns, setChapterAnns] = useState({});
   const [selectedChapter, setSelectedChapter] = useState(null);
+  const [assignAdminEmail, setAssignAdminEmail] = useState('');
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -100,7 +104,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
-    const [a, w, r, rk, ch, ce, cu] = await Promise.all([
+    const [a, w, r, rk, ch, ce, cu, reg] = await Promise.all([
       base44.entities.Announcement.list('-created_date'),
       base44.entities.Workshop.list('-created_date'),
       base44.entities.Resource.list(),
@@ -108,9 +112,10 @@ export default function Admin() {
       base44.entities.Chapter.list(),
       base44.entities.CompetitionEvent.list('order'),
       base44.entities.CurriculumUnit.list('order'),
+      base44.entities.EventRegistration.list('-registered_at'),
     ]);
     setAnnouncements(a); setWorkshops(w); setResources(r); setRankings(rk); setChapters(ch);
-    setCompetitionEvents(ce); setCurriculumUnits(cu);
+    setCompetitionEvents(ce); setCurriculumUnits(cu); setRegistrations(reg);
   };
 
   useEffect(() => { loadAll(); }, []);
@@ -179,6 +184,7 @@ export default function Admin() {
     { label: 'Rankings', value: rankings.length, id: 'rankings' },
     { label: 'Timeline Events', value: competitionEvents.length, id: 'competition' },
     { label: 'Curriculum Units', value: curriculumUnits.length, id: 'curriculum' },
+    { label: 'Registrations', value: registrations.length, id: 'registrations' },
   ];
 
   const navigate = (id) => { setActive(id); setSidebarOpen(false); };
@@ -550,6 +556,40 @@ export default function Admin() {
                         </div>
                       </div>
 
+                      {/* Assign Chapter Admin */}
+                      <div className="md:col-span-2 border-t border-border pt-4">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Assign Chapter Admin</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            placeholder="user@email.com"
+                            value={assignAdminEmail}
+                            onChange={e => setAssignAdminEmail(e.target.value)}
+                            className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                          />
+                          <button
+                            onClick={async () => {
+                              if (!assignAdminEmail.trim()) return;
+                              try {
+                                const existing = (chapterMembers[c.id] || []).find(m => m.user_email === assignAdminEmail.trim());
+                                if (existing) {
+                                  await supabase.from('chapter_members').update({ role: 'chapter_admin' }).eq('id', existing.id);
+                                } else {
+                                  await supabase.from('chapter_members').insert({ chapter_id: c.id, user_email: assignAdminEmail.trim(), role: 'chapter_admin', status: 'active' });
+                                }
+                                setAssignAdminEmail('');
+                                loadChapterDetails(c.id);
+                              } catch (err) {
+                                alert('Failed: ' + err.message);
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
+                          >
+                            Assign
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Chapter Announcements */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
@@ -631,6 +671,49 @@ export default function Admin() {
                       className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── REGISTRATIONS ── */}
+          {active === 'registrations' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">Event Registrations</h2>
+                <span className="text-sm text-muted-foreground">{registrations.length} total</span>
+              </div>
+              <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                {registrations.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations yet.</p>}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Event</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Type</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {registrations.map(r => (
+                        <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
+                          <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-primary border border-orange-200">{r.event_type || '—'}</span>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

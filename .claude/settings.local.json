@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:/Users/austi/Downloads/Synthica Logo.png\" \"C:/Users/austi/OneDrive/Documents/GitHub/usaeo-portal/.claude/worktrees/gracious-albattani-0ad0bf/public/logos/synthica.png\")",
+      "Bash(cp \"C:/Users/austi/Downloads/YEL Logo.png\" \"C:/Users/austi/OneDrive/Documents/GitHub/usaeo-portal/.claude/worktrees/gracious-albattani-0ad0bf/public/logos/yel.png\")",
+      "Bash(cp \"C:/Users/austi/Downloads/favicon.ico\" \"C:/Users/austi/OneDrive/Documents/GitHub/usaeo-portal/.claude/worktrees/gracious-albattani-0ad0bf/public/logos/awarded.ico\")",
+      "WebSearch"
+    ]
+  }
+}
