@@ -8,7 +8,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Home from './pages/Home';
 import About from './pages/About';
 import Competitions from './pages/Competitions';
-import IEO from './pages/IEO';
+import QuizBowl from './pages/QuizBowl';
+import Essay from './pages/Essay';
 import Workshops from './pages/Workshops';
 import Curriculum from './pages/Curriculum';
 import Research from './pages/Research';
@@ -23,6 +24,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
 import Unauthorized from './pages/Unauthorized';
+import QuizBowlRegister from './pages/QuizBowlRegister';
+import EssayRegister from './pages/EssayRegister';
+import ChapterRegister from './pages/ChapterRegister';
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
 function CodeRedirect({ element }) {
@@ -44,9 +48,13 @@ function App() {
             <Route path="/" element={<CodeRedirect element={<Home />} />} />
             <Route path="/about" element={<About />} />
             <Route path="/competitions" element={<Competitions />} />
-            <Route path="/competitions/ieo" element={<IEO />} />
+            <Route path="/competitions/quiz-bowl" element={<QuizBowl />} />
+            <Route path="/competitions/essay" element={<Essay />} />
             <Route path="/competitions/qualifiers" element={<NationalQualifiers />} />
             <Route path="/competitions/finals" element={<NationalFinals />} />
+            <Route path="/register/quiz-bowl" element={<QuizBowlRegister />} />
+            <Route path="/register/essay" element={<EssayRegister />} />
+            <Route path="/register/chapter" element={<ChapterRegister />} />
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/research" element={<Research />} />

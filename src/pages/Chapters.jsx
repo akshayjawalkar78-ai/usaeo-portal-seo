@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, MapPin, Users, X, ExternalLink, Calendar, BookOpen, Mic2, Trophy, Radio } from 'lucide-react';
+import { ArrowRight, MapPin, X, ExternalLink, Calendar, BookOpen, Mic2, Trophy, Radio } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
+import { base44 } from '@/api/base44Client';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,16 +30,16 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const chapters = [
-  { school: 'Thomas Jefferson High School', city: 'Alexandria, VA', members: 24, lat: 38.8048, lng: -77.0719, founded: 'Sep 2024', focus: 'Competition prep, weekly econ talks' },
-  { school: 'Stuyvesant High School', city: 'New York, NY', members: 31, lat: 40.7178, lng: -74.0134, founded: 'Aug 2024', focus: 'Research, debate, competitions' },
-  { school: 'Phillips Academy', city: 'Andover, MA', members: 18, lat: 42.6509, lng: -71.1369, founded: 'Oct 2024', focus: 'Global economics, IEO prep' },
-  { school: 'Chicago Lab School', city: 'Chicago, IL', members: 22, lat: 41.7943, lng: -87.5907, founded: 'Nov 2024', focus: 'Policy analysis, workshops' },
-  { school: 'Basis Scottsdale', city: 'Scottsdale, AZ', members: 15, lat: 33.5093, lng: -111.8985, founded: 'Jan 2025', focus: 'Micro/macro deep dives' },
-  { school: 'Lowell High School', city: 'San Francisco, CA', members: 27, lat: 37.7454, lng: -122.4614, founded: 'Sep 2024', focus: 'Tech economics, market analysis' },
-  { school: 'Montgomery Blair High School', city: 'Silver Spring, MD', members: 19, lat: 39.0415, lng: -77.0009, founded: 'Dec 2024', focus: 'Econometrics, data science' },
-  { school: 'Lynbrook High School', city: 'San Jose, CA', members: 21, lat: 37.3508, lng: -121.9961, founded: 'Feb 2025', focus: 'Competition strategy, IEO prep' },
-  { school: 'River Hill High School', city: 'Clarksville, MD', members: 14, lat: 39.1774, lng: -76.9247, founded: 'Mar 2025', focus: 'Economics outreach, mentorship' },
+const SEED_CHAPTERS = [
+  { school: 'Thomas Jefferson High School', city: 'Alexandria, VA', lat: 38.8048, lng: -77.0719, founded: 'Sep 2024', focus: 'Competition prep, weekly econ talks' },
+  { school: 'Stuyvesant High School', city: 'New York, NY', lat: 40.7178, lng: -74.0134, founded: 'Aug 2024', focus: 'Research, debate, competitions' },
+  { school: 'Phillips Academy', city: 'Andover, MA', lat: 42.6509, lng: -71.1369, founded: 'Oct 2024', focus: 'Global economics, competition prep' },
+  { school: 'Chicago Lab School', city: 'Chicago, IL', lat: 41.7943, lng: -87.5907, founded: 'Nov 2024', focus: 'Policy analysis, workshops' },
+  { school: 'Basis Scottsdale', city: 'Scottsdale, AZ', lat: 33.5093, lng: -111.8985, founded: 'Jan 2025', focus: 'Micro/macro deep dives' },
+  { school: 'Lowell High School', city: 'San Francisco, CA', lat: 37.7454, lng: -122.4614, founded: 'Sep 2024', focus: 'Tech economics, market analysis' },
+  { school: 'Montgomery Blair High School', city: 'Silver Spring, MD', lat: 39.0415, lng: -77.0009, founded: 'Dec 2024', focus: 'Econometrics, data science' },
+  { school: 'Lynbrook High School', city: 'San Jose, CA', lat: 37.3508, lng: -121.9961, founded: 'Feb 2025', focus: 'Competition strategy, quiz bowl prep' },
+  { school: 'River Hill High School', city: 'Clarksville, MD', lat: 39.1774, lng: -76.9247, founded: 'Mar 2025', focus: 'Economics outreach, mentorship' },
 ];
 
 const founderActions = [
@@ -50,6 +52,13 @@ const founderActions = [
 
 export default function Chapters() {
   const [selected, setSelected] = useState(null);
+  const [chapters, setChapters] = useState(SEED_CHAPTERS);
+
+  useEffect(() => {
+    base44.entities.Chapter.filter({ status: 'active' }).then((data) => {
+      if (data && data.length > 0) setChapters(data);
+    }).catch(() => {});
+  }, []);
 
   return (
     <PageLayout>
@@ -64,7 +73,7 @@ export default function Chapters() {
               Start a chapter at your school, lead your peers, and build a local economics community connected to the national network.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
-              {[['9+', 'Active chapters'], ['190+', 'Chapter members'], ['15+', 'States represented']].map(([v, l]) => (
+              {[[`${chapters.length}+`, 'Active chapters'], ['15+', 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
@@ -98,8 +107,7 @@ export default function Chapters() {
                   <Popup>
                     <div className="text-sm">
                       <strong className="block text-foreground">{c.school}</strong>
-                      <span className="text-muted-foreground">{c.city}</span><br />
-                      <span className="text-primary font-medium">{c.members} members</span>
+                      <span className="text-muted-foreground">{c.city}</span>
                     </div>
                   </Popup>
                 </Marker>
@@ -118,9 +126,6 @@ export default function Chapters() {
                         <MapPin className="w-3 h-3" /> {c.city}
                       </div>
                       <p className="text-xs text-muted-foreground">{c.focus}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1.5 rounded-full flex-shrink-0">
-                      <Users className="w-3 h-3" /> {c.members}
                     </div>
                   </div>
                 </button>
@@ -180,11 +185,10 @@ export default function Chapters() {
           </div>
 
           <motion.div {...fadeUp(0.15)}>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe1p-OteCPs8ulvpy53dDcd5QkNfidprtc9rqGd1FITLJqA6Q/viewform"
-              target="_blank" rel="noopener noreferrer"
+            <Link to="/register/chapter"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
               Apply as Chapter Founder <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -207,9 +211,6 @@ export default function Chapters() {
                 <button onClick={() => setSelected(null)} className="p-1.5 hover:bg-muted rounded-lg transition-colors"><X className="w-4 h-4" /></button>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">Members</span><span className="font-semibold text-foreground">{selected.members}</span>
-                </div>
                 <div className="flex justify-between py-2 border-b border-border">
                   <span className="text-muted-foreground">Founded</span><span className="font-semibold text-foreground">{selected.founded}</span>
                 </div>

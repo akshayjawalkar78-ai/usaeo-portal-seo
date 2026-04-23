@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Trophy, BookOpen, Calendar, Users, FileText, ExternalLink,
+  Trophy, BookOpen, Calendar, CalendarDays, Users, FileText, ExternalLink,
   Bell, CheckCircle, Clock, ArrowRight, Lock,
   LayoutDashboard, Menu, ChevronRight, School, BarChart2, X
 } from 'lucide-react';
@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
   { label: 'Competition', id: 'competition', icon: Trophy },
   { label: 'Rankings', id: 'rankings', icon: BarChart2 },
+  { label: 'Calendar', id: 'calendar', icon: CalendarDays },
   { label: 'Resources', id: 'resources', icon: FileText },
   { label: 'Workshops', id: 'workshops', icon: Calendar },
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [joinError, setJoinError] = useState('');
   const [joinSuccess, setJoinSuccess] = useState('');
   const [rankStage, setRankStage] = useState('qualifiers');
+  const [myRegistrations, setMyRegistrations] = useState([]);
 
   useEffect(() => {
     base44.entities.Announcement.filter({ published: true }, '-created_date').then(setAnnouncements);
@@ -49,11 +51,18 @@ export default function Dashboard() {
     base44.entities.Chapter.filter({ status: 'active' }).then(setChapters);
     base44.entities.CompetitionEvent.list('order').then(setCompetitionEvents);
     base44.entities.CurriculumUnit.list('order').then(setCurriculumUnits);
-  }, []);
+    if (authUser?.email) {
+      base44.entities.EventRegistration.filter({ user_email: authUser.email }).then(setMyRegistrations);
+    }
+  }, [authUser?.email]);
 
   const upcomingWorkshops = workshops.filter(w => w.status === 'upcoming');
   const pastWorkshops = workshops.filter(w => w.status === 'past');
   const filteredRankings = rankings.filter(r => r.stage === rankStage);
+  const myRankingEntry = filteredRankings.find(r =>
+    (authUser?.email && r.user_email && r.user_email.toLowerCase() === authUser.email.toLowerCase()) ||
+    (profile?.full_name && r.student_name && r.student_name.toLowerCase() === profile.full_name.toLowerCase())
+  );
 
   const handleJoinChapter = async () => {
     setJoinError(''); setJoinSuccess('');
@@ -102,14 +111,11 @@ export default function Dashboard() {
           ))}
           <div className="pt-4">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">External</p>
-            <a href="https://usaeo.org/testing" target="_blank" rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-              <ExternalLink className="w-4 h-4 flex-shrink-0" /> Testing Portal
-            </a>
-            <button onClick={() => navigate('chapters')}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-left">
-              <School className="w-4 h-4 flex-shrink-0" /> Chapter Portal
-            </button>
+            <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground cursor-not-allowed select-none">
+              <Lock className="w-4 h-4 flex-shrink-0" />
+              Testing Portal
+              <span className="ml-auto text-[10px] font-semibold bg-muted border border-border px-1.5 py-0.5 rounded-full">Soon</span>
+            </div>
           </div>
         </nav>
         <div className="p-4 border-t border-border space-y-2">
@@ -150,11 +156,12 @@ export default function Dashboard() {
           {/* ── OVERVIEW ── */}
           {active === 'overview' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'National Qualifiers', status: 'Complete', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
+                  { label: 'National Qualifiers', status: 'Closed', color: 'text-red-700', bg: 'bg-red-50 border-red-200' },
+                  { label: 'Quiz Bowl', status: 'Open', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
+                  { label: 'Essay Competition', status: 'Open', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
                   { label: 'National Finals', status: 'Upcoming — May 2026', color: 'text-primary', bg: 'bg-orange-50 border-orange-200' },
-                  { label: 'IEO', status: 'Summer 2026', color: 'text-muted-foreground', bg: 'bg-muted border-border' },
                 ].map((s) => (
                   <div key={s.label} className={`rounded-xl border px-4 py-3 ${s.bg}`}>
                     <p className="text-xs text-muted-foreground mb-0.5">{s.label}</p>
@@ -219,7 +226,7 @@ export default function Dashboard() {
             <div className="space-y-6">
               <div className="bg-white rounded-2xl border border-border p-8">
                 <h2 className="font-semibold text-foreground mb-2">Competition Timeline 2025–2026</h2>
-                <p className="text-sm text-muted-foreground mb-8">Your full pathway from registration through the International Economics Olympiad.</p>
+                <p className="text-sm text-muted-foreground mb-8">Your full pathway from registration through the National Finals.</p>
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
                   <div className="space-y-6">
@@ -243,19 +250,26 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-5">
+              <div className="grid md:grid-cols-3 gap-5">
                 <div className="bg-white rounded-2xl border border-border p-6">
-                  <h3 className="font-semibold text-foreground mb-3">National Finals</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">In-person, full-day event in May 2026. Written exam + case study analysis. Top scorers selected for Team USA.</p>
-                  <Link to="/competitions/finals" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-                    Full details <ArrowRight className="w-3.5 h-3.5" />
+                  <h3 className="font-semibold text-foreground mb-3">Quiz Bowl</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students.</p>
+                  <Link to="/competitions/quiz-bowl" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                    Register now <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
                 <div className="bg-white rounded-2xl border border-border p-6">
-                  <h3 className="font-semibold text-foreground mb-3">International Economics Olympiad</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">Team USA competes against 50+ countries in individual and team-based rounds covering economic theory, business cases, and financial literacy.</p>
-                  <Link to="/competitions/ieo" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-                    Learn about IEO <ArrowRight className="w-3.5 h-3.5" />
+                  <h3 className="font-semibold text-foreground mb-3">Essay Competition</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">Submit a research essay on an economics topic. Judged on economic reasoning, evidence, and clarity of argument.</p>
+                  <Link to="/competitions/essay" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                    Register now <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+                <div className="bg-white rounded-2xl border border-border p-6">
+                  <h3 className="font-semibold text-foreground mb-3">National Finals</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">In-person, full-day event in May 2026. Written exam + case study analysis. Top scorers selected as National Champions.</p>
+                  <Link to="/competitions/finals" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                    Full details <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
@@ -266,6 +280,31 @@ export default function Dashboard() {
           {active === 'rankings' && (
             <div className="space-y-5">
               <div className="bg-white rounded-2xl border border-border p-8">
+                {/* Personalized header */}
+                {myRankingEntry ? (
+                  <div className="rounded-xl bg-foreground text-white px-6 py-5 mb-6 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">Your Standing</p>
+                      <p className="font-semibold text-lg">Rank #{myRankingEntry.rank}</p>
+                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts · {myRankingEntry.stage}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">
+                      {myRankingEntry.rank}
+                    </div>
+                  </div>
+                ) : filteredRankings.length > 0 ? (
+                  <div className="rounded-xl border border-border px-6 py-5 mb-6 flex items-center justify-between gap-4 bg-muted/30">
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">You haven't been ranked yet</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">Register for Quiz Bowl or Essay to earn a ranking.</p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Link to="/register/quiz-bowl" className="text-xs font-semibold text-primary hover:underline">Quiz Bowl</Link>
+                      <span className="text-muted-foreground text-xs">·</span>
+                      <Link to="/register/essay" className="text-xs font-semibold text-primary hover:underline">Essay</Link>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="font-semibold text-foreground">Competition Rankings</h2>
@@ -518,7 +557,6 @@ export default function Dashboard() {
                         <p className="text-xs text-muted-foreground">{c.city}, {c.state}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-muted-foreground">{c.member_count} members</p>
                         <p className="text-xs text-primary font-medium">Founded by {c.founder_name}</p>
                       </div>
                     </div>
@@ -526,11 +564,87 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-5 pt-5 border-t border-border">
                   <p className="text-sm text-muted-foreground mb-3">Don't see your school? Start a chapter.</p>
-                  <a href="https://docs.google.com/forms/d/e/1FAIpQLSe1p-OteCPs8ulvpy53dDcd5QkNfidprtc9rqGd1FITLJqA6Q/viewform"
-                    target="_blank" rel="noopener noreferrer"
+                  <Link to="/register/chapter"
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                     Apply to start a chapter <ArrowRight className="w-3 h-3" />
-                  </a>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── CALENDAR ── */}
+          {active === 'calendar' && (
+            <div className="space-y-6">
+              {/* My Registered Events */}
+              <div className="bg-white rounded-2xl border border-border p-8">
+                <div className="flex items-center gap-2 mb-5">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  <h2 className="font-semibold text-foreground text-sm">My Registered Events</h2>
+                </div>
+                {myRegistrations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground mb-4">You haven't registered for any events yet.</p>
+                    <div className="flex gap-3 justify-center flex-wrap">
+                      <Link to="/register/quiz-bowl" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
+                        Register for Quiz Bowl <ArrowRight className="w-3 h-3" />
+                      </Link>
+                      <Link to="/register/essay" className="inline-flex items-center gap-1.5 px-4 py-2 border border-primary text-primary rounded-full text-xs font-semibold hover:bg-orange-50 transition-colors">
+                        Register for Essay <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myRegistrations.map((reg) => (
+                      <div key={reg.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                        <div>
+                          <p className="font-medium text-sm text-foreground">{reg.event_name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{reg.event_type?.replace('-', ' ')} · Registered {new Date(reg.registered_at).toLocaleDateString()}</p>
+                        </div>
+                        <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* All Upcoming Events */}
+              <div className="bg-white rounded-2xl border border-border p-8">
+                <div className="flex items-center gap-2 mb-5">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <h2 className="font-semibold text-foreground text-sm">All Upcoming Events</h2>
+                </div>
+                <div className="space-y-3">
+                  {competitionEvents.filter(e => e.status !== 'done').map((e) => {
+                    const isRegistered = myRegistrations.some(r =>
+                      r.event_name?.toLowerCase().includes(e.phase?.toLowerCase() ?? '') ||
+                      r.event_type?.toLowerCase().includes(e.phase?.toLowerCase() ?? '')
+                    );
+                    return (
+                      <div key={e.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                        <div>
+                          <p className="font-medium text-sm text-foreground">{e.phase}</p>
+                          <p className="text-xs text-muted-foreground">{e.date}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isRegistered && <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">Registered</span>}
+                          {e.status === 'current' && <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">Open</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {upcomingWorkshops.map((w) => (
+                    <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                      <div>
+                        <p className="font-medium text-sm text-foreground">{w.title}</p>
+                        <p className="text-xs text-muted-foreground">Workshop · {w.date}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {competitionEvents.filter(e => e.status !== 'done').length === 0 && upcomingWorkshops.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No upcoming events at this time.</p>
+                  )}
                 </div>
               </div>
             </div>

@@ -20,6 +20,10 @@ const partners = [
   { name: 'YRI', logo: 'https://www.usaeo.org/imgs/sponsors/YRI.png', url: 'https://www.yriscience.com/', desc: 'Youth research initiative' },
   { name: 'FYC', logo: 'https://www.usaeo.org/imgs/sponsors/FYC.png', url: 'https://linktr.ee/financialyouthclub', desc: 'Financial Youth Club' },
   { name: 'CFE', logo: 'https://www.usaeo.org/imgs/sponsors/CFE.png', url: 'https://councilfe.org/', desc: 'Council for Financial Education' },
+  { name: 'A-Warded', logo: null, url: '#', desc: 'Student recognition platform' },
+  { name: 'Synthica', logo: null, url: '#', desc: 'AI research tools for students' },
+  { name: 'Southeast Asian Economics Project', logo: null, url: '#', desc: 'Regional economics education' },
+  { name: 'Youth Economy Lab (YEL)', logo: null, url: '#', desc: 'Youth economics research lab' },
 ];
 
 const tiers = [
@@ -57,7 +61,13 @@ export default function Partners() {
               <motion.div key={p.name} {...fadeUp(i * 0.06)}>
                 <a href={p.url} target="_blank" rel="noopener noreferrer"
                   className="group flex flex-col items-center gap-4 p-8 bg-white border border-border rounded-2xl hover:border-primary/30 hover:shadow-md transition-all duration-200">
-                  <img src={p.logo} alt={p.name} className="h-10 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                  {p.logo ? (
+                    <img src={p.logo} alt={p.name} className="h-10 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                  ) : (
+                    <div className="h-10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">{p.name.split(' ').map(w => w[0]).join('').slice(0, 3)}</span>
+                    </div>
+                  )}
                   <div className="text-center">
                     <div className="text-sm font-semibold text-foreground">{p.name}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">{p.desc}</div>

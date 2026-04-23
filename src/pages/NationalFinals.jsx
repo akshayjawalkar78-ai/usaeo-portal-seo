@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
@@ -37,8 +38,8 @@ export default function NationalFinals() {
               The national stage<br /><em>for America's best</em>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students — those who scored highest in the National Qualifiers — are notified by email and invited to attend at no cost.</p>
-              <p>The Finals combines a comprehensive written examination with a structured case study analysis. Top performers across both sections form Team USA, which goes on to represent the country at the International Economics Olympiad.</p>
+              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students — top scorers from the Quiz Bowl and Essay rounds — are notified by email and invited to attend at no cost.</p>
+              <p>The Finals combines a comprehensive written examination with a structured case study analysis. Top performers across both sections are named National Champions of the USA Economics Olympiad.</p>
               <p>USAEO provides a dedicated Finals preparation workshop series in April and May, covering advanced topics and case study methodology. All recordings are available to qualified students through the student portal.</p>
             </div>
             <div className="mt-8">
@@ -85,11 +86,11 @@ export default function NationalFinals() {
               {[
                 { label: 'Date', value: 'May 2026 (exact date TBA)' },
                 { label: 'Format', value: 'In-person — location TBA' },
-                { label: 'Eligibility', value: 'Invitation only (top Qualifiers scorers)' },
+                { label: 'Eligibility', value: 'Invitation only (top Quiz Bowl & Essay scorers)' },
                 { label: 'Sections', value: 'Written exam + case study analysis' },
                 { label: 'Duration', value: 'Full day event' },
                 { label: 'Cost', value: 'Free for qualified students' },
-                { label: 'Outcome', value: 'Top students selected for Team USA (IEO)' },
+                { label: 'Outcome', value: 'Top students named National Champions' },
               ].map((row) => (
                 <div key={row.label} className="flex gap-8 py-4">
                   <span className="text-sm text-muted-foreground w-40 flex-shrink-0">{row.label}</span>
@@ -103,7 +104,7 @@ export default function NationalFinals() {
               {[
                 { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization — students are expected to reason through complex economic scenarios.' },
                 { step: '02', title: 'Case Study Analysis', body: 'Students are presented with a real-world economic policy challenge and must produce a structured written analysis within a time limit. Evaluated on economic reasoning, use of evidence, and policy recommendations.' },
-                { step: '03', title: 'Team USA Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are invited to represent the United States at the International Economics Olympiad.' },
+                { step: '03', title: 'National Champion Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are named National Champions of the USA Economics Olympiad.' },
               ].map((s) => (
                 <div key={s.step} className="flex gap-5">
                   <span className="font-serif text-3xl text-orange-200 leading-none flex-shrink-0 w-8 text-center">{s.step}</span>
@@ -127,7 +128,7 @@ export default function NationalFinals() {
             <div className="space-y-6">
               {[
                 { title: 'Advanced syllabus mastery', desc: 'Go beyond textbook definitions. Practice applying concepts to real economic data, policy debates, and historical case studies.' },
-                { title: 'Case study practice', desc: 'Practice structured economic writing. Use the USAEO practice materials and past IEO case study prompts to develop your analytical voice.' },
+                { title: 'Case study practice', desc: 'Practice structured economic writing. Use the USAEO practice materials and past Finals case study prompts to develop your analytical voice.' },
                 { title: 'Workshop attendance', desc: 'The April and May workshop series is specifically designed for Finals prep. Past participants report these sessions as the single most valuable preparation resource.' },
                 { title: 'Past exam review', desc: 'Review released practice exams available through the student portal after registration. Focus on the applied question formats.' },
               ].map((item) => (
@@ -144,15 +145,15 @@ export default function NationalFinals() {
       {/* CTA */}
       <section className="py-20 px-5 text-center">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-foreground mb-5">The path to Finals starts at Qualifiers</h2>
+          <h2 className="font-serif text-4xl text-foreground mb-5">Compete now — Quiz Bowl & Essay are open</h2>
           <p className="text-muted-foreground mb-8">
-            Register for the National Qualifiers on February 28. Top scorers advance automatically — registration is completely free.
+            Register for Quiz Bowl or Essay Competition — both are free and open to all high school students.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="/register"
+            <Link to="/register/quiz-bowl"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-              Register for Qualifiers <ArrowRight className="w-4 h-4" />
-            </a>
+              Register for Quiz Bowl <ArrowRight className="w-4 h-4" />
+            </Link>
             <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
               Study with Free Curriculum

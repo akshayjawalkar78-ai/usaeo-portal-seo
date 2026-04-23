@@ -1,0 +1,15 @@
+{
+  "name": "EventRegistration",
+  "fields": [
+    { "name": "user_email", "type": "string", "required": true },
+    { "name": "user_name", "type": "string", "required": true },
+    { "name": "school", "type": "string" },
+    { "name": "grade", "type": "string" },
+    { "name": "state", "type": "string" },
+    { "name": "event_type", "type": "enum", "options": ["quiz-bowl", "essay", "chapter", "workshop"] },
+    { "name": "event_name", "type": "string" },
+    { "name": "registered_at", "type": "string" },
+    { "name": "notes", "type": "string" },
+    { "name": "status", "type": "string" }
+  ]
+}

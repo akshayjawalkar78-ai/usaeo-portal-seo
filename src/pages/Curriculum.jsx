@@ -38,7 +38,7 @@ const units = [
   },
   {
     n: '06', title: 'International Trade & Finance', hrs: '5–7 hrs',
-    desc: 'The final unit covers the global economy. From comparative advantage to exchange rate dynamics, this unit prepares you for the international economics questions at both the Qualifiers and IEO.',
+    desc: 'The final unit covers the global economy. From comparative advantage to exchange rate dynamics, this unit prepares you for the international economics questions at the National Qualifiers and Finals.',
     topics: ['Comparative advantage', 'Trade policy', 'Exchange rates', 'Balance of payments'],
   },
 ];
