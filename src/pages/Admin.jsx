@@ -83,7 +83,12 @@ function Field({ label, type = 'text', value, onChange, options, rows }) {
 }
 
 export default function Admin() {
-  const [active, setActive] = useState('overview');
+  const [active, setActive] = useState(() => {
+    try { return localStorage.getItem('admin.activeTab') || 'overview'; } catch { return 'overview'; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('admin.activeTab', active); } catch {}
+  }, [active]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Data

@@ -39,10 +39,6 @@ CREATE TABLE IF NOT EXISTS public.applications (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "applications_select" ON public.applications FOR SELECT USING (true);
-CREATE POLICY "applications_insert" ON public.applications FOR INSERT WITH CHECK (true);
-CREATE POLICY "applications_update" ON public.applications FOR UPDATE USING (true);
-CREATE POLICY "applications_delete" ON public.applications FOR DELETE USING (true);
 
 -- site_content: editable marketing-site blocks (used by admin "Edit Website")
 CREATE TABLE IF NOT EXISTS public.site_content (
@@ -55,7 +51,25 @@ CREATE TABLE IF NOT EXISTS public.site_content (
   UNIQUE (page, block)
 );
 ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "site_content_select" ON public.site_content;
+DROP POLICY IF EXISTS "site_content_insert" ON public.site_content;
+DROP POLICY IF EXISTS "site_content_update" ON public.site_content;
+DROP POLICY IF EXISTS "site_content_delete" ON public.site_content;
 CREATE POLICY "site_content_select" ON public.site_content FOR SELECT USING (true);
 CREATE POLICY "site_content_insert" ON public.site_content FOR INSERT WITH CHECK (true);
 CREATE POLICY "site_content_update" ON public.site_content FOR UPDATE USING (true);
 CREATE POLICY "site_content_delete" ON public.site_content FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "applications_select" ON public.applications;
+DROP POLICY IF EXISTS "applications_insert" ON public.applications;
+DROP POLICY IF EXISTS "applications_update" ON public.applications;
+DROP POLICY IF EXISTS "applications_delete" ON public.applications;
+CREATE POLICY "applications_select" ON public.applications FOR SELECT USING (true);
+CREATE POLICY "applications_insert" ON public.applications FOR INSERT WITH CHECK (true);
+CREATE POLICY "applications_update" ON public.applications FOR UPDATE USING (true);
+CREATE POLICY "applications_delete" ON public.applications FOR DELETE USING (true);
+
+-- Force PostgREST to reload its schema cache so new columns/tables are usable
+-- immediately from the REST API (otherwise you'll get "Could not find the X
+-- column of Y in the schema cache" errors from supabase-js).
+NOTIFY pgrst, 'reload schema';

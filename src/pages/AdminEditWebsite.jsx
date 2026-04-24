@@ -165,8 +165,9 @@ export default function AdminEditWebsite() {
           </div>
           <iframe
             key={previewKey}
-            src={page?.path}
+            src={`${page?.path}?preview=1`}
             title="Website preview"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
             className="w-full h-[720px] border-0 bg-white"
           />
         </div>

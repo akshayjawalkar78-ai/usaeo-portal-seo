@@ -19,10 +19,9 @@ export const PARTNERS = [
   },
   {
     name: 'Launchpoint',
-    logo: '/logos/launchpoint.png',
     url: 'https://www.launchpointhq.com/',
     desc: 'Career launchpad',
-    logoScale: 1.35,
+    wordmark: { text: 'Launchpoint', fontFamily: 'Sora, sans-serif', fontWeight: 600 },
     tags: ['research'],
   },
   {
@@ -34,10 +33,9 @@ export const PARTNERS = [
   },
   {
     name: 'Think Finance',
-    logo: '/logos/thinkfinance.png',
     url: 'https://www.think-finance.org/',
     desc: 'Finance education',
-    logoScale: 1.35,
+    wordmark: { text: 'Think Finance', fontFamily: 'Sora, sans-serif', fontWeight: 600 },
     tags: ['awareness', 'academic'],
   },
   {

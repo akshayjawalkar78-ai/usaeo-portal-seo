@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, Mail } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNERS, PARTNER_BY_NAME } from '@/lib/partnersSeed';
 
@@ -71,39 +71,73 @@ function SectionLogos({ section }) {
   );
 }
 
-function ContributionSection({ section }) {
+function ProgressDot({ scrollYProgress, i, count }) {
+  const opacity = useTransform(
+    scrollYProgress,
+    [i / count - 0.1, i / count, (i + 1) / count],
+    [0.3, 1, 0.3]
+  );
+  return <motion.span style={{ opacity }} className="h-1 w-6 rounded-full bg-primary" />;
+}
+
+function StoryCard({ story }) {
+  const p = PARTNER_BY_NAME[story.partner];
   return (
-    <section className="py-20 px-5 border-b border-border">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-[minmax(0,1fr)_2fr] gap-10 md:gap-16 items-start">
-          <div className="md:sticky md:top-24 self-start">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">{section.eyebrow}</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight whitespace-pre-line mb-5">{section.title}</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{section.body}</p>
+    <article className="flex-shrink-0 w-[420px] md:w-[520px] h-[480px] bg-white border border-border rounded-3xl p-10 flex flex-col justify-between shadow-sm">
+      <div>
+        <div className="flex items-center gap-3 mb-8 h-12">
+          {p?.logo && (
+            <img src={p.logo} alt={p.name} className="h-10 w-auto max-w-[96px] object-contain" onError={e => { e.currentTarget.style.display = 'none'; }} />
+          )}
+          {p?.wordmark && (
+            <span style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight }} className="text-2xl text-foreground/80 whitespace-nowrap">
+              {p.wordmark.text}
+            </span>
+          )}
+          {!p?.logo && !p?.wordmark && (
+            <span className="text-lg font-semibold text-foreground">{story.partner}</span>
+          )}
+        </div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">{story.partner}</p>
+        <h3 className="font-serif text-3xl text-foreground leading-tight mb-5">{story.headline}</h3>
+        <p className="text-base text-muted-foreground leading-relaxed">{story.body}</p>
+      </div>
+    </article>
+  );
+}
+
+function ContributionSection({ section, index }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
+  // Scroll distance: section is 3× viewport tall; while sticky, horizontal track translates.
+  // Cards total width ≈ storyCount × 540px. Viewport right-pane ≈ 65vw.
+  // Translate track from 0 to -(totalCards - viewportFit).
+  const storyCount = section.stories.length;
+  const cardW = 540; // card + gap approx
+  const total = storyCount * cardW;
+  const x = useTransform(scrollYProgress, [0, 1], [0, -(total - 600)]);
+  const bg = index % 2 === 0 ? 'bg-white' : 'bg-muted/30';
+
+  return (
+    <section ref={ref} className={`relative ${bg}`} style={{ height: '260vh' }}>
+      <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full px-5 md:px-10 grid md:grid-cols-[minmax(0,380px)_1fr] gap-10 md:gap-14 items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">{section.eyebrow}</p>
+            <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-[1.05] whitespace-pre-line mb-6">{section.title}</h2>
+            <p className="text-base text-muted-foreground leading-relaxed mb-6">{section.body}</p>
             <SectionLogos section={section} />
           </div>
-          <div className="-mx-5 md:mx-0 overflow-x-auto snap-x snap-mandatory pb-4 scroll-px-5 [scrollbar-width:thin]">
-            <div className="flex gap-5 px-5 md:px-0">
-              {section.stories.map((s, i) => {
-                const p = PARTNER_BY_NAME[s.partner];
-                return (
-                  <motion.article
-                    key={s.partner + i}
-                    {...fadeUp(i * 0.05)}
-                    className="snap-start flex-shrink-0 w-[280px] md:w-[360px] bg-white border border-border rounded-2xl p-7 hover:border-primary/30 hover:shadow-md transition"
-                  >
-                    <div className="flex items-center gap-3 mb-5">
-                      {p?.logo
-                        ? <img src={p.logo} alt={p.name} className="h-7 w-auto max-w-[64px] object-contain" />
-                        : <span className="text-xs font-semibold text-muted-foreground">{p?.shortName || s.partner}</span>
-                      }
-                      <span className="text-xs font-medium text-muted-foreground">{s.partner}</span>
-                    </div>
-                    <h3 className="font-semibold text-foreground text-lg leading-tight mb-3">{s.headline}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
-                  </motion.article>
-                );
-              })}
+          <div className="relative overflow-hidden">
+            <motion.div style={{ x }} className="flex gap-5 will-change-transform">
+              {section.stories.map((s, i) => (
+                <StoryCard key={s.partner + i} story={s} />
+              ))}
+            </motion.div>
+            <div className="absolute top-2 right-0 flex gap-1.5">
+              {section.stories.map((_, i) => (
+                <ProgressDot key={i} scrollYProgress={scrollYProgress} i={i} count={storyCount} />
+              ))}
             </div>
           </div>
         </div>
@@ -129,8 +163,8 @@ export default function Partners() {
         </div>
       </section>
 
-      {contributionSections.map(section => (
-        <ContributionSection key={section.id} section={section} />
+      {contributionSections.map((section, i) => (
+        <ContributionSection key={section.id} section={section} index={i} />
       ))}
 
       {/* Current Partners grid */}
@@ -173,7 +207,14 @@ export default function Partners() {
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Become a Partner</p>
-            <h2 className="font-serif text-4xl text-foreground">Partner with USAEO</h2>
+            <h2 className="font-serif text-4xl text-foreground mb-8">Partner with USAEO</h2>
+            <a
+              href="mailto:partnerships@usaeo.org?subject=Partnership%20inquiry"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition-colors"
+            >
+              <Mail className="w-4 h-4" /> Contact us
+              <ArrowRight className="w-4 h-4" />
+            </a>
           </motion.div>
         </div>
       </section>
