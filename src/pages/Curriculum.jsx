@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
@@ -43,6 +43,59 @@ const units = [
   },
 ];
 
+function CurriculumUnit({ unit, index }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div {...fadeUp(index * 0.05)} className="border border-border rounded-2xl bg-white overflow-hidden hover:border-primary/30 transition-colors">
+      <button
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        className="w-full bg-orange-50/70 border-b border-border px-8 py-6 flex items-center justify-between gap-4 text-left"
+      >
+        <div className="flex items-center gap-5">
+          <span className="font-serif text-5xl text-orange-200 leading-none flex-shrink-0">{unit.n}</span>
+          <div>
+            <h3 className="font-semibold text-foreground text-xl">{unit.title}</h3>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-xs text-muted-foreground">{unit.hrs}</span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-[10px] font-semibold uppercase tracking-wider">
+                Releasing soon
+              </span>
+            </div>
+          </div>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="px-8 py-6">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-5">{unit.desc}</p>
+              <div className="grid grid-cols-2 gap-x-10 gap-y-2 mb-5">
+                {unit.topics.map((t) => (
+                  <div key={t} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                    <span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />{t}
+                  </div>
+                ))}
+              </div>
+              <button disabled aria-disabled="true"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-muted text-muted-foreground rounded-full text-xs font-semibold cursor-not-allowed">
+                Releasing soon
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export default function Curriculum() {
   return (
     <PageLayout>
@@ -56,11 +109,15 @@ export default function Curriculum() {
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
               6 comprehensive units covering everything from introductory micro to international finance — designed specifically to prepare you for the USAEO competition.
             </p>
-            <div className="flex flex-wrap gap-3 mt-8">
-              <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+            <div className="inline-flex items-center gap-2 mt-8 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Releasing soon
+            </div>
+            <div className="flex flex-wrap gap-3 mt-5">
+              <button disabled aria-disabled="true"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-muted text-muted-foreground rounded-full font-medium text-sm cursor-not-allowed">
                 Start Learning <ArrowRight className="w-4 h-4" />
-              </a>
+              </button>
               <a href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
                 Register to Compete
@@ -85,35 +142,9 @@ export default function Curriculum() {
             <h2 className="font-serif text-3xl text-foreground">Course units</h2>
           </motion.div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {units.map((unit, i) => (
-              <motion.div key={unit.n} {...fadeUp(i * 0.07)} className="border border-border rounded-2xl bg-white overflow-hidden hover:border-primary/30 transition-colors group">
-                {/* Header bar */}
-                <div className="bg-orange-50/70 border-b border-border px-8 py-6 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-5">
-                    <span className="font-serif text-5xl text-orange-200 leading-none flex-shrink-0">{unit.n}</span>
-                    <div>
-                      <h3 className="font-semibold text-foreground text-xl">{unit.title}</h3>
-                      <span className="text-xs text-muted-foreground">{unit.hrs}</span>
-                    </div>
-                  </div>
-                  <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
-                    className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
-                    Start Unit <ArrowUpRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-                {/* Body */}
-                <div className="px-8 py-6">
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">{unit.desc}</p>
-                  <div className="grid grid-cols-2 gap-x-10 gap-y-2">
-                    {unit.topics.map((t) => (
-                      <div key={t} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                        <span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />{t}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
+              <CurriculumUnit key={unit.n} unit={unit} index={i} />
             ))}
           </div>
         </div>

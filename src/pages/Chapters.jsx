@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
+import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,56 +31,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const SEED_CHAPTERS = [
-  { id: 's1', school: 'Obra D. Tompkins HS', name: 'Obra D. Tompkins HS', city: 'Katy', state: 'TX', lat: 29.7858, lng: -95.8245, status: 'active' },
-  { id: 's2', school: 'Lebanon Trail HS', name: 'Lebanon Trail HS', city: 'Frisco', state: 'TX', lat: 33.1581, lng: -96.8230, status: 'active' },
-  { id: 's3', school: 'Frisco HS', name: 'Frisco HS', city: 'Frisco', state: 'TX', lat: 33.1501, lng: -96.8236, status: 'active' },
-  { id: 's4', school: 'Westwood HS', name: 'Westwood HS', city: 'Austin', state: 'TX', lat: 30.4406, lng: -97.7836, status: 'active' },
-  { id: 's5', school: 'Plano West Senior HS', name: 'Plano West Senior HS', city: 'Plano', state: 'TX', lat: 33.0198, lng: -96.7836, status: 'active' },
-  { id: 's6', school: 'Flower Mound HS', name: 'Flower Mound HS', city: 'Flower Mound', state: 'TX', lat: 33.0148, lng: -97.0969, status: 'active' },
-  { id: 's7', school: 'Southlake Carroll HS', name: 'Southlake Carroll HS', city: 'Southlake', state: 'TX', lat: 32.9401, lng: -97.1340, status: 'active' },
-  { id: 's8', school: 'Jesuit College Preparatory', name: 'Jesuit College Preparatory', city: 'Dallas', state: 'TX', lat: 32.8678, lng: -96.8370, status: 'active' },
-  { id: 's9', school: 'Highland Park HS', name: 'Highland Park HS', city: 'Dallas', state: 'TX', lat: 32.8367, lng: -96.7973, status: 'active' },
-  { id: 's10', school: 'Prosper HS', name: 'Prosper HS', city: 'Prosper', state: 'TX', lat: 33.2368, lng: -96.8009, status: 'active' },
-  { id: 's11', school: 'Coppell HS', name: 'Coppell HS', city: 'Coppell', state: 'TX', lat: 32.9543, lng: -97.0150, status: 'active' },
-  { id: 's12', school: 'Allen HS', name: 'Allen HS', city: 'Allen', state: 'TX', lat: 33.0951, lng: -96.6641, status: 'active' },
-  { id: 's13', school: 'McKinney Boyd HS', name: 'McKinney Boyd HS', city: 'McKinney', state: 'TX', lat: 33.1972, lng: -96.6397, status: 'active' },
-  { id: 's14', school: 'Lovejoy HS', name: 'Lovejoy HS', city: 'Lucas', state: 'TX', lat: 33.1029, lng: -96.5780, status: 'active' },
-  { id: 's15', school: 'Hebron HS', name: 'Hebron HS', city: 'Carrollton', state: 'TX', lat: 33.0001, lng: -96.9301, status: 'active' },
-  { id: 's16', school: 'Rockwall HS', name: 'Rockwall HS', city: 'Rockwall', state: 'TX', lat: 32.9290, lng: -96.4597, status: 'active' },
-  { id: 's17', school: 'Wakeland HS', name: 'Wakeland HS', city: 'Frisco', state: 'TX', lat: 33.1700, lng: -96.8900, status: 'active' },
-  { id: 's18', school: 'Centennial HS', name: 'Centennial HS', city: 'Frisco', state: 'TX', lat: 33.1450, lng: -96.7710, status: 'active' },
-  { id: 's19', school: 'Liberty HS', name: 'Liberty HS', city: 'Frisco', state: 'TX', lat: 33.1200, lng: -96.8200, status: 'active' },
-  { id: 's20', school: 'Lone Star HS', name: 'Lone Star HS', city: 'Frisco', state: 'TX', lat: 33.1550, lng: -96.8000, status: 'active' },
-  { id: 's21', school: 'Memorial HS', name: 'Memorial HS', city: 'Houston', state: 'TX', lat: 29.7643, lng: -95.5277, status: 'active' },
-  { id: 's22', school: 'Dulles HS', name: 'Dulles HS', city: 'Sugar Land', state: 'TX', lat: 29.5724, lng: -95.6397, status: 'active' },
-  { id: 's23', school: 'Seven Lakes HS', name: 'Seven Lakes HS', city: 'Katy', state: 'TX', lat: 29.7258, lng: -95.8049, status: 'active' },
-  { id: 's24', school: 'Clements HS', name: 'Clements HS', city: 'Sugar Land', state: 'TX', lat: 29.5701, lng: -95.6671, status: 'active' },
-  { id: 's25', school: 'Ridge Point HS', name: 'Ridge Point HS', city: 'Missouri City', state: 'TX', lat: 29.5387, lng: -95.5780, status: 'active' },
-  { id: 's26', school: 'Cypress Creek HS', name: 'Cypress Creek HS', city: 'Houston', state: 'TX', lat: 29.9463, lng: -95.6613, status: 'active' },
-  { id: 's27', school: 'Strake Jesuit', name: 'Strake Jesuit', city: 'Houston', state: 'TX', lat: 29.7134, lng: -95.4887, status: 'active' },
-  { id: 's28', school: 'Cinco Ranch HS', name: 'Cinco Ranch HS', city: 'Katy', state: 'TX', lat: 29.7539, lng: -95.7677, status: 'active' },
-  { id: 's29', school: 'Jasper HS', name: 'Jasper HS', city: 'Plano', state: 'TX', lat: 33.0200, lng: -96.7200, status: 'active' },
-  { id: 's30', school: 'Thomas Jefferson HS (SA)', name: 'Thomas Jefferson HS (SA)', city: 'San Antonio', state: 'TX', lat: 29.4441, lng: -98.5034, status: 'active' },
-  { id: 's31', school: 'James Madison HS (SA)', name: 'James Madison HS (SA)', city: 'San Antonio', state: 'TX', lat: 29.5523, lng: -98.4955, status: 'active' },
-  { id: 's32', school: 'Ronald Reagan HS (SA)', name: 'Ronald Reagan HS (SA)', city: 'San Antonio', state: 'TX', lat: 29.6131, lng: -98.4231, status: 'active' },
-  { id: 's33', school: 'Walter Payton College Prep', name: 'Walter Payton College Prep', city: 'Chicago', state: 'IL', lat: 41.9050, lng: -87.6381, status: 'active' },
-  { id: 's34', school: 'Northside College Prep', name: 'Northside College Prep', city: 'Chicago', state: 'IL', lat: 41.9803, lng: -87.7180, status: 'active' },
-  { id: 's35', school: 'Niles West HS', name: 'Niles West HS', city: 'Skokie', state: 'IL', lat: 42.0386, lng: -87.7408, status: 'active' },
-  { id: 's36', school: 'Niles North HS', name: 'Niles North HS', city: 'Skokie', state: 'IL', lat: 42.0539, lng: -87.7408, status: 'active' },
-  { id: 's37', school: 'Naperville Central HS', name: 'Naperville Central HS', city: 'Naperville', state: 'IL', lat: 41.7703, lng: -88.1536, status: 'active' },
-  { id: 's38', school: 'TJHSST', name: 'TJHSST', city: 'Falls Church', state: 'VA', lat: 38.8173, lng: -77.1993, status: 'active' },
-  { id: 's39', school: 'Langley HS', name: 'Langley HS', city: 'McLean', state: 'VA', lat: 38.9218, lng: -77.1947, status: 'active' },
-  { id: 's40', school: 'McLean HS', name: 'McLean HS', city: 'McLean', state: 'VA', lat: 38.9337, lng: -77.1801, status: 'active' },
-  { id: 's41', school: 'South Lakes HS', name: 'South Lakes HS', city: 'Reston', state: 'VA', lat: 38.9462, lng: -77.3439, status: 'active' },
-  { id: 's42', school: 'Westfield HS', name: 'Westfield HS', city: 'Chantilly', state: 'VA', lat: 38.8844, lng: -77.4075, status: 'active' },
-  { id: 's43', school: 'Lynbrook HS', name: 'Lynbrook HS', city: 'San Jose', state: 'CA', lat: 37.3526, lng: -121.9843, status: 'active' },
-  { id: 's44', school: 'Monta Vista HS', name: 'Monta Vista HS', city: 'Cupertino', state: 'CA', lat: 37.3230, lng: -122.0452, status: 'active' },
-  { id: 's45', school: 'Stuyvesant HS', name: 'Stuyvesant HS', city: 'New York', state: 'NY', lat: 40.7176, lng: -74.0137, status: 'active' },
-  { id: 's46', school: 'Townsend Harris HS', name: 'Townsend Harris HS', city: 'Flushing', state: 'NY', lat: 40.7289, lng: -73.8200, status: 'active' },
-  { id: 's47', school: 'Lexington HS', name: 'Lexington HS', city: 'Lexington', state: 'MA', lat: 42.4474, lng: -71.2150, status: 'active' },
-  { id: 's48', school: 'Brookline HS', name: 'Brookline HS', city: 'Brookline', state: 'MA', lat: 42.3321, lng: -71.1397, status: 'active' },
-];
+const SEED_CHAPTERS = CHAPTERS_SEED.map(c => ({ ...c, name: c.school }));
 
 const founderActions = [
   { icon: Calendar, action: 'Host weekly or bi-weekly economics meetings' },
@@ -92,6 +44,9 @@ const founderActions = [
 export default function Chapters() {
   const [selected, setSelected] = useState(null);
   const [chapters, setChapters] = useState(SEED_CHAPTERS);
+  const [showAll, setShowAll] = useState(false);
+  const INITIAL_COUNT = 8;
+  const visibleChapters = showAll ? chapters : chapters.slice(0, INITIAL_COUNT);
 
   useEffect(() => {
     base44.entities.Chapter.filter({ status: 'active' }).then((data) => {
@@ -112,7 +67,7 @@ export default function Chapters() {
               Start a chapter at your school, lead your peers, and build a local economics community connected to the national network.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
-              {[['50+', 'Active chapters'], ['25+', 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
+              {[[`${CHAPTERS_SEED.length}`, 'Active chapters'], [`${CHAPTER_STATE_COUNT}`, 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
@@ -154,8 +109,8 @@ export default function Chapters() {
             </MapContainer>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {chapters.map((c, i) => (
-              <motion.div key={c.school} {...fadeUp(i * 0.06)}>
+            {visibleChapters.map((c, i) => (
+              <motion.div key={c.id || c.school} {...fadeUp(i * 0.06)}>
                 <button onClick={() => setSelected(c)}
                   className="w-full text-left bg-white border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all duration-200 group">
                   <div className="flex items-start justify-between gap-4">
@@ -171,8 +126,17 @@ export default function Chapters() {
               </motion.div>
             ))}
           </div>
+          {chapters.length > INITIAL_COUNT && (
+            <motion.div {...fadeUp(0.2)} className="mt-6 flex justify-center">
+              <button onClick={() => setShowAll(v => !v)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
+                {showAll ? 'Show less' : `Show all ${chapters.length} chapters`}
+                <ArrowRight className={`w-3.5 h-3.5 transition-transform ${showAll ? '-rotate-90' : 'rotate-90'}`} />
+              </button>
+            </motion.div>
+          )}
           <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
-            Showing {chapters.length} active chapters · More joining every week
+            Showing {visibleChapters.length} of {chapters.length} active chapters · More joining every week
           </motion.p>
         </div>
       </section>

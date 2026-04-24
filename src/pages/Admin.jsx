@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
+import AdminEditWebsite from './AdminEditWebsite';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -19,6 +20,8 @@ const navItems = [
   { label: 'Competition', id: 'competition', icon: Trophy },
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
+  { label: 'Applications', id: 'applications', icon: ShieldCheck },
+  { label: 'Edit Website', id: 'edit-website', icon: Pencil },
 ];
 
 function Modal({ title, onClose, children }) {
@@ -92,6 +95,7 @@ export default function Admin() {
   const [competitionEvents, setCompetitionEvents] = useState([]);
   const [curriculumUnits, setCurriculumUnits] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [chapterMembers, setChapterMembers] = useState({});
   const [chapterAnns, setChapterAnns] = useState({});
   const [selectedChapter, setSelectedChapter] = useState(null);
@@ -104,7 +108,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
-    const [a, w, r, rk, ch, ce, cu, reg] = await Promise.all([
+    const [a, w, r, rk, ch, ce, cu, reg, apps] = await Promise.all([
       base44.entities.Announcement.list('-created_date'),
       base44.entities.Workshop.list('-created_date'),
       base44.entities.Resource.list(),
@@ -113,9 +117,10 @@ export default function Admin() {
       base44.entities.CompetitionEvent.list('order'),
       base44.entities.CurriculumUnit.list('order'),
       base44.entities.EventRegistration.list('-registered_at'),
+      base44.entities.Application?.list('-created_at').catch(() => []) ?? [],
     ]);
     setAnnouncements(a); setWorkshops(w); setResources(r); setRankings(rk); setChapters(ch);
-    setCompetitionEvents(ce); setCurriculumUnits(cu); setRegistrations(reg);
+    setCompetitionEvents(ce); setCurriculumUnits(cu); setRegistrations(reg); setApplications(apps);
   };
 
   useEffect(() => { loadAll(); }, []);
@@ -695,6 +700,7 @@ export default function Admin() {
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                        <th className="px-4 py-3"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -709,6 +715,10 @@ export default function Admin() {
                           <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
                           <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
                           <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
+                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -717,6 +727,60 @@ export default function Admin() {
               </div>
             </div>
           )}
+
+          {/* ── APPLICATIONS ── */}
+          {active === 'applications' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">Applications</h2>
+                <span className="text-sm text-muted-foreground">{applications.length} total</span>
+              </div>
+              <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                {applications.length === 0 && <p className="p-6 text-sm text-muted-foreground">No applications yet.</p>}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Program</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                        <th className="px-4 py-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {applications.map(a => (
+                        <tr key={a.id} className="hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-medium text-foreground">{a.user_name || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{a.user_email}</td>
+                          <td className="px-4 py-3 text-foreground capitalize">{a.program}</td>
+                          <td className="px-4 py-3">
+                            <select value={a.status || 'pending'} onChange={async e => {
+                              await base44.entities.Application.update(a.id, { status: e.target.value });
+                              loadAll();
+                            }} className="text-xs border border-border rounded-lg px-2 py-1 bg-white">
+                              <option value="pending">Pending</option>
+                              <option value="approved">Approved</option>
+                              <option value="rejected">Rejected</option>
+                            </select>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button onClick={() => setDeleteTarget({ entity: base44.entities.Application, id: a.id, label: a.user_name || a.user_email })}
+                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── EDIT WEBSITE ── */}
+          {active === 'edit-website' && <AdminEditWebsite />}
 
         </main>
       </div>

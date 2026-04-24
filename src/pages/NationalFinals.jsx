@@ -50,7 +50,12 @@ export default function NationalFinals() {
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
-            <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80" alt="In-person competition" className="w-full rounded-2xl object-cover h-80 border border-border" />
+            <img
+              src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1400&q=85"
+              onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1400&q=85'; }}
+              alt="Students competing at a university campus"
+              className="w-full rounded-2xl object-cover h-80 border border-border"
+            />
           </motion.div>
         </div>
       </section>
@@ -77,67 +82,85 @@ export default function NationalFinals() {
         </div>
       </section>
 
-      {/* Structure + Preparation */}
-      <section className="py-20 px-5">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
+      {/* Event Details */}
+      <section className="py-20 px-5 border-t border-border">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
           <motion.div {...fadeUp()}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Event Details</p>
-            <div className="divide-y divide-border mb-10">
-              {[
-                { label: 'Date', value: 'May 2026 (exact date TBA)' },
-                { label: 'Format', value: 'In-person — location TBA' },
-                { label: 'Eligibility', value: 'Invitation only (top Quiz Bowl & Essay scorers)' },
-                { label: 'Sections', value: 'Written exam + case study analysis' },
-                { label: 'Duration', value: 'Full day event' },
-                { label: 'Cost', value: 'Free for qualified students' },
-                { label: 'Outcome', value: 'Top students named National Champions' },
-              ].map((row) => (
-                <div key={row.label} className="flex gap-8 py-4">
-                  <span className="text-sm text-muted-foreground w-40 flex-shrink-0">{row.label}</span>
-                  <span className="text-sm text-foreground font-medium">{row.value}</span>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Competition Structure</p>
-            <div className="space-y-8">
-              {[
-                { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization — students are expected to reason through complex economic scenarios.' },
-                { step: '02', title: 'Case Study Analysis', body: 'Students are presented with a real-world economic policy challenge and must produce a structured written analysis within a time limit. Evaluated on economic reasoning, use of evidence, and policy recommendations.' },
-                { step: '03', title: 'National Champion Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are named National Champions of the USA Economics Olympiad.' },
-              ].map((s) => (
-                <div key={s.step} className="flex gap-5">
-                  <span className="font-serif text-3xl text-orange-200 leading-none flex-shrink-0 w-8 text-center">{s.step}</span>
-                  <div>
-                    <p className="font-semibold text-foreground text-sm mb-2">{s.title}</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Event Details</p>
+            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight">
+              The essentials<br /><em>at a glance</em>
+            </h2>
           </motion.div>
+          <motion.div {...fadeUp(0.1)} className="divide-y divide-border">
+            {[
+              { label: 'Date', value: 'May 2026 (exact date TBA)' },
+              { label: 'Format', value: 'In-person — location TBA' },
+              { label: 'Eligibility', value: 'Invitation only (top Quiz Bowl & Essay scorers)' },
+              { label: 'Sections', value: 'Written exam + case study analysis' },
+              { label: 'Duration', value: 'Full day event' },
+              { label: 'Cost', value: 'Free for qualified students' },
+              { label: 'Outcome', value: 'Top students named National Champions' },
+            ].map((row) => (
+              <div key={row.label} className="flex gap-8 py-4">
+                <span className="text-sm text-muted-foreground w-40 flex-shrink-0">{row.label}</span>
+                <span className="text-sm text-foreground font-medium">{row.value}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
-          <motion.div {...fadeUp(0.1)}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">How to Prepare</p>
-            <h2 className="font-serif text-3xl text-foreground leading-tight mb-6">
+      {/* Competition Structure */}
+      <section className="py-20 px-5 border-t border-border bg-muted/30">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
+          <motion.div {...fadeUp()}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Competition Structure</p>
+            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight">
+              Two sections,<br /><em>one champion</em>
+            </h2>
+          </motion.div>
+          <motion.div {...fadeUp(0.1)} className="space-y-10">
+            {[
+              { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization — students are expected to reason through complex economic scenarios.' },
+              { step: '02', title: 'Case Study Analysis', body: 'Students are presented with a real-world economic policy challenge and must produce a structured written analysis within a time limit. Evaluated on economic reasoning, use of evidence, and policy recommendations.' },
+              { step: '03', title: 'National Champion Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are named National Champions of the USA Economics Olympiad.' },
+            ].map((s) => (
+              <div key={s.step} className="flex gap-6">
+                <span className="font-serif text-4xl text-orange-300 leading-none flex-shrink-0 w-12 text-right">{s.step}</span>
+                <div>
+                  <p className="font-semibold text-foreground text-lg mb-2">{s.title}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How to Prepare */}
+      <section className="py-20 px-5 border-t border-border">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
+          <motion.div {...fadeUp()}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">How to Prepare</p>
+            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight mb-5">
               What separates finalists<br /><em>from qualifiers</em>
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-8">
-              The National Finals demands a deeper command of economic reasoning than the Qualifiers. Top performers demonstrate the ability to apply theory to novel scenarios, synthesize evidence, and communicate policy analysis clearly under pressure.
+            <p className="text-muted-foreground leading-relaxed">
+              The National Finals demands a deeper command of economic reasoning than the Qualifiers. Top performers apply theory to novel scenarios and communicate policy analysis clearly under pressure.
             </p>
-            <div className="space-y-6">
-              {[
-                { title: 'Advanced syllabus mastery', desc: 'Go beyond textbook definitions. Practice applying concepts to real economic data, policy debates, and historical case studies.' },
-                { title: 'Case study practice', desc: 'Practice structured economic writing. Use the USAEO practice materials and past Finals case study prompts to develop your analytical voice.' },
-                { title: 'Workshop attendance', desc: 'The April and May workshop series is specifically designed for Finals prep. Past participants report these sessions as the single most valuable preparation resource.' },
-                { title: 'Past exam review', desc: 'Review released practice exams available through the student portal after registration. Focus on the applied question formats.' },
-              ].map((item) => (
-                <div key={item.title} className="border-l-2 border-primary/20 pl-5 py-1">
-                  <p className="font-semibold text-sm text-foreground mb-1">{item.title}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
-            </div>
+          </motion.div>
+          <motion.div {...fadeUp(0.1)} className="space-y-6">
+            {[
+              { title: 'Advanced syllabus mastery', desc: 'Go beyond textbook definitions. Practice applying concepts to real economic data, policy debates, and historical case studies.' },
+              { title: 'Case study practice', desc: 'Practice structured economic writing. Use the USAEO practice materials and past Finals case study prompts to develop your analytical voice.' },
+              { title: 'Workshop attendance', desc: 'The April and May workshop series is specifically designed for Finals prep. Past participants report these sessions as the single most valuable preparation resource.' },
+              { title: 'Past exam review', desc: 'Review released practice exams available through the student portal after registration. Focus on the applied question formats.' },
+            ].map((item) => (
+              <div key={item.title} className="border-l-2 border-primary/20 pl-5 py-1">
+                <p className="font-semibold text-sm text-foreground mb-1">{item.title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>

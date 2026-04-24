@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'r
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ScrollToTop from '@/components/ScrollToTop';
 import Home from './pages/Home';
 import About from './pages/About';
 import Competitions from './pages/Competitions';
@@ -43,6 +44,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <ScrollToTop />
           <Routes>
             {/* Public */}
             <Route path="/" element={<CodeRedirect element={<Home />} />} />

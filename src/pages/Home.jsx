@@ -7,6 +7,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
+import { PARTNERS } from '@/lib/partnersSeed';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -29,20 +31,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const partners = [
-  { name: 'Stellar', logo: 'https://www.usaeo.org/imgs/sponsors/Stellar.png', url: 'https://stellarlearning.app/' },
-  { name: 'Crackd', logo: 'https://www.usaeo.org/imgs/sponsors/Crackd.png', url: 'https://crackd.it/' },
-  { name: 'Launchpoint', logo: 'https://www.usaeo.org/imgs/sponsors/Launchpoint.png', url: 'https://www.launchpointhq.com/' },
-  { name: 'Fintech Scholars', logo: 'https://www.usaeo.org/imgs/sponsors/FintechScholars.png', url: 'https://www.fintechscholars.org/' },
-  { name: 'Think Finance', logo: 'https://www.usaeo.org/imgs/sponsors/ThinkFinance.png', url: 'https://www.think-finance.org/' },
-  { name: 'YRI', logo: 'https://www.usaeo.org/imgs/sponsors/YRI.png', url: 'https://www.yriscience.com/' },
-  { name: 'FYC', logo: 'https://www.usaeo.org/imgs/sponsors/FYC.png', url: 'https://linktr.ee/financialyouthclub' },
-  { name: 'CFE', logo: 'https://www.usaeo.org/imgs/sponsors/CFE.png', url: 'https://councilfe.org/' },
-  { name: 'Youth Economics Lab', logo: '/logos/yel.png', url: 'https://www.youtheconomicslab.com/' },
-  { name: 'Synthica', logo: '/logos/synthica.png', url: 'https://www.synthica.org/' },
-  { name: 'A-Warded', logo: '/logos/awarded.ico', url: 'https://a-warded.org/' },
-  { name: 'SE Asian Economics Project', logo: null, url: '#' },
-];
+const partners = PARTNERS;
 
 const faqs = [
   { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required — we provide all the study materials you need, completely free.' },
@@ -147,10 +136,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10">
             {[
-              { value: '500+', label: 'Registered students', sub: 'From 40+ states' },
+              { value: '500+', label: 'Registered students', sub: `From ${CHAPTER_STATE_COUNT}+ states` },
               { value: '100%', label: 'Free to participate', sub: 'No fees at any stage' },
-              { value: '501(c)(3)', label: 'Registered nonprofit', sub: 'Mission-driven organization' },
-              { value: '50+', label: 'Active school chapters', sub: 'And growing' },
+              { value: `${CHAPTERS_SEED.length}`, label: 'Active school chapters', sub: `Across ${CHAPTER_STATE_COUNT} states` },
+              { value: '4', label: 'Competition stages', sub: 'Qualifiers to Finals' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.07)}>
                 <div className="text-4xl md:text-5xl font-serif text-foreground mb-1.5">{s.value}</div>
@@ -297,16 +286,27 @@ export default function Home() {
             </motion.div>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-            {partners.map((p, i) => (
-              <motion.a key={p.name} {...fadeUp(i * 0.04)}
-                href={p.url} target="_blank" rel="noopener noreferrer"
-                className="group flex items-center justify-center p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
-                {p.logo
-                  ? <img src={p.logo} alt={p.name} className="h-8 w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
-                  : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.name}</span>
-                }
-              </motion.a>
-            ))}
+            {partners.map((p, i) => {
+              const logoH = p.logoScale ? Math.round(32 * p.logoScale) : 32;
+              return (
+                <motion.a key={p.name} {...fadeUp(i * 0.04)}
+                  href={p.url} target="_blank" rel="noopener noreferrer"
+                  className="group flex items-center justify-center gap-2 p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
+                  {p.logo
+                    ? <img src={p.logo} alt={p.name} style={{ height: logoH }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                    : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.shortName || p.name}</span>
+                  }
+                  {p.wordmark && (
+                    <span
+                      style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight }}
+                      className="text-base text-foreground/70 group-hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      {p.wordmark.text}
+                    </span>
+                  )}
+                </motion.a>
+              );
+            })}
             <motion.a {...fadeUp(0.56)} href="mailto:info@usaeo.org"
               className="flex items-center justify-center p-6 border border-dashed border-border rounded-xl hover:border-primary/40 transition-all duration-200 h-20">
               <span className="text-sm text-muted-foreground">+ Partner</span>
@@ -353,86 +353,30 @@ export default function Home() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               />
-              {[
-                { school: 'Obra D. Tompkins HS', city: 'Katy, TX', lat: 29.7858, lng: -95.8245 },
-                { school: 'Lebanon Trail HS', city: 'Frisco, TX', lat: 33.1581, lng: -96.8230 },
-                { school: 'Frisco HS', city: 'Frisco, TX', lat: 33.1501, lng: -96.8236 },
-                { school: 'Westwood HS', city: 'Austin, TX', lat: 30.4406, lng: -97.7836 },
-                { school: 'Plano West Senior HS', city: 'Plano, TX', lat: 33.0198, lng: -96.7836 },
-                { school: 'Flower Mound HS', city: 'Flower Mound, TX', lat: 33.0148, lng: -97.0969 },
-                { school: 'Southlake Carroll HS', city: 'Southlake, TX', lat: 32.9401, lng: -97.1340 },
-                { school: 'Jesuit College Preparatory', city: 'Dallas, TX', lat: 32.8678, lng: -96.8370 },
-                { school: 'Highland Park HS', city: 'Dallas, TX', lat: 32.8367, lng: -96.7973 },
-                { school: 'Prosper HS', city: 'Prosper, TX', lat: 33.2368, lng: -96.8009 },
-                { school: 'Coppell HS', city: 'Coppell, TX', lat: 32.9543, lng: -97.0150 },
-                { school: 'Allen HS', city: 'Allen, TX', lat: 33.0951, lng: -96.6641 },
-                { school: 'McKinney Boyd HS', city: 'McKinney, TX', lat: 33.1972, lng: -96.6397 },
-                { school: 'Lovejoy HS', city: 'Lucas, TX', lat: 33.1029, lng: -96.5780 },
-                { school: 'Hebron HS', city: 'Carrollton, TX', lat: 33.0001, lng: -96.9301 },
-                { school: 'Rockwall HS', city: 'Rockwall, TX', lat: 32.9290, lng: -96.4597 },
-                { school: 'Wakeland HS', city: 'Frisco, TX', lat: 33.1700, lng: -96.8900 },
-                { school: 'Centennial HS', city: 'Frisco, TX', lat: 33.1450, lng: -96.7710 },
-                { school: 'Liberty HS', city: 'Frisco, TX', lat: 33.1200, lng: -96.8200 },
-                { school: 'Lone Star HS', city: 'Frisco, TX', lat: 33.1550, lng: -96.8000 },
-                { school: 'Memorial HS', city: 'Houston, TX', lat: 29.7643, lng: -95.5277 },
-                { school: 'Dulles HS', city: 'Sugar Land, TX', lat: 29.5724, lng: -95.6397 },
-                { school: 'Seven Lakes HS', city: 'Katy, TX', lat: 29.7258, lng: -95.8049 },
-                { school: 'Clements HS', city: 'Sugar Land, TX', lat: 29.5701, lng: -95.6671 },
-                { school: 'Ridge Point HS', city: 'Missouri City, TX', lat: 29.5387, lng: -95.5780 },
-                { school: 'Cypress Creek HS', city: 'Houston, TX', lat: 29.9463, lng: -95.6613 },
-                { school: 'Strake Jesuit', city: 'Houston, TX', lat: 29.7134, lng: -95.4887 },
-                { school: 'Cinco Ranch HS', city: 'Katy, TX', lat: 29.7539, lng: -95.7677 },
-                { school: 'Jasper HS', city: 'Plano, TX', lat: 33.0200, lng: -96.7200 },
-                { school: 'Thomas Jefferson HS (SA)', city: 'San Antonio, TX', lat: 29.4441, lng: -98.5034 },
-                { school: 'James Madison HS (SA)', city: 'San Antonio, TX', lat: 29.5523, lng: -98.4955 },
-                { school: 'Ronald Reagan HS (SA)', city: 'San Antonio, TX', lat: 29.6131, lng: -98.4231 },
-                { school: 'Walter Payton College Prep', city: 'Chicago, IL', lat: 41.9050, lng: -87.6381 },
-                { school: 'Northside College Prep', city: 'Chicago, IL', lat: 41.9803, lng: -87.7180 },
-                { school: 'Niles West HS', city: 'Skokie, IL', lat: 42.0386, lng: -87.7408 },
-                { school: 'Niles North HS', city: 'Skokie, IL', lat: 42.0539, lng: -87.7408 },
-                { school: 'Naperville Central HS', city: 'Naperville, IL', lat: 41.7703, lng: -88.1536 },
-                { school: 'TJHSST', city: 'Falls Church, VA', lat: 38.8173, lng: -77.1993 },
-                { school: 'Langley HS', city: 'McLean, VA', lat: 38.9218, lng: -77.1947 },
-                { school: 'McLean HS', city: 'McLean, VA', lat: 38.9337, lng: -77.1801 },
-                { school: 'South Lakes HS', city: 'Reston, VA', lat: 38.9462, lng: -77.3439 },
-                { school: 'Westfield HS', city: 'Chantilly, VA', lat: 38.8844, lng: -77.4075 },
-                { school: 'Lynbrook HS', city: 'San Jose, CA', lat: 37.3526, lng: -121.9843 },
-                { school: 'Monta Vista HS', city: 'Cupertino, CA', lat: 37.3230, lng: -122.0452 },
-                { school: 'Stuyvesant HS', city: 'New York, NY', lat: 40.7176, lng: -74.0137 },
-                { school: 'Townsend Harris HS', city: 'Flushing, NY', lat: 40.7289, lng: -73.8200 },
-                { school: 'Lexington HS', city: 'Lexington, MA', lat: 42.4474, lng: -71.2150 },
-                { school: 'Brookline HS', city: 'Brookline, MA', lat: 42.3321, lng: -71.1397 },
-              ].map((c) => (
-                <Marker key={c.school} position={[c.lat, c.lng]} icon={orangeIcon}>
+              {CHAPTERS_SEED.map((c) => (
+                <Marker key={c.id} position={[c.lat, c.lng]} icon={orangeIcon}>
                   <Popup>
-                    <strong>{c.school}</strong><br />{c.city}
+                    <strong>{c.school}</strong><br />{c.city}, {c.state}
                   </Popup>
                 </Marker>
               ))}
             </MapContainer>
           </motion.div>
 
-          {/* Chapter grid */}
+          {/* Chapter grid — first 6 from canonical seed */}
           <motion.div {...fadeUp(0.15)} className="grid md:grid-cols-3 gap-4">
-            {[
-              { school: 'Obra D. Tompkins HS', city: 'Katy, TX' },
-              { school: 'Westwood HS', city: 'Austin, TX' },
-              { school: 'Plano West Senior HS', city: 'Plano, TX' },
-              { school: 'Walter Payton College Prep', city: 'Chicago, IL' },
-              { school: 'TJHSST', city: 'Falls Church, VA' },
-              { school: 'Stuyvesant HS', city: 'New York, NY' },
-            ].map((c) => (
-              <div key={c.school} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
+            {CHAPTERS_SEED.slice(0, 6).map((c) => (
+              <div key={c.id} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
                 <p className="font-medium text-foreground text-sm mb-2">{c.school}</p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="w-3 h-3" /> {c.city}
+                  <MapPin className="w-3 h-3" /> {c.city}, {c.state}
                 </div>
               </div>
             ))}
           </motion.div>
           <motion.div {...fadeUp(0.2)} className="mt-5">
             <Link to="/chapters" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-              + 42 more chapters <ArrowRight className="w-3 h-3" />
+              + {CHAPTERS_SEED.length - 6} more chapters <ArrowRight className="w-3 h-3" />
             </Link>
           </motion.div>
         </div>

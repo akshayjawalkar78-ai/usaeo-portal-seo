@@ -57,4 +57,6 @@ export const entities = {
   CompetitionEvent: makeEntity('competition_events'),
   CurriculumUnit: makeEntity('curriculum_units'),
   EventRegistration: makeEntity('event_registrations'),
+  Application: makeEntity('applications'),
+  SiteContent: makeEntity('site_content'),
 };

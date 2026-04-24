@@ -43,6 +43,8 @@ export default function Dashboard() {
   const [joinSuccess, setJoinSuccess] = useState('');
   const [rankStage, setRankStage] = useState('qualifiers');
   const [myRegistrations, setMyRegistrations] = useState([]);
+  const [myApplications, setMyApplications] = useState([]);
+  const [myPendingMemberships, setMyPendingMemberships] = useState([]);
   // Chapter admin state
   const [adminChapter, setAdminChapter] = useState(null);
   const [adminMembers, setAdminMembers] = useState([]);
@@ -60,6 +62,8 @@ export default function Dashboard() {
     base44.entities.CurriculumUnit.list('order').then(setCurriculumUnits);
     if (authUser?.email) {
       base44.entities.EventRegistration.filter({ user_email: authUser.email }).then(setMyRegistrations);
+      base44.entities.Application?.filter({ user_email: authUser.email }).then(setMyApplications).catch(() => setMyApplications([]));
+      base44.entities.ChapterMember.filter({ user_email: authUser.email, status: 'pending' }).then(setMyPendingMemberships).catch(() => setMyPendingMemberships([]));
     }
   }, [authUser?.email]);
 
@@ -241,14 +245,33 @@ export default function Dashboard() {
                 </div>
                 <div className="md:col-span-2 space-y-4">
                   <div className="bg-foreground rounded-2xl p-5">
-                    <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Next milestone</p>
-                    <h3 className="font-serif text-2xl text-white mb-1">National Finals</h3>
-                    <p className="text-sm text-white/60 mb-4">May 2026 · In-person</p>
-                    <Link to="/register"
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Registration open</p>
+                    <h3 className="font-serif text-2xl text-white mb-1">Quiz Bowl</h3>
+                    <p className="text-sm text-white/60 mb-4">Timed quiz · Open to all</p>
+                    <Link to="/register?event=quiz-bowl"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                       Register <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
+                  {(myApplications.length > 0 || myPendingMemberships.length > 0) && (
+                    <div className="bg-white rounded-2xl border border-border p-5">
+                      <p className="font-semibold text-foreground text-sm mb-3">My applications</p>
+                      <div className="space-y-2">
+                        {myPendingMemberships.map(m => (
+                          <div key={`mem-${m.id}`} className="flex items-center justify-between text-xs">
+                            <span className="text-foreground truncate">Chapter membership</span>
+                            <span className="font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Pending</span>
+                          </div>
+                        ))}
+                        {myApplications.map(a => (
+                          <div key={`app-${a.id}`} className="flex items-center justify-between text-xs">
+                            <span className="text-foreground truncate capitalize">{a.program?.replace('-', ' ') || 'Application'}</span>
+                            <span className={`font-semibold px-2 py-0.5 rounded-full border ${a.status === 'approved' ? 'text-green-700 bg-green-50 border-green-200' : a.status === 'rejected' ? 'text-red-700 bg-red-50 border-red-200' : 'text-orange-700 bg-orange-50 border-orange-200'}`}>{a.status || 'Pending'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="bg-white rounded-2xl border border-border p-5">
                     <p className="font-semibold text-foreground text-sm mb-3">Quick links</p>
                     <div className="space-y-0.5">
@@ -497,7 +520,10 @@ export default function Dashboard() {
           {/* ── CURRICULUM ── */}
           {active === 'curriculum' && (
             <div className="bg-white rounded-2xl border border-border p-8">
-              <h2 className="font-semibold text-foreground mb-1">Study Curriculum</h2>
+              <div className="flex items-center gap-3 mb-1">
+                <h2 className="font-semibold text-foreground">Study Curriculum</h2>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Releasing soon</span>
+              </div>
               <p className="text-sm text-muted-foreground mb-6">Six units covering the full USAEO syllabus. Free for all students at usaeo.org/curriculum.</p>
               <div className="space-y-0 divide-y divide-border">
                 {curriculumUnits.length === 0 && <p className="text-sm text-muted-foreground">Curriculum not yet published.</p>}

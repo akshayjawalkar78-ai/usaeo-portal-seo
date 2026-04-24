@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, FileText, ExternalLink, ChevronDown, ChevronUp, User } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Lock } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
@@ -12,49 +12,22 @@ const fadeUp = (delay = 0) => ({
 
 const papers = [
   {
-    title: 'The Effects of Federal Reserve Quantitative Easing on Equity Market Volatility',
-    author: 'Maya Chen', school: 'Stuyvesant High School', year: '2025',
-    abstract: 'This paper examines the causal relationship between Federal Reserve asset purchase programs (QE1–QE4) and the CBOE Volatility Index (VIX), employing event-study methodology and difference-in-differences estimation. We find significant negative effects on short-run volatility during announcement windows, with diminishing returns across successive rounds.',
-    tags: ['Monetary Policy', 'Financial Markets', 'Econometrics'], pages: 22,
-  },
-  {
-    title: 'Minimum Wage and Employment: A Meta-Analysis of Recent US Studies',
-    author: 'James Park', school: 'Thomas Jefferson High School', year: '2025',
-    abstract: 'We conduct a systematic meta-analysis of 47 empirical studies on minimum wage effects in the United States published between 2010 and 2024. Correcting for publication bias via funnel asymmetry tests, our central estimate suggests a small but statistically significant employment elasticity of -0.11 for low-wage workers.',
-    tags: ['Labor Economics', 'Policy Analysis', 'Meta-Analysis'], pages: 28,
-  },
-  {
-    title: 'Carbon Pricing Mechanisms and Innovation: Evidence from European ETS',
-    author: 'Sofia Rodriguez', school: 'Lowell High School', year: '2024',
-    abstract: 'Using patent application data from the European Patent Office and firm-level panel data from EU ETS participating firms (2005–2022), we estimate the causal effect of carbon price exposure on green innovation. We find a 12% increase in clean technology patents per €10/tonne increase in carbon prices.',
-    tags: ['Environmental Economics', 'Innovation', 'Climate Policy'], pages: 31,
-  },
-  {
-    title: 'Algorithmic Pricing and Market Competition in Online Retail',
-    author: 'Daniel Kim', school: 'Phillips Academy', year: '2024',
-    abstract: 'This paper investigates whether the widespread adoption of algorithmic pricing software among online retailers facilitates tacit collusion. Using scraped price data from 200+ product categories over 18 months, we document systematic co-movement in prices consistent with algorithmic coordination.',
-    tags: ['Industrial Organization', 'Digital Markets', 'Competition'], pages: 19,
-  },
-  {
-    title: 'Remittances and Household Consumption Smoothing in Rural Mexico',
-    author: 'Ana Lima', school: 'Basis Scottsdale', year: '2024',
-    abstract: 'We use ENIGH household survey data matched with migration patterns to estimate how remittance receipts affect consumption smoothing in rural Mexican households. IV estimates using bilateral migration networks as instruments suggest remittances reduce consumption volatility by 18-24% for recipient households.',
-    tags: ['Development Economics', 'Migration', 'Household Finance'], pages: 25,
+    title: 'Economics Olympiad Research',
+    visibility: 'private',
+    description: 'Internal research used to build the question-difficulty benchmark for the USAEO competition and support academia partnership teams.',
   },
 ];
 
 const topics = [
-  { area: 'Monetary Economics', desc: 'Central banking, inflation, interest rate policy', count: 12 },
-  { area: 'Labor Economics', desc: 'Employment, wages, inequality', count: 9 },
-  { area: 'Environmental Economics', desc: 'Climate policy, carbon markets, sustainability', count: 8 },
-  { area: 'Development Economics', desc: 'Poverty, migration, aid effectiveness', count: 11 },
-  { area: 'Industrial Organization', desc: 'Market structure, competition, digital markets', count: 7 },
-  { area: 'Behavioral Economics', desc: 'Decision-making, nudges, cognitive biases', count: 6 },
+  { area: 'Monetary Economics', desc: 'Central banking, inflation, interest rate policy' },
+  { area: 'Labor Economics', desc: 'Employment, wages, inequality' },
+  { area: 'Environmental Economics', desc: 'Climate policy, carbon markets, sustainability' },
+  { area: 'Development Economics', desc: 'Poverty, migration, aid effectiveness' },
+  { area: 'Industrial Organization', desc: 'Market structure, competition, digital markets' },
+  { area: 'Behavioral Economics', desc: 'Decision-making, nudges, cognitive biases' },
 ];
 
 export default function Research() {
-  const [expanded, setExpanded] = useState(null);
-
   return (
     <PageLayout>
       <section className="pt-20 pb-16 px-5 border-b border-border">
@@ -68,7 +41,7 @@ export default function Research() {
               Conduct original economics research under the guidance of professional economists and academics. Published work appears in the USAEO Research Journal — a peer-reviewed publication read by university admissions offices nationwide.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
-              {[['45+', 'Papers published'], ['30+', 'Faculty mentors'], ['15+', 'Research areas']].map(([v, l]) => (
+              {[['Open', 'Applications'], ['30+', 'Faculty mentors'], [`${topics.length}+`, 'Research areas']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
@@ -126,13 +99,8 @@ export default function Research() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {topics.map((t, i) => (
               <motion.div key={t.area} {...fadeUp(i * 0.07)} className="bg-white border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold text-foreground text-sm mb-1">{t.area}</h3>
-                    <p className="text-xs text-muted-foreground">{t.desc}</p>
-                  </div>
-                  <span className="text-xs text-primary bg-orange-50 border border-orange-200 px-2 py-1 rounded-full flex-shrink-0">{t.count} papers</span>
-                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{t.area}</h3>
+                <p className="text-xs text-muted-foreground">{t.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -147,55 +115,18 @@ export default function Research() {
             <h2 className="font-serif text-3xl text-foreground">Featured published papers</h2>
           </motion.div>
           <div className="space-y-4">
-            {papers.map((p, i) => (
-              <motion.div key={p.title} {...fadeUp(i * 0.07)} className="bg-white border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-colors">
-                <button className="w-full text-left p-6 md:p-8" onClick={() => setExpanded(expanded === i ? null : i)}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="mb-2">
-                        <span className="text-xs text-muted-foreground">{p.year}</span>
-                      </div>
-                      <h3 className="font-semibold text-foreground text-base md:text-lg leading-snug mb-2">{p.title}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="w-3.5 h-3.5" />
-                        <span>{p.author}</span>
-                        <span>·</span>
-                        <span>{p.school}</span>
-                        <span>·</span>
-                        <span>{p.pages} pages</span>
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 text-muted-foreground mt-1">
-                      {expanded === i ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </div>
-                  </div>
-                </button>
-                <AnimatePresence>
-                  {expanded === i && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 md:px-8 pb-6 border-t border-border pt-5">
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{p.abstract}</p>
-                        <a href="mailto:info@usaeo.org" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-                          Request full paper <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            {papers.map((p) => (
+              <motion.div key={p.title} {...fadeUp()} className="bg-white border border-border rounded-2xl p-6 md:p-8">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground">
+                    <Lock className="w-3 h-3" /> Private · Internal
+                  </span>
+                </div>
+                <h3 className="font-semibold text-foreground text-base md:text-lg leading-snug mb-3">{p.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.description}</p>
               </motion.div>
             ))}
           </div>
-          <motion.div {...fadeUp(0.3)} className="mt-8 text-center">
-            <a href="mailto:info@usaeo.org" className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
-              <FileText className="w-4 h-4" /> View full journal archive
-            </a>
-          </motion.div>
         </div>
       </section>
     </PageLayout>
