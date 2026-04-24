@@ -7,6 +7,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
+import { PARTNERS } from '@/lib/partnersSeed';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -29,21 +31,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const partners = [
-  { name: 'Ultra AI', logo: 'https://www.usaeo.org/imgs/sponsors/UltraAI.png', url: 'https://useultra.ai/' },
-  { name: 'Stellar', logo: 'https://www.usaeo.org/imgs/sponsors/Stellar.png', url: 'https://stellarlearning.app/' },
-  { name: 'Crackd', logo: 'https://www.usaeo.org/imgs/sponsors/Crackd.png', url: 'https://crackd.it/' },
-  { name: 'Launchpoint', logo: 'https://www.usaeo.org/imgs/sponsors/Launchpoint.png', url: 'https://www.launchpointhq.com/' },
-  { name: 'Fintech Scholars', logo: 'https://www.usaeo.org/imgs/sponsors/FintechScholars.png', url: 'https://www.fintechscholars.org/' },
-  { name: 'Think Finance', logo: 'https://www.usaeo.org/imgs/sponsors/ThinkFinance.png', url: 'https://www.think-finance.org/' },
-  { name: 'YRI', logo: 'https://www.usaeo.org/imgs/sponsors/YRI.png', url: 'https://www.yriscience.com/' },
-  { name: 'FYC', logo: 'https://www.usaeo.org/imgs/sponsors/FYC.png', url: 'https://linktr.ee/financialyouthclub' },
-  { name: 'CFE', logo: 'https://www.usaeo.org/imgs/sponsors/CFE.png', url: 'https://councilfe.org/' },
-  { name: 'Youth Economy Lab', logo: null, url: 'https://www.youtheconomylab.com/' },
-  { name: 'Synthica', logo: null, url: 'https://www.synthica.org/' },
-  { name: 'A-Warded', logo: null, url: 'https://a-warded.org/' },
-  { name: 'SE Asia Econ Project', logo: null, url: 'https://seaecon.org/' },
-];
+const partners = PARTNERS;
 
 const faqs = [
   { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required — we provide all the study materials you need, completely free.' },
@@ -120,7 +108,7 @@ export default function Home() {
             <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-3">
               <a href="/register"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-foreground text-white rounded-full font-medium hover:bg-foreground/85 transition-colors">
-                Register — it's free <ArrowRight className="w-4 h-4" />
+                Register <ArrowRight className="w-4 h-4" />
               </a>
               <Link to="/competitions"
                 className="inline-flex items-center gap-2 px-7 py-3.5 border border-border text-foreground rounded-full font-medium hover:border-foreground transition-colors">
@@ -148,10 +136,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10">
             {[
-              { value: '500+', label: 'Registered students', sub: 'From 40+ states' },
+              { value: '500+', label: 'Registered students', sub: `From ${CHAPTER_STATE_COUNT}+ states` },
               { value: '100%', label: 'Free to participate', sub: 'No fees at any stage' },
-              { value: '501(c)(3)', label: 'Registered nonprofit', sub: 'Mission-driven organization' },
-              { value: '9+', label: 'Active school chapters', sub: 'And growing' },
+              { value: `${CHAPTERS_SEED.length}`, label: 'Active school chapters', sub: `Across ${CHAPTER_STATE_COUNT} states` },
+              { value: '4', label: 'Competition stages', sub: 'Qualifiers to Finals' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.07)}>
                 <div className="text-4xl md:text-5xl font-serif text-foreground mb-1.5">{s.value}</div>
@@ -263,7 +251,7 @@ export default function Home() {
                 title: 'Chapter Program',
                 to: '/chapters',
                 body: 'Start a USAEO chapter at your high school. Chapter Founders lead weekly meetings, organize local study sessions, and connect their peers to the national competition. Active chapters exist in 15+ states.',
-                meta: '9+ active chapters · Applications open',
+                meta: '50+ active chapters · Applications open',
               },
             ].map((p, i) => (
               <motion.div key={p.title} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10 group">
@@ -288,26 +276,37 @@ export default function Home() {
             <motion.div {...fadeUp()}>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Partners & Sponsors</p>
               <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
-                Organizations that share<br /><em>our mission</em>
+                Organizations that share <em>our mission</em>
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
-                The USAEO is supported by organizations committed to economics education and student opportunity.
+                The USAEO is supported by organizations committed to economics education and student opportunity. Our partners share our belief that every student — regardless of background or resources — deserves access to rigorous, real-world economic learning. Together, we work to expand the reach and impact of the USAEO mission across the country.
               </p>
             </motion.div>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-            {partners.map((p, i) => (
-              <motion.a key={p.name} {...fadeUp(i * 0.04)}
-                href={p.url} target="_blank" rel="noopener noreferrer"
-                className="group flex items-center justify-center p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
-                {p.logo
-                  ? <img src={p.logo} alt={p.name} className="h-8 w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
-                  : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.name}</span>
-                }
-              </motion.a>
-            ))}
+            {partners.map((p, i) => {
+              const logoH = p.logoScale ? Math.round(32 * p.logoScale) : 32;
+              return (
+                <motion.a key={p.name} {...fadeUp(i * 0.04)}
+                  href={p.url} target="_blank" rel="noopener noreferrer"
+                  className="group flex items-center justify-center gap-2 p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
+                  {p.logo
+                    ? <img src={p.logo} alt={p.name} style={{ height: logoH }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                    : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.shortName || p.name}</span>
+                  }
+                  {p.wordmark && (
+                    <span
+                      style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight }}
+                      className="text-base text-foreground/70 group-hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      {p.wordmark.text}
+                    </span>
+                  )}
+                </motion.a>
+              );
+            })}
             <motion.a {...fadeUp(0.56)} href="mailto:info@usaeo.org"
               className="flex items-center justify-center p-6 border border-dashed border-border rounded-xl hover:border-primary/40 transition-all duration-200 h-20">
               <span className="text-sm text-muted-foreground">+ Partner</span>
@@ -354,47 +353,30 @@ export default function Home() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               />
-              {[
-                { school: 'Thomas Jefferson HS', city: 'Alexandria, VA', members: 24, lat: 38.8048, lng: -77.0719 },
-                { school: 'Stuyvesant HS', city: 'New York, NY', members: 31, lat: 40.7178, lng: -74.0134 },
-                { school: 'Phillips Academy', city: 'Andover, MA', members: 18, lat: 42.6509, lng: -71.1369 },
-                { school: 'Chicago Lab School', city: 'Chicago, IL', members: 22, lat: 41.7943, lng: -87.5907 },
-                { school: 'Basis Scottsdale', city: 'Scottsdale, AZ', members: 15, lat: 33.5093, lng: -111.8985 },
-                { school: 'Lowell High School', city: 'San Francisco, CA', members: 27, lat: 37.7454, lng: -122.4614 },
-                { school: 'Montgomery Blair HS', city: 'Silver Spring, MD', members: 19, lat: 39.0415, lng: -77.0009 },
-                { school: 'Lynbrook High School', city: 'San Jose, CA', members: 21, lat: 37.3508, lng: -121.9961 },
-                { school: 'River Hill High School', city: 'Clarksville, MD', members: 14, lat: 39.1774, lng: -76.9247 },
-              ].map((c) => (
-                <Marker key={c.school} position={[c.lat, c.lng]} icon={orangeIcon}>
+              {CHAPTERS_SEED.map((c) => (
+                <Marker key={c.id} position={[c.lat, c.lng]} icon={orangeIcon}>
                   <Popup>
-                    <strong>{c.school}</strong><br />{c.city}
+                    <strong>{c.school}</strong><br />{c.city}, {c.state}
                   </Popup>
                 </Marker>
               ))}
             </MapContainer>
           </motion.div>
 
-          {/* Chapter grid */}
+          {/* Chapter grid — first 6 from canonical seed */}
           <motion.div {...fadeUp(0.15)} className="grid md:grid-cols-3 gap-4">
-            {[
-              { school: 'Thomas Jefferson High School', city: 'Alexandria, VA', members: 24, founded: 'Sep 2024' },
-              { school: 'Stuyvesant High School', city: 'New York, NY', members: 31, founded: 'Aug 2024' },
-              { school: 'Phillips Academy', city: 'Andover, MA', members: 18, founded: 'Oct 2024' },
-              { school: 'Chicago Lab School', city: 'Chicago, IL', members: 22, founded: 'Nov 2024' },
-              { school: 'Lowell High School', city: 'San Francisco, CA', members: 27, founded: 'Sep 2024' },
-              { school: 'Lynbrook High School', city: 'San Jose, CA', members: 21, founded: 'Feb 2025' },
-            ].map((c) => (
-              <div key={c.school} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
+            {CHAPTERS_SEED.slice(0, 6).map((c) => (
+              <div key={c.id} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
                 <p className="font-medium text-foreground text-sm mb-2">{c.school}</p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="w-3 h-3" /> {c.city}
+                  <MapPin className="w-3 h-3" /> {c.city}, {c.state}
                 </div>
               </div>
             ))}
           </motion.div>
           <motion.div {...fadeUp(0.2)} className="mt-5">
             <Link to="/chapters" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-              + 3 more chapters <ArrowRight className="w-3 h-3" />
+              + {CHAPTERS_SEED.length - 6} more chapters <ArrowRight className="w-3 h-3" />
             </Link>
           </motion.div>
         </div>
@@ -492,7 +474,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-3">
             <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-              Register Now — Free <ArrowRight className="w-4 h-4" />
+              Register <ArrowRight className="w-4 h-4" />
             </a>
             <a href="mailto:info@usaeo.org"
               className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">

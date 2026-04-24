@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
+import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,17 +31,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
 });
 
-const SEED_CHAPTERS = [
-  { school: 'Thomas Jefferson High School', city: 'Alexandria, VA', lat: 38.8048, lng: -77.0719, founded: 'Sep 2024', focus: 'Competition prep, weekly econ talks' },
-  { school: 'Stuyvesant High School', city: 'New York, NY', lat: 40.7178, lng: -74.0134, founded: 'Aug 2024', focus: 'Research, debate, competitions' },
-  { school: 'Phillips Academy', city: 'Andover, MA', lat: 42.6509, lng: -71.1369, founded: 'Oct 2024', focus: 'Global economics, competition prep' },
-  { school: 'Chicago Lab School', city: 'Chicago, IL', lat: 41.7943, lng: -87.5907, founded: 'Nov 2024', focus: 'Policy analysis, workshops' },
-  { school: 'Basis Scottsdale', city: 'Scottsdale, AZ', lat: 33.5093, lng: -111.8985, founded: 'Jan 2025', focus: 'Micro/macro deep dives' },
-  { school: 'Lowell High School', city: 'San Francisco, CA', lat: 37.7454, lng: -122.4614, founded: 'Sep 2024', focus: 'Tech economics, market analysis' },
-  { school: 'Montgomery Blair High School', city: 'Silver Spring, MD', lat: 39.0415, lng: -77.0009, founded: 'Dec 2024', focus: 'Econometrics, data science' },
-  { school: 'Lynbrook High School', city: 'San Jose, CA', lat: 37.3508, lng: -121.9961, founded: 'Feb 2025', focus: 'Competition strategy, quiz bowl prep' },
-  { school: 'River Hill High School', city: 'Clarksville, MD', lat: 39.1774, lng: -76.9247, founded: 'Mar 2025', focus: 'Economics outreach, mentorship' },
-];
+const SEED_CHAPTERS = CHAPTERS_SEED.map(c => ({ ...c, name: c.school }));
 
 const founderActions = [
   { icon: Calendar, action: 'Host weekly or bi-weekly economics meetings' },
@@ -53,6 +44,9 @@ const founderActions = [
 export default function Chapters() {
   const [selected, setSelected] = useState(null);
   const [chapters, setChapters] = useState(SEED_CHAPTERS);
+  const [showAll, setShowAll] = useState(false);
+  const INITIAL_COUNT = 8;
+  const visibleChapters = showAll ? chapters : chapters.slice(0, INITIAL_COUNT);
 
   useEffect(() => {
     base44.entities.Chapter.filter({ status: 'active' }).then((data) => {
@@ -73,7 +67,7 @@ export default function Chapters() {
               Start a chapter at your school, lead your peers, and build a local economics community connected to the national network.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
-              {[[`${chapters.length}+`, 'Active chapters'], ['15+', 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
+              {[[`${CHAPTERS_SEED.length}`, 'Active chapters'], [`${CHAPTER_STATE_COUNT}`, 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
                 <div key={l}>
                   <div className="text-3xl font-serif text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
@@ -107,7 +101,7 @@ export default function Chapters() {
                   <Popup>
                     <div className="text-sm">
                       <strong className="block text-foreground">{c.school}</strong>
-                      <span className="text-muted-foreground">{c.city}</span>
+                      <span className="text-muted-foreground">{c.state ? `${c.city}, ${c.state}` : c.city}</span>
                     </div>
                   </Popup>
                 </Marker>
@@ -115,25 +109,34 @@ export default function Chapters() {
             </MapContainer>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {chapters.map((c, i) => (
-              <motion.div key={c.school} {...fadeUp(i * 0.06)}>
+            {visibleChapters.map((c, i) => (
+              <motion.div key={c.id || c.school} {...fadeUp(i * 0.06)}>
                 <button onClick={() => setSelected(c)}
                   className="w-full text-left bg-white border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all duration-200 group">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="font-semibold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">{c.school}</h3>
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                        <MapPin className="w-3 h-3" /> {c.city}
+                        <MapPin className="w-3 h-3" /> {c.state ? `${c.city}, ${c.state}` : c.city}
                       </div>
-                      <p className="text-xs text-muted-foreground">{c.focus}</p>
+                      {c.focus && <p className="text-xs text-muted-foreground">{c.focus}</p>}
                     </div>
                   </div>
                 </button>
               </motion.div>
             ))}
           </div>
+          {chapters.length > INITIAL_COUNT && (
+            <motion.div {...fadeUp(0.2)} className="mt-6 flex justify-center">
+              <button onClick={() => setShowAll(v => !v)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">
+                {showAll ? 'Show less' : `Show all ${chapters.length} chapters`}
+                <ArrowRight className={`w-3.5 h-3.5 transition-transform ${showAll ? '-rotate-90' : 'rotate-90'}`} />
+              </button>
+            </motion.div>
+          )}
           <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
-            Showing {chapters.length} active chapters · More joining every week
+            Showing {visibleChapters.length} of {chapters.length} active chapters · More joining every week
           </motion.p>
         </div>
       </section>

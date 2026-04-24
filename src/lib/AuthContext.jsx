@@ -7,10 +7,9 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [chapterAdminOf, setChapterAdminOf] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // true while a profile fetch is in-flight
   const [isProfileLoading, setIsProfileLoading] = useState(false);
-  // true once at least one profile fetch has completed (success or fail)
   const [profileAttempted, setProfileAttempted] = useState(false);
 
   const loadProfile = useCallback(async (userId) => {
@@ -32,6 +31,19 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.log('[auth] profile loaded:', data);
         setProfile(data);
+        // Load chapter admin roles
+        try {
+          const email = data.email;
+          if (email) {
+            const { data: memberships } = await supabase
+              .from('chapter_members')
+              .select('chapter_id, role')
+              .eq('user_email', email)
+              .in('role', ['chapter_admin', 'founder'])
+              .eq('status', 'active');
+            setChapterAdminOf((memberships || []).map(m => m.chapter_id));
+          }
+        } catch (_) {}
       }
     } catch (e) {
       console.error('loadProfile threw:', e);
@@ -111,11 +123,13 @@ export const AuthProvider = ({ children }) => {
     setSession(null);
     setUser(null);
     setProfile(null);
+    setChapterAdminOf([]);
     setProfileAttempted(false);
   };
 
   const isAuthenticated = !!session?.user;
   const isAdmin = profile?.role === 'admin';
+  const isChapterAdmin = chapterAdminOf.length > 0;
 
   return (
     <AuthContext.Provider value={{
@@ -124,6 +138,8 @@ export const AuthProvider = ({ children }) => {
       profile,
       isAuthenticated,
       isAdmin,
+      isChapterAdmin,
+      chapterAdminOf,
       isLoading,
       isProfileLoading,
       profileAttempted,
