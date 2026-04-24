@@ -134,6 +134,8 @@ function ContributionSection({ section, index }) {
                 <StoryCard key={s.partner + i} story={s} />
               ))}
             </motion.div>
+            {/* Right-edge fade hint — indicates more cards available */}
+            <div className={`pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l ${index % 2 === 0 ? 'from-white' : 'from-[#f4f4f2]'} to-transparent`} />
             <div className="absolute top-2 right-0 flex gap-1.5">
               {section.stories.map((_, i) => (
                 <ProgressDot key={i} scrollYProgress={scrollYProgress} i={i} count={storyCount} />

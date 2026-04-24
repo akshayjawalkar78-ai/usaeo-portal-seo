@@ -19,9 +19,10 @@ export const PARTNERS = [
   },
   {
     name: 'Launchpoint',
+    logo: 'https://www.usaeo.org/imgs/sponsors/Launchpoint.png',
     url: 'https://www.launchpointhq.com/',
     desc: 'Career launchpad',
-    wordmark: { text: 'Launchpoint', fontFamily: 'Sora, sans-serif', fontWeight: 600 },
+    logoScale: 1.35,
     tags: ['research'],
   },
   {
@@ -33,9 +34,10 @@ export const PARTNERS = [
   },
   {
     name: 'Think Finance',
+    logo: 'https://www.usaeo.org/imgs/sponsors/ThinkFinance.png',
     url: 'https://www.think-finance.org/',
     desc: 'Finance education',
-    wordmark: { text: 'Think Finance', fontFamily: 'Sora, sans-serif', fontWeight: 600 },
+    logoScale: 1.35,
     tags: ['awareness', 'academic'],
   },
   {
