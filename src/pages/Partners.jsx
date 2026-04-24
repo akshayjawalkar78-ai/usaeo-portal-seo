@@ -183,7 +183,15 @@ export default function Partners() {
                   className="group flex flex-col items-center gap-4 p-8 bg-white border border-border rounded-2xl hover:border-primary/30 hover:shadow-md transition-all duration-200">
                   <div className="h-10 flex items-center gap-2">
                     {p.logo ? (
-                      <img src={p.logo} alt={p.name} style={{ height: p.logoScale ? 40 * p.logoScale : 40 }} className="w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                      p.logoCrop ? (
+                        <div style={{ height: 40, width: 100, overflow: 'hidden', position: 'relative' }} className="flex items-center justify-center">
+                          <img src={p.logo} alt={p.name}
+                            style={{ height: 40 * (p.logoScale || 1.5), width: 'auto', position: 'absolute', transform: 'translate(-50%, -50%)', top: '50%', left: '50%' }}
+                            className="grayscale group-hover:grayscale-0 transition-all duration-300" />
+                        </div>
+                      ) : (
+                        <img src={p.logo} alt={p.name} style={{ height: p.logoScale ? 40 * p.logoScale : 40 }} className="w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                      )
                     ) : (
                       <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">{p.shortName || p.name.split(' ').map(w => w[0]).join('').slice(0, 3)}</span>
                     )}

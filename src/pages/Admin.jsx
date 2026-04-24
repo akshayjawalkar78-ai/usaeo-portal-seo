@@ -157,8 +157,12 @@ export default function Admin() {
         curriculumUnit: base44.entities.CurriculumUnit,
       };
       const entity = entityMap[type];
-      if (data?.id) await entity.update(data.id, form);
-      else await entity.create(form);
+      // rankings: team_name NOT NULL — derive from student_name if not provided
+      const payload = type === 'ranking'
+        ? { ...form, team_name: form.team_name || form.student_name || form.school || 'Individual' }
+        : form;
+      if (data?.id) await entity.update(data.id, payload);
+      else await entity.create(payload);
       setModal(null);
       await loadAll();
       if (selectedChapter) loadChapterDetails(selectedChapter.id);

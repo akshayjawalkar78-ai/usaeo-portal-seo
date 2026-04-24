@@ -22,7 +22,8 @@ export const PARTNERS = [
     logo: 'https://www.usaeo.org/imgs/sponsors/Launchpoint.png',
     url: 'https://www.launchpointhq.com/',
     desc: 'Career launchpad',
-    logoScale: 1.35,
+    logoScale: 1.5,
+    logoCrop: true,
     tags: ['research'],
   },
   {
@@ -37,7 +38,8 @@ export const PARTNERS = [
     logo: 'https://www.usaeo.org/imgs/sponsors/ThinkFinance.png',
     url: 'https://www.think-finance.org/',
     desc: 'Finance education',
-    logoScale: 1.35,
+    logoScale: 1.5,
+    logoCrop: true,
     tags: ['awareness', 'academic'],
   },
   {
