@@ -28,14 +28,14 @@ export const PARTNERS = [
   },
   {
     name: 'Fintech Scholars',
-    logo: '/logos/Fintech Scholars.png',
+    logo: '/logos/Fintech-Scholars.png',
     url: 'https://www.fintechscholars.org/',
     desc: 'Financial literacy',
     tags: ['awareness'],
   },
   {
     name: 'Think Finance',
-    logo: '/logos/Think Finance.png',
+    logo: '/logos/Think-Finance.png',
     url: 'https://www.think-finance.org/',
     desc: 'Finance education',
     logoScale: 1.5,
@@ -51,7 +51,7 @@ export const PARTNERS = [
   },
   {
     name: 'FYC',
-    logo: '/logos/FYC Logo.png',
+    logo: '/logos/FYC-Logo.png',
     url: 'https://linktr.ee/financialyouthclub',
     desc: 'Financial Youth Club',
     tags: ['awareness'],
@@ -92,6 +92,7 @@ export const PARTNERS = [
     logo: '/logos/seaecon.png',
     url: 'https://seaecon.org/',
     desc: 'Regional economics education',
+    wordmark: { text: 'Southeast Asian Economics Project', fontFamily: 'Inter, sans-serif', fontWeight: 500 },
     tags: ['research', 'awareness'],
   },
 ];
