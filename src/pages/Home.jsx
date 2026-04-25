@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, MapPin } from 'lucide-react';
@@ -64,20 +64,6 @@ function ScrollPrinciple({ item }) {
 }
 
 export default function Home() {
-  const [days, setDays] = useState(0);
-  const [hours, setHours] = useState(0);
-
-  useEffect(() => {
-    const target = new Date('2026-05-15T11:00:00');
-    const update = () => {
-      const diff = Math.max(0, target - new Date());
-      setDays(Math.floor(diff / 86400000));
-      setHours(Math.floor((diff % 86400000) / 3600000));
-    };
-    update();
-    const i = setInterval(update, 60000);
-    return () => clearInterval(i);
-  }, []);
 
   return (
     <PageLayout>
@@ -88,12 +74,6 @@ export default function Home() {
 
         <div className="max-w-6xl mx-auto w-full relative z-10">
           <div className="max-w-4xl">
-            <motion.div {...fadeUp(0)}>
-              <div className="inline-flex items-center gap-2 text-sm text-primary font-medium mb-10">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                National Finals in {days}d {hours}h — May 2026
-              </div>
-            </motion.div>
 
             <motion.h1 {...fadeUp(0.05)} className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[84px] text-foreground leading-[1.03] mb-7 tracking-tight">
               The US economics<br />
