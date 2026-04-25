@@ -28,6 +28,7 @@ import Unauthorized from './pages/Unauthorized';
 import QuizBowlRegister from './pages/QuizBowlRegister';
 import EssayRegister from './pages/EssayRegister';
 import ChapterRegister from './pages/ChapterRegister';
+import Legal from './pages/Legal';
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
 function CodeRedirect({ element }) {
@@ -67,6 +68,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/legal" element={<Legal />} />
 
             {/* Authed */}
             <Route element={<ProtectedRoute />}>
