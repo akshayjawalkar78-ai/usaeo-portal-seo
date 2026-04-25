@@ -293,13 +293,13 @@ export default function Home() {
                   href={p.url} target="_blank" rel="noopener noreferrer"
                   className="group flex items-center justify-center gap-2 p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
                   {p.logo
-                    ? <img src={p.logo} alt={p.name} style={{ height: logoH }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                    ? <img src={p.logo} alt={p.name} style={{ height: logoH, ...(p.logoFilter ? { filter: p.logoFilter } : {}) }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
                     : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.shortName || p.name}</span>
                   }
                   {p.wordmark && (
                     <span
-                      style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight }}
-                      className="text-base text-foreground/70 group-hover:text-foreground transition-colors whitespace-nowrap"
+                      style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight, fontSize: p.wordmark.fontSize, whiteSpace: p.wordmark.wrap ? 'pre-line' : 'nowrap', lineHeight: 1.2 }}
+                      className="text-base text-foreground/70 group-hover:text-foreground transition-colors"
                     >
                       {p.wordmark.text}
                     </span>

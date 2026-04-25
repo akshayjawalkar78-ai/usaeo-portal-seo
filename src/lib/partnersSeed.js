@@ -8,6 +8,7 @@ export const PARTNERS = [
     logo: '/logos/Stellar.png',
     url: 'https://stellarlearning.app/',
     desc: 'Student learning tools',
+    wordmark: { text: 'Stellar\nLearning', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', wrap: true },
     tags: ['academic'],
   },
   {
@@ -15,6 +16,7 @@ export const PARTNERS = [
     logo: '/logos/Crackd.png',
     url: 'https://crackd.it/',
     desc: 'Test prep platform',
+    wordmark: { text: 'Crackd', fontFamily: 'Inter, sans-serif', fontWeight: 700 },
     tags: ['academic'],
   },
   {
@@ -31,6 +33,9 @@ export const PARTNERS = [
     logo: '/logos/Fintech-Scholars.png',
     url: 'https://www.fintechscholars.org/',
     desc: 'Financial literacy',
+    logoScale: 1.2,
+    logoFilter: 'brightness(0.4)',
+    wordmark: { text: 'Fintech\nScholars', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', wrap: true },
     tags: ['awareness'],
   },
   {
@@ -38,8 +43,9 @@ export const PARTNERS = [
     logo: '/logos/Think-Finance.png',
     url: 'https://www.think-finance.org/',
     desc: 'Finance education',
-    logoScale: 1.5,
+    logoScale: 0.9,
     logoCrop: true,
+    wordmark: { text: 'Think\nFinance', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
     tags: ['awareness', 'academic'],
   },
   {
@@ -47,6 +53,7 @@ export const PARTNERS = [
     logo: '/logos/YRI.png',
     url: 'https://www.yriscience.com/',
     desc: 'Youth research institute',
+    wordmark: { text: 'YRI\nFellowship', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
     tags: ['research'],
   },
   {
@@ -68,6 +75,7 @@ export const PARTNERS = [
     logo: '/logos/yel.png',
     url: 'https://youtheconomylab.com/',
     desc: 'Student-led economics research',
+    wordmark: { text: 'Youth\nEconomics Lab', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
     tags: ['research', 'academic'],
   },
   {
@@ -92,7 +100,7 @@ export const PARTNERS = [
     logo: '/logos/seaecon.png',
     url: 'https://seaecon.org/',
     desc: 'Regional economics education',
-    wordmark: { text: 'Southeast Asian Economics Project', fontFamily: 'Inter, sans-serif', fontWeight: 500 },
+    wordmark: { text: 'Southeast Asian\nEconomics Project', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8rem', wrap: true },
     tags: ['research', 'awareness'],
   },
 ];
