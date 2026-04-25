@@ -54,7 +54,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} USA Economics Olympiad. All rights reserved. 501(c)(3) nonprofit.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} USA Economics Olympiad. All rights reserved. 501(c)(3) nonprofit. <Link to="/legal" className="hover:underline">Legal</Link></p>
           <div className="flex items-center gap-5">
             {socialLinks.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{s.label}</a>
