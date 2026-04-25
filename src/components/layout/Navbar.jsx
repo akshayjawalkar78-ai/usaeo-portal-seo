@@ -73,7 +73,7 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="https://www.usaeo.org/USAEOlogo.png" alt="USAEO" className="h-7 w-7" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-7 w-7" />
             <span className="font-inter font-semibold text-foreground text-sm tracking-tight">USAEO</span>
           </Link>
 
