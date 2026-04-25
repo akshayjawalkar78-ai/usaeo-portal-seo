@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy, BookOpen, Calendar, CalendarDays, Users, FileText, ExternalLink,
-  Bell, CheckCircle, Clock, ArrowRight, Lock,
+  Bell, CheckCircle, Clock, ArrowRight, Lock, Info,
   LayoutDashboard, Menu, ChevronRight, School, BarChart2, X, ShieldCheck, Plus, Trash2
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -395,25 +395,58 @@ export default function Dashboard() {
                 </div>
                 {filteredRankings.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">Rankings for this stage have not been published yet.</p>
-                ) : (
-                  <div className="space-y-0 divide-y divide-border">
-                    {filteredRankings.map((r) => (
-                      <div key={r.id} className={`flex items-center gap-4 py-3.5 ${r.rank <= 3 ? 'bg-orange-50/50 -mx-2 px-2 rounded-lg' : ''}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${r.rank === 1 ? 'bg-yellow-100 text-yellow-700' : r.rank === 2 ? 'bg-gray-100 text-gray-600' : r.rank === 3 ? 'bg-orange-100 text-orange-700' : 'bg-muted text-muted-foreground'}`}>
-                          {r.rank}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm text-foreground">{r.student_name}</p>
-                          <p className="text-xs text-muted-foreground">{r.school} · {r.state}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-sm text-foreground">{r.score}</p>
-                          <p className="text-xs text-muted-foreground">score</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                ) : (() => {
+                  // Build tie map: rank → count of entries sharing it
+                  const rankCount = filteredRankings.reduce((acc, r) => {
+                    acc[r.rank] = (acc[r.rank] || 0) + 1;
+                    return acc;
+                  }, {});
+                  return (
+                    <div className="space-y-1">
+                      {filteredRankings.map((r) => {
+                        const isTop10 = r.rank <= 10;
+                        const isTie = rankCount[r.rank] > 1;
+                        const rowBg = isTie
+                          ? 'bg-sky-50 border border-sky-200'
+                          : isTop10
+                          ? 'bg-amber-50/70 border border-amber-200/60'
+                          : 'border border-transparent';
+                        const badgeBg = r.rank === 1
+                          ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+                          : r.rank === 2
+                          ? 'bg-gray-200 text-gray-600 border border-gray-300'
+                          : r.rank === 3
+                          ? 'bg-orange-100 text-orange-700 border border-orange-300'
+                          : isTop10
+                          ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                          : 'bg-muted text-muted-foreground border border-border';
+                        return (
+                          <div key={r.id} className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors ${rowBg}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${badgeBg}`}>
+                              {r.rank}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-semibold text-sm ${isTop10 ? 'text-foreground' : 'text-foreground'}`}>{r.student_name || r.team_name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{r.school}{r.state ? ` · ${r.state}` : ''}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="font-semibold text-sm text-foreground">{r.score}</p>
+                              <p className="text-xs text-muted-foreground">score</p>
+                            </div>
+                            {isTie && (
+                              <div className="group relative flex-shrink-0">
+                                <Info className="w-4 h-4 text-sky-500 cursor-help" />
+                                <div className="pointer-events-none absolute right-0 bottom-6 z-10 w-64 bg-foreground text-white text-xs rounded-xl px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity leading-relaxed">
+                                  Participants who have the same overall, MCQ, and essay scores will share ranks. Tiebreaks are decided by essay scores.
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
