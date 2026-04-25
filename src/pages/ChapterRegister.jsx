@@ -52,7 +52,7 @@ export default function ChapterRegister() {
         <section className="min-h-[70vh] flex items-center justify-center px-5">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-lg">
             <div className="flex justify-center mb-5">
-              <img src="https://www.usaeo.org/USAEOlogo.png" alt="USAEO" className="h-16 w-16" />
+              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" />
             </div>
             <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <h2 className="font-serif text-3xl text-foreground mb-3">Application submitted!</h2>
@@ -71,7 +71,7 @@ export default function ChapterRegister() {
       <section className="pt-20 pb-24 px-5">
         <div className="max-w-lg mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-            <img src="https://www.usaeo.org/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Apply</p>
             <h1 className="font-serif text-3xl text-foreground mb-2">Start a USAEO Chapter</h1>
             <p className="text-sm text-muted-foreground">Applications reviewed on a rolling basis · Free</p>

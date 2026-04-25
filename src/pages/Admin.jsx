@@ -209,7 +209,7 @@ export default function Admin() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-border flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="h-14 flex items-center px-5 border-b border-border flex-shrink-0">
           <Link to="/" className="flex items-center gap-2">
-            <img src="https://www.usaeo.org/USAEOlogo.png" alt="USAEO" className="h-6 w-6" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-6 w-6" />
             <span className="font-semibold text-sm text-foreground">Admin Console</span>
           </Link>
         </div>
