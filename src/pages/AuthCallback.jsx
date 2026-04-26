@@ -18,7 +18,7 @@ export default function AuthCallback() {
           return;
         }
       }
-      navigate('/dashboard', { replace: true });
+      navigate('/login', { replace: true });
     };
     run();
   }, [navigate]);
