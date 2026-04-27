@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/auth/callback`,
       },
     });
     return { data, error };
