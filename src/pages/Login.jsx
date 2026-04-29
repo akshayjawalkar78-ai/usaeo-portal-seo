@@ -44,7 +44,10 @@ export default function Login() {
               className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-foreground">Password</label>
+              <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+            </div>
             <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
               className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>

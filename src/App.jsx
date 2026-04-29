@@ -24,6 +24,8 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Unauthorized from './pages/Unauthorized';
 import QuizBowlRegister from './pages/QuizBowlRegister';
 import EssayRegister from './pages/EssayRegister';
@@ -34,7 +36,7 @@ import Legal from './pages/Legal';
 function CodeRedirect({ element }) {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  if (params.has('code') && location.pathname !== '/auth/callback') {
+  if (params.has('code') && location.pathname !== '/auth/callback' && location.pathname !== '/auth/reset-password') {
     return <Navigate to={`/auth/callback${location.search}`} replace />;
   }
   return element;
@@ -67,6 +69,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/legal" element={<Legal />} />
 
