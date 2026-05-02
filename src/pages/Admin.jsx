@@ -111,6 +111,7 @@ export default function Admin() {
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [assignAdminEmail, setAssignAdminEmail] = useState('');
   const [regFilter, setRegFilter] = useState('all');
+  const [dupExportModal, setDupExportModal] = useState(null); // { filtered, dupIds, filteredDupIds }
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -363,6 +364,43 @@ export default function Admin() {
         )}
         {deleteTarget && (
           <ConfirmDelete label={deleteTarget.label} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
+        )}
+        {dupExportModal && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                <h3 className="font-semibold text-foreground">Duplicate Registrations Found</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
+                <strong>{dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''}</strong> detected in the current view — same email registered for the same event more than once.
+              </p>
+              <p className="text-sm text-muted-foreground mb-5">
+                Removing keeps the <strong>earliest</strong> registration per email + event type and permanently deletes the rest.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button onClick={async () => {
+                  for (const id of dupExportModal.filteredDupIds) {
+                    await base44.entities.EventRegistration.delete(id);
+                  }
+                  await loadAll();
+                  setDupExportModal(null);
+                  const cleaned = dupExportModal.filtered.filter(r => !dupExportModal.dupIds.has(r.id));
+                  exportRegistrationsCSV(cleaned);
+                }} className="w-full px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 transition-colors">
+                  Remove {dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''} &amp; export
+                </button>
+                <button onClick={() => { exportRegistrationsCSV(dupExportModal.filtered); setDupExportModal(null); }}
+                  className="w-full px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">
+                  Export anyway (with duplicates)
+                </button>
+                <button onClick={() => setDupExportModal(null)}
+                  className="w-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -731,12 +769,48 @@ export default function Admin() {
           {active === 'registrations' && (() => {
             const nonChapter = registrations.filter(r => r.event_type !== 'chapter');
             const filtered = regFilter === 'all' ? nonChapter : nonChapter.filter(r => r.event_type === regFilter);
+
+            // Detect duplicates: same email + event_type → keep earliest, mark rest as dup
+            const groupMap = {};
+            nonChapter.forEach(r => {
+              const key = `${r.user_email}::${r.event_type}`;
+              if (!groupMap[key]) groupMap[key] = [];
+              groupMap[key].push(r);
+            });
+            const dupIds = new Set();
+            const dupReasons = {}; // id → reason string
+            Object.values(groupMap).forEach(group => {
+              if (group.length > 1) {
+                const sorted = [...group].sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
+                sorted.slice(1).forEach(r => {
+                  dupIds.add(r.id);
+                  dupReasons[r.id] = `Duplicate: ${sorted[0].user_name || sorted[0].user_email} registered for ${r.event_type} on ${new Date(sorted[0].registered_at).toLocaleDateString()} (kept). This entry registered ${new Date(r.registered_at).toLocaleDateString()}.`;
+                });
+              }
+            });
+            const filteredDupIds = filtered.filter(r => dupIds.has(r.id)).map(r => r.id);
+            const dupCount = filteredDupIds.length;
+
+            const handleExportClick = () => {
+              if (dupCount > 0) {
+                setDupExportModal({ filtered, dupIds, filteredDupIds });
+              } else {
+                exportRegistrationsCSV(filtered);
+              }
+            };
+
+
             return (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <h2 className="font-semibold text-foreground">Event Registrations</h2>
                     <span className="text-sm text-muted-foreground">{filtered.length} of {nonChapter.length}</span>
+                    {dupCount > 0 && (
+                      <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> {dupCount} duplicate{dupCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex bg-muted rounded-lg p-1 gap-1">
@@ -751,7 +825,7 @@ export default function Admin() {
                         </button>
                       ))}
                     </div>
-                    <button onClick={() => exportRegistrationsCSV(filtered)}
+                    <button onClick={handleExportClick}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-xs font-semibold text-foreground hover:bg-muted transition-colors">
                       <Download className="w-3.5 h-3.5" /> Export CSV
                     </button>
@@ -774,25 +848,35 @@ export default function Admin() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {filtered.map(r => (
-                          <tr key={r.id} className="group hover:bg-muted/20 transition-colors">
-                            <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
-                            <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                            <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-orange-50 text-primary border border-orange-200'}`}>
-                                {r.event_type || '—'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
-                            <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
-                            <td className="sticky right-0 bg-white px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] group-hover:bg-muted/20">
-                              <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
-                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
-                            </td>
-                          </tr>
-                        ))}
+                        {filtered.map(r => {
+                          const isDup = dupIds.has(r.id);
+                          return (
+                            <tr key={r.id}
+                              title={isDup ? dupReasons[r.id] : undefined}
+                              className={`group transition-colors ${isDup ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-muted/20'}`}>
+                              <td className="px-4 py-3 font-medium text-foreground">
+                                <span className="flex items-center gap-1.5">
+                                  {isDup && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
+                                  {r.user_name || '—'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
+                              <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                              <td className="px-4 py-3">
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-orange-50 text-primary border border-orange-200'}`}>
+                                  {r.event_type || '—'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                              <td className={`sticky right-0 px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] ${isDup ? 'bg-amber-50 group-hover:bg-amber-100' : 'bg-white group-hover:bg-muted/20'}`}>
+                                <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
+                                  className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
