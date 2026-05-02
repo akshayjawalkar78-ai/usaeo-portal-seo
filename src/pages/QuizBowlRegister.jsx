@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/supabaseClient';
 
 const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 
@@ -37,6 +38,9 @@ export default function QuizBowlRegister() {
         registered_at: new Date().toISOString(),
         status: 'registered',
       });
+      supabase.functions.invoke('send-registration-email', {
+        body: { name: form.name, email: form.email, event_type: 'quiz-bowl', event_name: 'USAEO Quiz Bowl 2026' },
+      }).catch(() => {});
       setSubmitted(true);
     } catch {
       setError('Something went wrong. Please try again.');
@@ -55,8 +59,20 @@ export default function QuizBowlRegister() {
             </div>
             <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <h2 className="font-serif text-3xl text-foreground mb-3">You're registered!</h2>
-            <p className="text-muted-foreground mb-6">You've successfully registered for the USAEO Quiz Bowl 2026. We'll email you with the event date and details closer to the time.</p>
-            <Link to="/competitions/quiz-bowl" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+            <p className="text-muted-foreground mb-4">A confirmation email is on its way to <strong>{form.email}</strong>. Sign in to your USAEO account and head to your dashboard — you'll need to create your Quiz Bowl team there.</p>
+            <div className="bg-orange-50 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
+              <p className="text-sm font-semibold text-orange-900 mb-1">Next step: create your team</p>
+              <p className="text-sm text-orange-700">After signing in, go to Dashboard → Competition to view your registration and set up your team.</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary/90 transition-colors">
+                Sign In <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link to="/register-account" className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-semibold text-sm hover:border-foreground transition-colors">
+                Create Account
+              </Link>
+            </div>
+            <Link to="/competitions/quiz-bowl" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground mt-5">
               <ArrowLeft className="w-3.5 h-3.5" /> Back to Quiz Bowl
             </Link>
           </motion.div>
