@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
-  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck
+  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download,
+  Lock, Unlock, Crown
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
@@ -20,6 +21,7 @@ const navItems = [
   { label: 'Competition', id: 'competition', icon: Trophy },
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
+  { label: 'QB Teams', id: 'qb-teams', icon: Users },
   { label: 'Applications', id: 'applications', icon: ShieldCheck },
   { label: 'Edit Website', id: 'edit-website', icon: Pencil },
 ];
@@ -101,10 +103,14 @@ export default function Admin() {
   const [curriculumUnits, setCurriculumUnits] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [qbTeams, setQbTeams] = useState([]);
+  const [qbTeamMembers, setQbTeamMembers] = useState({}); // teamId → members[]
+  const [expandedQBTeam, setExpandedQBTeam] = useState(null);
   const [chapterMembers, setChapterMembers] = useState({});
   const [chapterAnns, setChapterAnns] = useState({});
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [assignAdminEmail, setAssignAdminEmail] = useState('');
+  const [regFilter, setRegFilter] = useState('all');
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -113,7 +119,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
-    const [a, w, r, rk, ch, ce, cu, reg, apps] = await Promise.all([
+    const [a, w, r, rk, ch, ce, cu, reg, apps, qbt] = await Promise.all([
       base44.entities.Announcement.list('-created_date'),
       base44.entities.Workshop.list('-created_date'),
       base44.entities.Resource.list(),
@@ -123,9 +129,16 @@ export default function Admin() {
       base44.entities.CurriculumUnit.list('order'),
       base44.entities.EventRegistration.list('-registered_at'),
       base44.entities.Application?.list('-created_at').catch(() => []) ?? [],
+      base44.entities.QuizBowlTeam.list('-created_at').catch(() => []),
     ]);
     setAnnouncements(a); setWorkshops(w); setResources(r); setRankings(rk); setChapters(ch);
     setCompetitionEvents(ce); setCurriculumUnits(cu); setRegistrations(reg); setApplications(apps);
+    setQbTeams(qbt);
+  };
+
+  const loadQBTeamMembers = async (teamId) => {
+    const members = await base44.entities.QuizBowlTeamMember.filter({ team_id: teamId });
+    setQbTeamMembers(prev => ({ ...prev, [teamId]: members }));
   };
 
   useEffect(() => { loadAll(); }, []);
@@ -200,6 +213,31 @@ export default function Admin() {
     { label: 'Curriculum Units', value: curriculumUnits.length, id: 'curriculum' },
     { label: 'Registrations', value: registrations.length, id: 'registrations' },
   ];
+
+  const exportRegistrationsCSV = (rows) => {
+    const headers = ['Name', 'Email', 'Event', 'Type', 'School', 'Grade', 'State', 'Registered At', 'Status'];
+    const lines = [
+      headers.join(','),
+      ...rows.map(r => [
+        r.user_name || '',
+        r.user_email || '',
+        r.event_name || '',
+        r.event_type || '',
+        r.school || '',
+        r.grade || '',
+        r.state || '',
+        r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '',
+        r.status || '',
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')),
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `registrations-${regFilter}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const navigate = (id) => { setActive(id); setSidebarOpen(false); };
 
@@ -690,50 +728,171 @@ export default function Admin() {
           )}
 
           {/* ── REGISTRATIONS ── */}
-          {active === 'registrations' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">Event Registrations</h2>
-                <span className="text-sm text-muted-foreground">{registrations.length} total</span>
-              </div>
-              <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                {registrations.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations yet.</p>}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Event</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Type</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
-                        <th className="px-4 py-3"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {registrations.map(r => (
-                        <tr key={r.id} className="hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                          <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-primary border border-orange-200">{r.event_type || '—'}</span>
-                          </td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
-                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </td>
-                        </tr>
+          {active === 'registrations' && (() => {
+            const filtered = regFilter === 'all' ? registrations : registrations.filter(r => r.event_type === regFilter);
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <h2 className="font-semibold text-foreground">Event Registrations</h2>
+                    <span className="text-sm text-muted-foreground">{filtered.length} of {registrations.length}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex bg-muted rounded-lg p-1 gap-1">
+                      {[
+                        { id: 'all', label: 'All' },
+                        { id: 'quiz-bowl', label: 'Quiz Bowl' },
+                        { id: 'essay', label: 'Essay' },
+                      ].map(f => (
+                        <button key={f.id} onClick={() => setRegFilter(f.id)}
+                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${regFilter === f.id ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                          {f.label}
+                        </button>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                    <button onClick={() => exportRegistrationsCSV(filtered)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-xs font-semibold text-foreground hover:bg-muted transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Export CSV
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  {filtered.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations{regFilter !== 'all' ? ` for ${regFilter}` : ''} yet.</p>}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Event</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Type</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                          <th className="sticky right-0 bg-muted/30 px-4 py-3 w-12 shadow-[-1px_0_0_0_#e5e7eb]"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filtered.map(r => (
+                          <tr key={r.id} className="group hover:bg-muted/20 transition-colors">
+                            <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
+                            <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-orange-50 text-primary border border-orange-200'}`}>
+                                {r.event_type || '—'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                            <td className="sticky right-0 bg-white px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] group-hover:bg-muted/20">
+                              <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
+                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
+            );
+          })()}
+
+          {/* ── QB TEAMS ── */}
+          {active === 'qb-teams' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">Quiz Bowl Teams</h2>
+                <span className="text-sm text-muted-foreground">{qbTeams.length} teams</span>
+              </div>
+              {qbTeams.length === 0 && (
+                <div className="bg-white rounded-2xl border border-border p-6">
+                  <p className="text-sm text-muted-foreground">No teams yet.</p>
+                </div>
+              )}
+              {qbTeams.map(team => {
+                const members = qbTeamMembers[team.id] || [];
+                const activeCount = members.filter(m => m.status === 'active').length;
+                const isExpanded = expandedQBTeam === team.id;
+                return (
+                  <div key={team.id} className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="flex items-center gap-4 p-5">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold text-foreground">{team.team_name}</p>
+                          {team.locked
+                            ? <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1"><Lock className="w-3 h-3" /> Locked</span>
+                            : <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Open</span>
+                          }
+                          {activeCount >= 3 && <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">Ready</span>}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Captain: {team.captain_email} · {activeCount} active member{activeCount !== 1 ? 's' : ''}
+                          {team.school ? ` · ${team.school}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button onClick={async () => {
+                          await base44.entities.QuizBowlTeam.update(team.id, { locked: !team.locked });
+                          loadAll();
+                        }} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${team.locked ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100' : 'border-border bg-muted text-foreground hover:bg-muted/70'}`}>
+                          {team.locked ? <><Unlock className="w-3 h-3" /> Unlock</> : <><Lock className="w-3 h-3" /> Lock</>}
+                        </button>
+                        <button onClick={() => {
+                          if (isExpanded) { setExpandedQBTeam(null); return; }
+                          setExpandedQBTeam(team.id);
+                          loadQBTeamMembers(team.id);
+                        }} className="px-3 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-muted transition-colors flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5" /> {isExpanded ? 'Hide' : 'Members'}
+                        </button>
+                        <button onClick={() => setDeleteTarget({ entity: base44.entities.QuizBowlTeam, id: team.id, label: team.team_name })}
+                          className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="border-t border-border p-5 bg-muted/10">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Members ({members.length})</p>
+                        {members.length === 0 && <p className="text-sm text-muted-foreground">No members.</p>}
+                        <div className="space-y-2">
+                          {members.map(m => (
+                            <div key={m.id} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
+                                  {(m.user_name || m.user_email)?.[0]?.toUpperCase() ?? '?'}
+                                </div>
+                                <div>
+                                  <p className="text-sm text-foreground">{m.user_name || m.user_email}</p>
+                                  <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${m.status === 'active' ? 'bg-green-50 text-green-700 border border-green-200' : m.status === 'pending' ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>
+                                  {m.status}
+                                </span>
+                                {!team.locked && (
+                                  <button onClick={async () => {
+                                    await base44.entities.QuizBowlTeamMember.delete(m.id);
+                                    loadQBTeamMembers(team.id);
+                                    loadAll();
+                                  }} className="p-1 hover:bg-red-50 rounded text-muted-foreground hover:text-destructive transition-colors">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
