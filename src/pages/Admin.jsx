@@ -729,13 +729,14 @@ export default function Admin() {
 
           {/* ── REGISTRATIONS ── */}
           {active === 'registrations' && (() => {
-            const filtered = regFilter === 'all' ? registrations : registrations.filter(r => r.event_type === regFilter);
+            const nonChapter = registrations.filter(r => r.event_type !== 'chapter');
+            const filtered = regFilter === 'all' ? nonChapter : nonChapter.filter(r => r.event_type === regFilter);
             return (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <h2 className="font-semibold text-foreground">Event Registrations</h2>
-                    <span className="text-sm text-muted-foreground">{filtered.length} of {registrations.length}</span>
+                    <span className="text-sm text-muted-foreground">{filtered.length} of {nonChapter.length}</span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex bg-muted rounded-lg p-1 gap-1">
@@ -912,6 +913,7 @@ export default function Admin() {
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Program</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Details</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
                         <th className="px-4 py-3"></th>
@@ -923,6 +925,7 @@ export default function Admin() {
                           <td className="px-4 py-3 font-medium text-foreground">{a.user_name || '—'}</td>
                           <td className="px-4 py-3 text-muted-foreground">{a.user_email}</td>
                           <td className="px-4 py-3 text-foreground capitalize">{a.program}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.payload?.school ? `${a.payload.school}${a.payload.state ? `, ${a.payload.state}` : ''}` : '—'}</td>
                           <td className="px-4 py-3">
                             <select value={a.status || 'pending'} onChange={async e => {
                               await base44.entities.Application.update(a.id, { status: e.target.value });
