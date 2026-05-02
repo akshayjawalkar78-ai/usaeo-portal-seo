@@ -26,17 +26,12 @@ export default function ChapterRegister() {
     setError('');
     setLoading(true);
     try {
-      await base44.entities.EventRegistration.create({
+      await base44.entities.Application.create({
         user_name: form.name,
         user_email: form.email,
-        school: form.school,
-        grade: form.grade,
-        state: form.state,
-        event_type: 'chapter',
-        event_name: 'USAEO Chapter Application',
-        notes: form.notes,
-        registered_at: new Date().toISOString(),
-        status: 'registered',
+        program: 'chapter',
+        payload: { school: form.school, grade: form.grade, state: form.state, notes: form.notes },
+        status: 'pending',
       });
       setSubmitted(true);
     } catch {
