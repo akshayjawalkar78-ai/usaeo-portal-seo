@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
-  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck
+  Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
@@ -105,6 +105,7 @@ export default function Admin() {
   const [chapterAnns, setChapterAnns] = useState({});
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [assignAdminEmail, setAssignAdminEmail] = useState('');
+  const [regFilter, setRegFilter] = useState('all');
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -200,6 +201,31 @@ export default function Admin() {
     { label: 'Curriculum Units', value: curriculumUnits.length, id: 'curriculum' },
     { label: 'Registrations', value: registrations.length, id: 'registrations' },
   ];
+
+  const exportRegistrationsCSV = (rows) => {
+    const headers = ['Name', 'Email', 'Event', 'Type', 'School', 'Grade', 'State', 'Registered At', 'Status'];
+    const lines = [
+      headers.join(','),
+      ...rows.map(r => [
+        r.user_name || '',
+        r.user_email || '',
+        r.event_name || '',
+        r.event_type || '',
+        r.school || '',
+        r.grade || '',
+        r.state || '',
+        r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '',
+        r.status || '',
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')),
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `registrations-${regFilter}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const navigate = (id) => { setActive(id); setSidebarOpen(false); };
 
@@ -690,52 +716,77 @@ export default function Admin() {
           )}
 
           {/* ── REGISTRATIONS ── */}
-          {active === 'registrations' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">Event Registrations</h2>
-                <span className="text-sm text-muted-foreground">{registrations.length} total</span>
-              </div>
-              <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                {registrations.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations yet.</p>}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Event</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Type</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
-                        <th className="px-4 py-3"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {registrations.map(r => (
-                        <tr key={r.id} className="hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                          <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
-                          <td className="px-4 py-3">
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-primary border border-orange-200">{r.event_type || '—'}</span>
-                          </td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
-                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </td>
-                        </tr>
+          {active === 'registrations' && (() => {
+            const filtered = regFilter === 'all' ? registrations : registrations.filter(r => r.event_type === regFilter);
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <h2 className="font-semibold text-foreground">Event Registrations</h2>
+                    <span className="text-sm text-muted-foreground">{filtered.length} of {registrations.length}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex bg-muted rounded-lg p-1 gap-1">
+                      {[
+                        { id: 'all', label: 'All' },
+                        { id: 'quiz-bowl', label: 'Quiz Bowl' },
+                        { id: 'essay', label: 'Essay' },
+                      ].map(f => (
+                        <button key={f.id} onClick={() => setRegFilter(f.id)}
+                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${regFilter === f.id ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                          {f.label}
+                        </button>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                    <button onClick={() => exportRegistrationsCSV(filtered)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-xs font-semibold text-foreground hover:bg-muted transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Export CSV
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  {filtered.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations{regFilter !== 'all' ? ` for ${regFilter}` : ''} yet.</p>}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Name</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Event</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Type</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                          <th className="px-4 py-3"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {filtered.map(r => (
+                          <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                            <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
+                            <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                            <td className="px-4 py-3">
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-orange-50 text-primary border border-orange-200'}`}>
+                                {r.event_type || '—'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
+                            <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                            <td className="px-4 py-3 text-right">
+                              <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
+                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ── APPLICATIONS ── */}
           {active === 'applications' && (
