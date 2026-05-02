@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [qbEditingName, setQbEditingName] = useState(false);
   const [qbError, setQbError] = useState('');
   const [qbSuccess, setQbSuccess] = useState('');
+  const [myQBInvites, setMyQBInvites] = useState([]);
   // Chapter admin state
   const [adminChapter, setAdminChapter] = useState(null);
   const [adminMembers, setAdminMembers] = useState([]);
@@ -82,6 +83,21 @@ export default function Dashboard() {
   const loadQBData = async (email) => {
     try {
       const myMemberships = await base44.entities.QuizBowlTeamMember.filter({ user_email: email });
+
+      // Always load pending invitations regardless of active membership
+      const invitedMemberships = myMemberships.filter(m => m.status === 'invited');
+      if (invitedMemberships.length > 0) {
+        const inviteTeams = await Promise.all(
+          invitedMemberships.map(async m => {
+            const teams = await base44.entities.QuizBowlTeam.filter({ id: m.team_id });
+            return teams[0] ? { ...m, team: teams[0] } : null;
+          })
+        );
+        setMyQBInvites(inviteTeams.filter(Boolean));
+      } else {
+        setMyQBInvites([]);
+      }
+
       const activeMembership = myMemberships.find(m => m.status === 'active');
       if (activeMembership) {
         const [teams, allMembers] = await Promise.all([
@@ -430,15 +446,69 @@ export default function Dashboard() {
                 </div>
               </div>
 
+              {/* ── QUIZ BOWL INVITATIONS (visible to all logged-in users) ── */}
+              {authUser && myQBInvites.length > 0 && !myQBTeam && (
+                <div className="bg-white rounded-2xl border border-border p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-foreground">Quiz Bowl Team Invitations</h3>
+                    <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">{myQBInvites.length}</span>
+                  </div>
+                  {qbError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-3">{qbError}</div>}
+                  {qbSuccess && <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3 mb-3">{qbSuccess}</div>}
+                  <div className="space-y-2">
+                    {myQBInvites.map(inv => {
+                      const activeCount = 0;
+                      return (
+                        <div key={inv.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                          <div>
+                            <p className="font-medium text-sm text-foreground">{inv.team.team_name}</p>
+                            <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` · ${inv.team.state}` : ''}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button onClick={async () => {
+                              setQbError(''); setQbSuccess('');
+                              try {
+                                // Auto-register for quiz bowl if not already
+                                const alreadyReg = myRegistrations.some(r => r.event_type === 'quiz-bowl');
+                                if (!alreadyReg) {
+                                  const reg = await base44.entities.EventRegistration.create({
+                                    user_name: profile?.full_name || '',
+                                    user_email: authUser.email,
+                                    school: inv.team.school || '',
+                                    state: inv.team.state || '',
+                                    event_type: 'quiz-bowl',
+                                    event_name: 'USAEO Quiz Bowl 2026',
+                                    registered_at: new Date().toISOString(),
+                                    status: 'registered',
+                                  });
+                                  setMyRegistrations(prev => [...prev, reg]);
+                                }
+                                await base44.entities.QuizBowlTeamMember.update(inv.id, { status: 'active' });
+                                setQbSuccess(`Joined ${inv.team.team_name}!`);
+                                loadQBData(authUser.email);
+                              } catch { setQbError('Something went wrong. Try again.'); }
+                            }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Accept</button>
+                            <button onClick={async () => {
+                              setQbError(''); setQbSuccess('');
+                              await base44.entities.QuizBowlTeamMember.delete(inv.id);
+                              setQbSuccess('Invitation declined.');
+                              loadQBData(authUser.email);
+                            }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Decline</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* ── QUIZ BOWL TEAMS ── */}
               {authUser && myRegistrations.some(r => r.event_type === 'quiz-bowl') && (() => {
                 const email = authUser.email;
                 const isCaptain = myQBTeam?.myMembership?.role === 'captain';
                 const activeMembers = myQBTeam?.members?.filter(m => m.status === 'active') ?? [];
                 const pendingRequests = myQBTeam?.members?.filter(m => m.status === 'pending') ?? [];
-                const myInvites = myQBTeam ? [] : openQBTeams.flatMap(t =>
-                  t.members.filter(m => m.user_email === email && m.status === 'invited').map(m => ({ ...m, team: t }))
-                );
 
                 return (
                   <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
@@ -452,35 +522,6 @@ export default function Dashboard() {
 
                     {qbError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{qbError}</div>}
                     {qbSuccess && <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}
-
-                    {/* Pending invitations (no team yet) */}
-                    {!myQBTeam && myInvites.length > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Pending Invitations</p>
-                        <div className="space-y-2">
-                          {myInvites.map(inv => (
-                            <div key={inv.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
-                              <div>
-                                <p className="font-medium text-sm text-foreground">{inv.team.team_name}</p>
-                                <p className="text-xs text-muted-foreground">{inv.team.school} · {activeMembers.length} member{activeMembers.length !== 1 ? 's' : ''}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <button onClick={async () => {
-                                  setQbError(''); setQbSuccess('');
-                                  await base44.entities.QuizBowlTeamMember.update(inv.id, { status: 'active' });
-                                  setQbSuccess(`Joined ${inv.team.team_name}!`);
-                                  loadQBData(email);
-                                }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Accept</button>
-                                <button onClick={async () => {
-                                  await base44.entities.QuizBowlTeamMember.delete(inv.id);
-                                  loadQBData(email);
-                                }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Decline</button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     {/* Has a team */}
                     {myQBTeam && (
