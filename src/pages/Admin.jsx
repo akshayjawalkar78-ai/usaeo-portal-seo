@@ -757,12 +757,12 @@ export default function Admin() {
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">School</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">State</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
-                          <th className="px-4 py-3"></th>
+                          <th className="sticky right-0 bg-muted/30 px-4 py-3 w-12"></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {filtered.map(r => (
-                          <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                          <tr key={r.id} className="group hover:bg-muted/20 transition-colors">
                             <td className="px-4 py-3 font-medium text-foreground">{r.user_name || '—'}</td>
                             <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
                             <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
@@ -774,7 +774,7 @@ export default function Admin() {
                             <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
                             <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
                             <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
-                            <td className="px-4 py-3 text-right">
+                            <td className="sticky right-0 bg-white px-4 py-3 text-right group-hover:bg-muted/20">
                               <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
                                 className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                             </td>
