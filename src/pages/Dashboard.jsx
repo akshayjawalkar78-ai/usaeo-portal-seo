@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy, BookOpen, Calendar, CalendarDays, Users, FileText, ExternalLink,
   Bell, CheckCircle, Clock, ArrowRight, Lock, Info,
-  LayoutDashboard, Menu, ChevronRight, School, BarChart2, X, ShieldCheck, Plus, Trash2
+  LayoutDashboard, Menu, ChevronRight, School, BarChart2, X, ShieldCheck, Plus, Trash2,
+  Pencil, Crown, UserPlus, LogOut
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -45,6 +46,16 @@ export default function Dashboard() {
   const [myRegistrations, setMyRegistrations] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
   const [myPendingMemberships, setMyPendingMemberships] = useState([]);
+  // Quiz Bowl teams
+  const [myQBTeam, setMyQBTeam] = useState(null); // { team, members, myMembership }
+  const [openQBTeams, setOpenQBTeams] = useState([]);
+  const [qbCreateName, setQbCreateName] = useState('');
+  const [qbInviteEmail, setQbInviteEmail] = useState('');
+  const [qbInviteName, setQbInviteName] = useState('');
+  const [qbEditName, setQbEditName] = useState('');
+  const [qbEditingName, setQbEditingName] = useState(false);
+  const [qbError, setQbError] = useState('');
+  const [qbSuccess, setQbSuccess] = useState('');
   // Chapter admin state
   const [adminChapter, setAdminChapter] = useState(null);
   const [adminMembers, setAdminMembers] = useState([]);
@@ -64,8 +75,37 @@ export default function Dashboard() {
       base44.entities.EventRegistration.filter({ user_email: authUser.email }).then(setMyRegistrations);
       base44.entities.Application?.filter({ user_email: authUser.email }).then(setMyApplications).catch(() => setMyApplications([]));
       base44.entities.ChapterMember.filter({ user_email: authUser.email, status: 'pending' }).then(setMyPendingMemberships).catch(() => setMyPendingMemberships([]));
+      loadQBData(authUser.email);
     }
   }, [authUser?.email]);
+
+  const loadQBData = async (email) => {
+    try {
+      const myMemberships = await base44.entities.QuizBowlTeamMember.filter({ user_email: email });
+      const activeMembership = myMemberships.find(m => m.status === 'active');
+      if (activeMembership) {
+        const [teams, allMembers] = await Promise.all([
+          base44.entities.QuizBowlTeam.filter({ id: activeMembership.team_id }),
+          base44.entities.QuizBowlTeamMember.filter({ team_id: activeMembership.team_id }),
+        ]);
+        if (teams[0]) {
+          setMyQBTeam({ team: teams[0], members: allMembers, myMembership: activeMembership });
+          return;
+        }
+      }
+      setMyQBTeam(null);
+      const allTeams = await base44.entities.QuizBowlTeam.list('created_at');
+      const openTeams = allTeams.filter(t => !t.locked);
+      const teamsWithMembers = await Promise.all(openTeams.map(async t => {
+        const members = await base44.entities.QuizBowlTeamMember.filter({ team_id: t.id });
+        return { ...t, members };
+      }));
+      setOpenQBTeams(teamsWithMembers.filter(t => {
+        const activeCount = t.members.filter(m => m.status === 'active').length;
+        return activeCount < 5;
+      }));
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     if (isChapterAdmin && chapterAdminOf.length > 0) {
@@ -389,6 +429,289 @@ export default function Dashboard() {
                   </Link>
                 </div>
               </div>
+
+              {/* ── QUIZ BOWL TEAMS ── */}
+              {authUser && myRegistrations.some(r => r.event_type === 'quiz-bowl') && (() => {
+                const email = authUser.email;
+                const isCaptain = myQBTeam?.myMembership?.role === 'captain';
+                const activeMembers = myQBTeam?.members?.filter(m => m.status === 'active') ?? [];
+                const pendingRequests = myQBTeam?.members?.filter(m => m.status === 'pending') ?? [];
+                const myInvites = myQBTeam ? [] : openQBTeams.flatMap(t =>
+                  t.members.filter(m => m.user_email === email && m.status === 'invited').map(m => ({ ...m, team: t }))
+                );
+
+                return (
+                  <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold text-foreground">Quiz Bowl Team</h3>
+                      {myQBTeam?.team?.locked && (
+                        <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1"><Lock className="w-3 h-3" /> Locked</span>
+                      )}
+                    </div>
+
+                    {qbError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{qbError}</div>}
+                    {qbSuccess && <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}
+
+                    {/* Pending invitations (no team yet) */}
+                    {!myQBTeam && myInvites.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Pending Invitations</p>
+                        <div className="space-y-2">
+                          {myInvites.map(inv => (
+                            <div key={inv.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                              <div>
+                                <p className="font-medium text-sm text-foreground">{inv.team.team_name}</p>
+                                <p className="text-xs text-muted-foreground">{inv.team.school} · {activeMembers.length} member{activeMembers.length !== 1 ? 's' : ''}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={async () => {
+                                  setQbError(''); setQbSuccess('');
+                                  await base44.entities.QuizBowlTeamMember.update(inv.id, { status: 'active' });
+                                  setQbSuccess(`Joined ${inv.team.team_name}!`);
+                                  loadQBData(email);
+                                }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Accept</button>
+                                <button onClick={async () => {
+                                  await base44.entities.QuizBowlTeamMember.delete(inv.id);
+                                  loadQBData(email);
+                                }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Decline</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Has a team */}
+                    {myQBTeam && (
+                      <div className="space-y-4">
+                        {/* Team header */}
+                        <div className="flex items-start justify-between">
+                          <div>
+                            {qbEditingName ? (
+                              <div className="flex items-center gap-2">
+                                <input value={qbEditName} onChange={e => setQbEditName(e.target.value)}
+                                  className="border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                                <button onClick={async () => {
+                                  if (!qbEditName.trim()) return;
+                                  await base44.entities.QuizBowlTeam.update(myQBTeam.team.id, { team_name: qbEditName.trim() });
+                                  setQbEditingName(false);
+                                  loadQBData(email);
+                                }} className="px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">Save</button>
+                                <button onClick={() => setQbEditingName(false)} className="px-3 py-1.5 text-xs text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-foreground">{myQBTeam.team.team_name}</p>
+                                {isCaptain && !myQBTeam.team.locked && (
+                                  <button onClick={() => { setQbEditName(myQBTeam.team.team_name); setQbEditingName(true); }}
+                                    className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground hover:text-foreground">
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-0.5">{myQBTeam.team.school} · {activeMembers.length}/5 members
+                              {activeMembers.length < 3 && <span className="text-orange-600"> · Need {3 - activeMembers.length} more to be ready</span>}
+                            </p>
+                          </div>
+                          {isCaptain && !myQBTeam.team.locked && (
+                            <button onClick={async () => {
+                              if (!window.confirm(`Delete team "${myQBTeam.team.team_name}"? This cannot be undone.`)) return;
+                              await base44.entities.QuizBowlTeam.delete(myQBTeam.team.id);
+                              setMyQBTeam(null);
+                              loadQBData(email);
+                            }} className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Members list */}
+                        <div className="space-y-2">
+                          {myQBTeam.members.map(m => (
+                            <div key={m.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
+                                  {(m.user_name || m.user_email)?.[0]?.toUpperCase() ?? '?'}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                                  <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
+                                {m.status === 'invited' && <span className="text-xs text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full">Invited</span>}
+                                {m.status === 'pending' && <span className="text-xs text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Requested</span>}
+                                {isCaptain && !myQBTeam.team.locked && m.user_email !== email && (
+                                  <button onClick={async () => {
+                                    await base44.entities.QuizBowlTeamMember.delete(m.id);
+                                    loadQBData(email);
+                                  }} className="p-1 hover:bg-red-50 rounded text-muted-foreground hover:text-destructive transition-colors">
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Captain: pending join requests */}
+                        {isCaptain && pendingRequests.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Join Requests ({pendingRequests.length})</p>
+                            <div className="space-y-2">
+                              {pendingRequests.map(req => (
+                                <div key={req.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-2.5">
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">{req.user_name || req.user_email}</p>
+                                    <p className="text-xs text-muted-foreground">{req.user_email}</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button onClick={async () => {
+                                      if (activeMembers.length >= 5) { setQbError('Team is full (5 members max).'); return; }
+                                      await base44.entities.QuizBowlTeamMember.update(req.id, { status: 'active' });
+                                      loadQBData(email);
+                                    }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Approve</button>
+                                    <button onClick={async () => {
+                                      await base44.entities.QuizBowlTeamMember.delete(req.id);
+                                      loadQBData(email);
+                                    }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Deny</button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Captain: invite by email */}
+                        {isCaptain && !myQBTeam.team.locked && activeMembers.length < 5 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Invite a Teammate</p>
+                            <div className="flex gap-2">
+                              <input value={qbInviteName} onChange={e => setQbInviteName(e.target.value)} placeholder="Name (optional)"
+                                className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                              <input value={qbInviteEmail} onChange={e => setQbInviteEmail(e.target.value)} placeholder="Email"
+                                className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                              <button onClick={async () => {
+                                setQbError(''); setQbSuccess('');
+                                if (!qbInviteEmail.trim()) { setQbError('Email required.'); return; }
+                                const already = myQBTeam.members.find(m => m.user_email === qbInviteEmail.trim());
+                                if (already) { setQbError('Already on team.'); return; }
+                                await base44.entities.QuizBowlTeamMember.create({
+                                  team_id: myQBTeam.team.id,
+                                  user_email: qbInviteEmail.trim(),
+                                  user_name: qbInviteName.trim() || null,
+                                  role: 'member',
+                                  status: 'invited',
+                                });
+                                supabase.functions.invoke('send-registration-email', {
+                                  body: { name: qbInviteName.trim() || qbInviteEmail, email: qbInviteEmail.trim(), event_type: 'team-invite', event_name: 'USAEO Quiz Bowl 2026', team_name: myQBTeam.team.team_name, invited_by: profile?.full_name || email },
+                                }).catch(() => {});
+                                setQbInviteEmail(''); setQbInviteName('');
+                                setQbSuccess('Invitation sent!');
+                                loadQBData(email);
+                              }} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap">
+                                <UserPlus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Member: leave team */}
+                        {!isCaptain && !myQBTeam.team.locked && (
+                          <button onClick={async () => {
+                            if (!window.confirm('Leave this team?')) return;
+                            await base44.entities.QuizBowlTeamMember.delete(myQBTeam.myMembership.id);
+                            setMyQBTeam(null);
+                            loadQBData(email);
+                          }} className="inline-flex items-center gap-1.5 text-sm text-destructive hover:underline">
+                            <LogOut className="w-3.5 h-3.5" /> Leave team
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* No team: create or browse */}
+                    {!myQBTeam && (
+                      <div className="space-y-6">
+                        {/* Create team */}
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Create a Team</p>
+                          <div className="flex gap-2">
+                            <input value={qbCreateName} onChange={e => setQbCreateName(e.target.value)} placeholder="Team name"
+                              className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                            <button onClick={async () => {
+                              setQbError(''); setQbSuccess('');
+                              if (!qbCreateName.trim()) { setQbError('Enter a team name.'); return; }
+                              const reg = myRegistrations.find(r => r.event_type === 'quiz-bowl');
+                              const team = await base44.entities.QuizBowlTeam.create({
+                                team_name: qbCreateName.trim(),
+                                captain_email: email,
+                                school: reg?.school || '',
+                                state: reg?.state || '',
+                                locked: false,
+                              });
+                              await base44.entities.QuizBowlTeamMember.create({
+                                team_id: team.id,
+                                user_email: email,
+                                user_name: profile?.full_name || '',
+                                role: 'captain',
+                                status: 'active',
+                              });
+                              setQbCreateName('');
+                              setQbSuccess('Team created! Invite teammates from the panel above.');
+                              loadQBData(email);
+                            }} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap">
+                              Create
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Browse open teams */}
+                        {openQBTeams.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams — Request to Join</p>
+                            <div className="space-y-2">
+                              {openQBTeams.map(t => {
+                                const activeCount = t.members.filter(m => m.status === 'active').length;
+                                const alreadyRequested = t.members.some(m => m.user_email === email && m.status === 'pending');
+                                return (
+                                  <div key={t.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                                    <div>
+                                      <p className="font-medium text-sm text-foreground">{t.team_name}</p>
+                                      <p className="text-xs text-muted-foreground">{t.school} · {activeCount}/5 members</p>
+                                    </div>
+                                    {alreadyRequested ? (
+                                      <span className="text-xs text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">Requested</span>
+                                    ) : (
+                                      <button onClick={async () => {
+                                        setQbError(''); setQbSuccess('');
+                                        await base44.entities.QuizBowlTeamMember.create({
+                                          team_id: t.id,
+                                          user_email: email,
+                                          user_name: profile?.full_name || '',
+                                          role: 'member',
+                                          status: 'pending',
+                                        });
+                                        setQbSuccess(`Join request sent to ${t.team_name}.`);
+                                        loadQBData(email);
+                                      }} className="px-3 py-1.5 text-xs font-semibold border border-primary text-primary rounded-lg hover:bg-orange-50 transition-colors">
+                                        Request to Join
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

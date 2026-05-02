@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, event_type, event_name } = await req.json();
+    const { name, email, event_type, event_name, team_name, invited_by } = await req.json();
 
     if (!email || !event_type) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -21,6 +21,7 @@ serve(async (req) => {
     }
 
     const isQuizBowl = event_type === 'quiz-bowl';
+    const isTeamInvite = event_type === 'team-invite';
     const siteUrl = Deno.env.get('SITE_URL') || 'https://usaeo.org';
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
@@ -31,11 +32,20 @@ serve(async (req) => {
       });
     }
 
-    const subject = isQuizBowl
+    const subject = isTeamInvite
+      ? `You've been invited to join a Quiz Bowl team on USAEO!`
+      : isQuizBowl
       ? `You're registered for USAEO Quiz Bowl 2026!`
       : `You're registered for the USAEO Essay Competition 2026!`;
 
-    const eventSpecificHtml = isQuizBowl
+    const eventSpecificHtml = isTeamInvite
+      ? `
+        <p style="margin:0 0 16px;"><strong>${invited_by || 'A teammate'}</strong> has invited you to join their Quiz Bowl team <strong>"${team_name || 'their team'}"</strong> for the USAEO Quiz Bowl 2026.</p>
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
+          <p style="margin:0;font-size:14px;color:#9a3412;font-weight:600;">How to accept</p>
+          <p style="margin:6px 0 0;font-size:14px;color:#7c2d12;">Sign in to your USAEO account and go to Dashboard → Competition → Quiz Bowl to accept or decline the invitation.</p>
+        </div>`
+      : isQuizBowl
       ? `
         <p style="margin:0 0 16px;">Once you've signed in, head to your <strong>Dashboard → Competition</strong> tab to view your registration and next steps.</p>
         <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
