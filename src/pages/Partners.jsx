@@ -5,10 +5,10 @@ import PageLayout from '../components/layout/PageLayout';
 import { PARTNERS, PARTNER_BY_NAME } from '@/lib/partnersSeed';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const contributionSections = [
@@ -29,13 +29,13 @@ const contributionSections = [
     id: 'awareness',
     eyebrow: 'Awareness',
     title: 'Bringing the competition\nto more students',
-    body: 'These partners amplify the USAEO across their networks — clubs, classrooms, and regional communities — so every student hears about us on time.',
+    body: 'These partners amplify the USAEO across their networks, clubs, classrooms, and regional communities, so every student hears about us on time.',
     stories: [
       { partner: 'Fintech Scholars', headline: 'Campus outreach', body: 'Fintech Scholars drove 200+ new registrations through their club network in a single month.' },
       { partner: 'FYC', headline: 'Local chapter activation', body: 'FYC activated five new city chapters to promote the Quiz Bowl and host study halls.' },
       { partner: 'A-Warded', headline: 'Credential surface', body: 'A-Warded surfaced the USAEO on every relevant student profile, widening the applicant funnel by 30%.' },
       { partner: 'Southeast Asian Economics Project', headline: 'Regional reach', body: 'SEAE organized info-sessions across their international network to extend USAEO visibility.' },
-      { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter — twice.' },
+      { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter, twice.' },
     ],
   },
   {
@@ -99,7 +99,7 @@ function StoryCard({ story }) {
           )}
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">{story.partner}</p>
-        <h3 className="font-serif text-3xl text-foreground leading-tight mb-5">{story.headline}</h3>
+        <h3 className="font-sans text-3xl text-foreground leading-tight mb-5">{story.headline}</h3>
         <p className="text-base text-muted-foreground leading-relaxed">{story.body}</p>
       </div>
     </article>
@@ -109,8 +109,8 @@ function StoryCard({ story }) {
 function ContributionSection({ section, index }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
-  // Scroll distance: section is 3× viewport tall; while sticky, horizontal track translates.
-  // Cards total width ≈ storyCount × 540px. Viewport right-pane ≈ 65vw.
+  // Scroll distance: section is 3Ã— viewport tall; while sticky, horizontal track translates.
+  // Cards total width â‰ˆ storyCount Ã— 540px. Viewport right-pane â‰ˆ 65vw.
   // Translate track from 0 to -(totalCards - viewportFit).
   const storyCount = section.stories.length;
   const cardW = 540; // card + gap approx
@@ -124,7 +124,7 @@ function ContributionSection({ section, index }) {
         <div className="max-w-7xl mx-auto w-full px-5 md:px-10 grid md:grid-cols-[minmax(0,380px)_1fr] gap-10 md:gap-14 items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">{section.eyebrow}</p>
-            <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-[1.05] whitespace-pre-line mb-6">{section.title}</h2>
+            <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-[1.05] whitespace-pre-line mb-6">{section.title}</h2>
             <p className="text-base text-muted-foreground leading-relaxed mb-6">{section.body}</p>
             <SectionLogos section={section} />
           </div>
@@ -134,9 +134,9 @@ function ContributionSection({ section, index }) {
                 <StoryCard key={s.partner + i} story={s} />
               ))}
             </motion.div>
-            {/* Left-edge fade — masks clipped content on left */}
+            {/* Left-edge fade, masks clipped content on left */}
             <div className={`pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r ${index % 2 === 0 ? 'from-white' : 'from-[#f4f4f2]'} to-transparent`} />
-            {/* Right-edge fade — indicates more cards available */}
+            {/* Right-edge fade, indicates more cards available */}
             <div className={`pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l ${index % 2 === 0 ? 'from-white' : 'from-[#f4f4f2]'} to-transparent`} />
             <div className="absolute top-2 right-0 flex gap-1.5">
               {section.stories.map((_, i) => (
@@ -157,7 +157,7 @@ export default function Partners() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Partners</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               Building the future<br /><em>together</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -176,7 +176,7 @@ export default function Partners() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Current Partners</p>
-            <h2 className="font-serif text-3xl text-foreground">Our partner network</h2>
+            <h2 className="font-sans text-3xl text-foreground">Our partner network</h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {PARTNERS.map((p, i) => (
@@ -214,12 +214,12 @@ export default function Partners() {
         </div>
       </section>
 
-      {/* Become a Partner — header only, tier cards intentionally removed. */}
+      {/* Become a Partner, header only, tier cards intentionally removed. */}
       <section className="py-20 px-5 bg-muted/30">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Become a Partner</p>
-            <h2 className="font-serif text-4xl text-foreground mb-8">Partner with USAEO</h2>
+            <h2 className="font-sans text-4xl text-foreground mb-8">Partner with USAEO</h2>
             <a
               href="mailto:partnerships@usaeo.org?subject=Partnership%20inquiry"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition-colors"

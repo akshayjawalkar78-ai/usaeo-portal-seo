@@ -5,10 +5,10 @@ import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 export default function NationalFinals() {
@@ -18,8 +18,8 @@ export default function NationalFinals() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02 — Competition</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02, Competition</p>
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6">
               National Finals
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
@@ -34,11 +34,11 @@ export default function NationalFinals() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">About the Finals</p>
-            <h2 className="font-serif text-4xl text-foreground leading-tight mb-6">
+            <h2 className="font-sans text-4xl text-foreground leading-tight mb-6">
               The national stage<br /><em>for America's best</em>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students — top scorers from the Quiz Bowl and Essay rounds — are notified by email and invited to attend at no cost.</p>
+              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students, top scorers from the Quiz Bowl and Essay rounds, are notified by email and invited to attend at no cost.</p>
               <p>The Finals combines a comprehensive written examination with a structured case study analysis. Top performers across both sections are named National Champions of the USA Economics Olympiad.</p>
               <p>USAEO provides a dedicated Finals preparation workshop series in April and May, covering advanced topics and case study methodology. All recordings are available to qualified students through the student portal.</p>
             </div>
@@ -64,7 +64,7 @@ export default function NationalFinals() {
       <section className="py-20 px-5 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12 text-center">
-            <h2 className="font-serif text-4xl text-foreground">Finals at a glance</h2>
+            <h2 className="font-sans text-4xl text-foreground">Finals at a glance</h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -74,7 +74,7 @@ export default function NationalFinals() {
               { value: 'Free', label: 'For qualified students' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.08)} className="bg-white border border-border rounded-2xl p-6 text-center">
-                <div className="font-serif text-4xl text-primary mb-2">{s.value}</div>
+                <div className="font-sans text-4xl text-primary mb-2">{s.value}</div>
                 <div className="text-sm text-muted-foreground">{s.label}</div>
               </motion.div>
             ))}
@@ -87,14 +87,14 @@ export default function NationalFinals() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Event Details</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight">
+            <h2 className="font-sans text-3xl md:text-4xl text-foreground leading-tight">
               The essentials<br /><em>at a glance</em>
             </h2>
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="divide-y divide-border">
             {[
               { label: 'Date', value: 'May 2026 (exact date TBA)' },
-              { label: 'Format', value: 'In-person — location TBA' },
+              { label: 'Format', value: 'In-person, location TBA' },
               { label: 'Eligibility', value: 'Invitation only (top Quiz Bowl & Essay scorers)' },
               { label: 'Sections', value: 'Written exam + case study analysis' },
               { label: 'Duration', value: 'Full day event' },
@@ -115,18 +115,18 @@ export default function NationalFinals() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Competition Structure</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight">
+            <h2 className="font-sans text-3xl md:text-4xl text-foreground leading-tight">
               Two sections,<br /><em>one champion</em>
             </h2>
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="space-y-10">
             {[
-              { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization — students are expected to reason through complex economic scenarios.' },
+              { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization, students are expected to reason through complex economic scenarios.' },
               { step: '02', title: 'Case Study Analysis', body: 'Students are presented with a real-world economic policy challenge and must produce a structured written analysis within a time limit. Evaluated on economic reasoning, use of evidence, and policy recommendations.' },
               { step: '03', title: 'National Champion Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are named National Champions of the USA Economics Olympiad.' },
             ].map((s) => (
               <div key={s.step} className="flex gap-6">
-                <span className="font-serif text-4xl text-orange-300 leading-none flex-shrink-0 w-12 text-right">{s.step}</span>
+                <span className="font-sans text-4xl text-primary/70 leading-none flex-shrink-0 w-12 text-right">{s.step}</span>
                 <div>
                   <p className="font-semibold text-foreground text-lg mb-2">{s.title}</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
@@ -142,7 +142,7 @@ export default function NationalFinals() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-[1fr_2fr] gap-16 items-start">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">How to Prepare</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight mb-5">
+            <h2 className="font-sans text-3xl md:text-4xl text-foreground leading-tight mb-5">
               What separates finalists<br /><em>from qualifiers</em>
             </h2>
             <p className="text-muted-foreground leading-relaxed">
@@ -168,9 +168,9 @@ export default function NationalFinals() {
       {/* CTA */}
       <section className="py-20 px-5 text-center">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-foreground mb-5">Compete now — Quiz Bowl & Essay are open</h2>
+          <h2 className="font-sans text-4xl text-foreground mb-5">Compete now, Quiz Bowl & Essay are open</h2>
           <p className="text-muted-foreground mb-8">
-            Register for Quiz Bowl or Essay Competition — both are free and open to all high school students.
+            Register for Quiz Bowl or Essay Competition, both are free and open to all high school students.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/register/quiz-bowl"

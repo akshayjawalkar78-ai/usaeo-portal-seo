@@ -179,7 +179,7 @@ export default function AdminEditWebsite() {
           {blocks.map(b => (
             <div key={b.id}
               onClick={() => setActiveBlock(b.block)}
-              className={`cursor-pointer rounded-xl border p-3 transition-colors ${activeBlock === b.block ? 'border-primary bg-orange-50' : 'border-border hover:border-primary/30'}`}>
+              className={`cursor-pointer rounded-xl border p-3 transition-colors ${activeBlock === b.block ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold text-foreground">{b.block}</span>
                 <span className="text-[10px] text-muted-foreground">{b.updated_at ? new Date(b.updated_at).toLocaleDateString() : ''}</span>

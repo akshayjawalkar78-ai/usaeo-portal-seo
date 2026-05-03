@@ -58,8 +58,8 @@ export default function EssayRegister() {
             <div className="flex justify-center mb-5">
               <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" />
             </div>
-            <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-            <h2 className="font-serif text-3xl text-foreground mb-3">You're registered!</h2>
+            <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
+            <h2 className="font-sans text-3xl text-foreground mb-3">You're registered!</h2>
             <p className="text-muted-foreground mb-6">A confirmation email is on its way to <strong>{form.email}</strong>. Sign in to your USAEO account and head to your dashboard to view your registration and submission details.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
               <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary/90 transition-colors">
@@ -85,13 +85,13 @@ export default function EssayRegister() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
             <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Register</p>
-            <h1 className="font-serif text-3xl text-foreground mb-2">USAEO Essay Competition 2026</h1>
-            <p className="text-sm text-muted-foreground">Free registration · Takes under 2 minutes</p>
+            <h1 className="font-sans text-3xl text-foreground mb-2">USAEO Essay Competition 2026</h1>
+            <p className="text-sm text-muted-foreground">Free registration Â· Takes under 2 minutes</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             onSubmit={handleSubmit} className="bg-white border border-border rounded-2xl p-8 space-y-4">
-            {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>}
+            {error && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3">{error}</div>}
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">Full Name</label>

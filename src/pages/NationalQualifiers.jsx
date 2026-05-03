@@ -4,10 +4,10 @@ import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 export default function NationalQualifiers() {
@@ -17,12 +17,12 @@ export default function NationalQualifiers() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 01 — Competition</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 01, Competition</p>
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6">
               National Qualifiers
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              The first stage of the USAEO competition. A two-hour virtual exam open to all US high school students — the entry point to the national stage.
+              The first stage of the USAEO competition. A two-hour virtual exam open to all US high school students, the entry point to the national stage.
             </p>
           </motion.div>
         </div>
@@ -33,18 +33,18 @@ export default function NationalQualifiers() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">About the Qualifiers</p>
-            <h2 className="font-serif text-4xl text-foreground leading-tight mb-6">
+            <h2 className="font-sans text-4xl text-foreground leading-tight mb-6">
               A virtual exam<br /><em>open to all</em>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>The National Qualifiers is a two-hour virtual exam open to any US high school student — no prior economics experience required. Students choose between an 11:00 AM or 6:00 PM ET session on February 28, 2026.</p>
+              <p>The National Qualifiers is a two-hour virtual exam open to any US high school student, no prior economics experience required. Students choose between an 11:00 AM or 6:00 PM ET session on February 28, 2026.</p>
               <p>Top-scoring students across both sessions receive an invitation to the in-person National Finals. All participants receive a detailed score report and access to complete answer explanations after the exam.</p>
               <p>The exam draws on the full USAEO curriculum, covering microeconomics, macroeconomics, international trade, and data analysis. Students who complete our free curriculum are fully prepared to compete.</p>
             </div>
             <div className="mt-8">
               <a href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register — Free <ArrowRight className="w-4 h-4" />
+                Register, Free <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </motion.div>
@@ -58,7 +58,7 @@ export default function NationalQualifiers() {
       <section className="py-20 px-5 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12 text-center">
-            <h2 className="font-serif text-4xl text-foreground">Exam at a glance</h2>
+            <h2 className="font-sans text-4xl text-foreground">Exam at a glance</h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -68,7 +68,7 @@ export default function NationalQualifiers() {
               { value: 'Free', label: 'No registration fee' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.08)} className="bg-white border border-border rounded-2xl p-6 text-center">
-                <div className="font-serif text-4xl text-primary mb-2">{s.value}</div>
+                <div className="font-sans text-4xl text-primary mb-2">{s.value}</div>
                 <div className="text-sm text-muted-foreground">{s.label}</div>
               </motion.div>
             ))}
@@ -84,7 +84,7 @@ export default function NationalQualifiers() {
             <div className="divide-y divide-border">
               {[
                 { label: 'Date', value: 'February 28, 2026' },
-                { label: 'Format', value: 'Virtual — taken from home' },
+                { label: 'Format', value: 'Virtual, taken from home' },
                 { label: 'Duration', value: '2 hours' },
                 { label: 'Session options', value: '11:00 AM ET or 6:00 PM ET' },
                 { label: 'Question types', value: 'Multiple choice and short answer' },
@@ -129,14 +129,14 @@ export default function NationalQualifiers() {
       {/* CTA */}
       <section className="py-20 px-5 text-center">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-foreground mb-5">Register before February 28</h2>
+          <h2 className="font-sans text-4xl text-foreground mb-5">Register before February 28</h2>
           <p className="text-muted-foreground mb-8">
-            The National Qualifiers is completely free. No economics background required — our curriculum provides everything you need to compete.
+            The National Qualifiers is completely free. No economics background required, our curriculum provides everything you need to compete.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <a href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-              Register Now — Free <ArrowRight className="w-4 h-4" />
+              Register Now, Free <ArrowRight className="w-4 h-4" />
             </a>
             <a href="https://usaeo.org/curriculum" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground rounded-full font-medium text-sm hover:border-foreground transition-colors">

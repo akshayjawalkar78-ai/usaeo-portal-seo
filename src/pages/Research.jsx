@@ -4,10 +4,10 @@ import { ArrowRight, Lock } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const papers = [
@@ -34,16 +34,16 @@ export default function Research() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Research Program</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               Original research,<br /><em>real mentorship</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Conduct original economics research under the guidance of professional economists and academics. Published work appears in the USAEO Research Journal — a peer-reviewed publication read by university admissions offices nationwide.
+              Conduct original economics research under the guidance of professional economists and academics. Published work appears in the USAEO Research Journal, a peer-reviewed publication read by university admissions offices nationwide.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
               {[['Open', 'Applications'], ['30+', 'Faculty mentors'], [`${topics.length}+`, 'Research areas']].map(([v, l]) => (
                 <div key={l}>
-                  <div className="text-3xl font-serif text-primary">{v}</div>
+                  <div className="text-3xl font-sans text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
                 </div>
               ))}
@@ -58,7 +58,7 @@ export default function Research() {
           <motion.div {...fadeUp()} className="grid md:grid-cols-2 gap-16 items-center mb-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">How it works</p>
-              <h2 className="font-serif text-4xl text-foreground leading-tight">From application<br /><em>to publication</em></h2>
+              <h2 className="font-sans text-4xl text-foreground leading-tight">From application<br /><em>to publication</em></h2>
             </div>
             <div className="flex items-start gap-3">
               <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-52 border border-border" />
@@ -69,11 +69,11 @@ export default function Research() {
               { n: '01', title: 'Apply & Get Matched', desc: 'Submit your research interests and a brief statement of purpose. We review applications on a rolling basis and match you with a professional economist mentor whose expertise aligns with your area of focus.', time: '~2 weeks' },
               { n: '02', title: 'Develop Your Research', desc: 'Work one-on-one with your mentor over 3–4 months to develop a rigorous, original research paper. Regular check-ins, feedback sessions, and structured milestones keep your project on track.', time: '3–4 months' },
               { n: '03', title: 'Peer Review Process', desc: 'Your completed paper is submitted to our editorial board of student and faculty reviewers. You\'ll receive detailed, constructive feedback and an opportunity for revision before final acceptance.', time: '4–6 weeks' },
-              { n: '04', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal — a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
+              { n: '04', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal, a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
             ].map((s, i) => (
               <motion.div key={s.n} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10">
                 <div className="flex items-start justify-between gap-4 mb-4">
-                  <span className="font-serif text-5xl text-orange-200 leading-none">{s.n}</span>
+                  <span className="font-sans text-5xl text-orange-200 leading-none">{s.n}</span>
                   <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full flex-shrink-0 mt-1">{s.time}</span>
                 </div>
                 <h3 className="font-semibold text-foreground text-lg mb-3">{s.title}</h3>
@@ -94,7 +94,7 @@ export default function Research() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Research Areas</p>
-            <h2 className="font-serif text-3xl text-foreground">Active research topics</h2>
+            <h2 className="font-sans text-3xl text-foreground">Active research topics</h2>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {topics.map((t, i) => (
@@ -112,14 +112,14 @@ export default function Research() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">USAEO Research Journal</p>
-            <h2 className="font-serif text-3xl text-foreground">Featured published papers</h2>
+            <h2 className="font-sans text-3xl text-foreground">Featured published papers</h2>
           </motion.div>
           <div className="space-y-4">
             {papers.map((p) => (
               <motion.div key={p.title} {...fadeUp()} className="bg-white border border-border rounded-2xl p-6 md:p-8">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground">
-                    <Lock className="w-3 h-3" /> Private · Internal
+                    <Lock className="w-3 h-3" /> Private Â· Internal
                   </span>
                 </div>
                 <h3 className="font-semibold text-foreground text-base md:text-lg leading-snug mb-3">{p.title}</h3>

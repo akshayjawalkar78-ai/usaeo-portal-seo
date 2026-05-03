@@ -9,6 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
 import { PARTNERS } from '@/lib/partnersSeed';
+import { easeOut, viewportOnce } from '@/lib/motion';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -17,24 +18,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 const orangeIcon = L.divIcon({
-  className: '',
-  html: '<div style="width:14px;height:14px;border-radius:50%;background:hsl(24,95%,53%);border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>',
+  className: 'usaeo-map-pin',
+  html: '<div class="h-3.5 w-3.5 rounded-full bg-primary border-[2.5px] border-white shadow-[0_1px_5px_rgba(0,0,0,0.35)]"></div>',
   iconSize: [14, 14],
   iconAnchor: [7, 7],
   popupAnchor: [0, -10],
 });
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
+  viewport: viewportOnce,
+  transition: { duration: 0.32, ease: easeOut, delay },
 });
 
 const partners = PARTNERS;
 
 const faqs = [
-  { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required — we provide all the study materials you need, completely free.' },
+  { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required, we provide all the study materials you need, completely free.' },
   { q: 'Is there a registration fee?', a: 'No. The USAEO is completely free to participate in at every stage. Our mission is to make economics education accessible to all students regardless of background.' },
   { q: 'What topics are covered?', a: 'Microeconomics, macroeconomics, international trade, data interpretation, and real-world economic analysis. The full syllabus is available to all registered students.' },
   { q: 'How is the competition structured?', a: 'Four stages: National Qualifiers (virtual, February 28, 2026), Quiz Bowl (open now), Essay Competition (open now), and National Finals (in-person, May 2026). Each stage builds on the last.' },
@@ -44,7 +45,7 @@ const faqs = [
 
 const principles = [
   { title: 'Academic excellence', body: 'We set a high standard for economic reasoning, testing theory, data analysis, and real-world problem solving across all competition stages. Students leave the USAEO with analytical skills that extend well beyond economics.' },
-  { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler — from any state, any school, any background.' },
+  { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler, from any state, any school, any background.' },
   { title: 'Impact-driven', body: "As a 501(c)(3) nonprofit, every dollar we raise goes toward student programming: free workshops, open curriculum, and a competition infrastructure that levels the playing field for students everywhere." },
 ];
 
@@ -68,21 +69,21 @@ export default function Home() {
   return (
     <PageLayout>
 
-      {/* ── HERO ── */}
+      {/* â”€â”€ HERO â”€â”€ */}
       <section className="relative min-h-screen flex flex-col justify-center px-5 overflow-hidden bg-white pt-14">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[600px] bg-orange-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[600px] bg-primary/5 rounded-full blur-3xl opacity-60 pointer-events-none" />
 
         <div className="max-w-6xl mx-auto w-full relative z-10">
           <div className="max-w-4xl">
 
-            <motion.h1 {...fadeUp(0.05)} className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[84px] text-foreground leading-[1.03] mb-7 tracking-tight">
+            <motion.h1 {...fadeUp(0.05)} className="font-sans text-5xl sm:text-6xl md:text-7xl lg:text-[84px] text-foreground leading-[1.03] mb-7 tracking-tight">
               The US economics<br />
               <em className="text-primary">olympiad</em> for<br />
               high school students
             </motion.h1>
 
             <motion.p {...fadeUp(0.1)} className="text-xl text-muted-foreground max-w-xl leading-relaxed mb-10">
-              The USAEO is a free national competition that identifies and develops America's top young economists — completely free, open to every US high school student, and run by a 501(c)(3) nonprofit.
+              The USAEO is a free national competition that identifies and develops America's top young economists, completely free, open to every US high school student, and run by a 501(c)(3) nonprofit.
             </motion.p>
 
             <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-3">
@@ -111,7 +112,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ── NUMBERS ── */}
+      {/* â”€â”€ NUMBERS â”€â”€ */}
       <section className="py-16 border-y border-border bg-white">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10">
@@ -122,7 +123,7 @@ export default function Home() {
               { value: '4', label: 'Competition stages', sub: 'Qualifiers to Finals' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.07)}>
-                <div className="text-4xl md:text-5xl font-serif text-foreground mb-1.5">{s.value}</div>
+                <div className="text-4xl md:text-5xl font-sans text-foreground mb-1.5">{s.value}</div>
                 <div className="text-sm font-semibold text-foreground">{s.label}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{s.sub}</div>
               </motion.div>
@@ -131,20 +132,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── COMPETITION PATH ── */}
+      {/* â”€â”€ COMPETITION PATH â”€â”€ */}
       <section className="py-28 md:py-36 bg-white">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-2 gap-16 items-start">
             <motion.div {...fadeUp()} className="md:sticky md:top-24">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">The Competition</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight mb-6">
+              <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-tight mb-6">
                 Four stages.<br /><em>One national champion.</em>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6 text-base">
                 The USAEO runs a multi-stage competition open to all US high school students: qualifying round, Quiz Bowl, Essay Competition, and National Finals. Each stage is free to enter.
               </p>
               <p className="text-muted-foreground leading-relaxed text-base">
-                Students advance based solely on performance. There are no nominations, no fees, and no prerequisites — just a genuine open competition accessible to every US high schooler.
+                Students advance based solely on performance. There are no nominations, no fees, and no prerequisites, just a genuine open competition accessible to every US high schooler.
               </p>
             </motion.div>
 
@@ -152,12 +153,12 @@ export default function Home() {
               {[
                 {
                   n: '01', title: 'National Qualifiers', date: 'February 28, 2026',
-                  body: 'A two-hour virtual exam open to all US high school students covering the full USAEO syllabus. Registration is now closed — top scorers have advanced to the next rounds.',
+                  body: 'A two-hour virtual exam open to all US high school students covering the full USAEO syllabus. Registration is now closed, top scorers have advanced to the next rounds.',
                   to: '/competitions',
                 },
                 {
                   n: '02', title: 'Quiz Bowl', date: 'Coming Soon',
-                  body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students — register now to secure your spot.',
+                  body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students, register now to secure your spot.',
                   to: '/competitions/quiz-bowl',
                 },
                 {
@@ -173,7 +174,7 @@ export default function Home() {
               ].map((step, i) => (
                 <motion.div key={step.n} {...fadeUp(i * 0.1)} className="py-8">
                   <div className="flex gap-6">
-                    <span className="font-serif text-5xl text-orange-300 leading-none flex-shrink-0 w-12 text-right">{step.n}</span>
+                    <span className="font-sans text-5xl text-primary/70 leading-none flex-shrink-0 w-12 text-right">{step.n}</span>
                     <div>
                       <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{step.date}</p>
                       <h3 className="font-semibold text-foreground text-lg mb-3">{step.title}</h3>
@@ -190,19 +191,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── PROGRAMS ── */}
+      {/* â”€â”€ PROGRAMS â”€â”€ */}
       <section className="py-28 md:py-36 bg-muted/30 border-t border-border">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
             <motion.div {...fadeUp()}>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Programs</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
+              <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-tight">
                 Beyond the competition
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
-                The competition is the core of USAEO — but the program extends well beyond exam day. Whether you're looking to study, research, connect with peers, or build something at your school, there's a place for you.
+                The competition is the core of USAEO, but the program extends well beyond exam day. Whether you're looking to study, research, connect with peers, or build something at your school, there's a place for you.
               </p>
             </motion.div>
           </div>
@@ -212,26 +213,26 @@ export default function Home() {
               {
                 title: 'Free Curriculum',
                 to: '/curriculum',
-                body: 'Six structured units covering the complete USAEO syllabus — from introductory supply and demand to international finance. Self-paced, with problem sets and practice tests. No prior economics background needed.',
-                meta: '6 units · 30+ hours · Self-paced',
+                body: 'Six structured units covering the complete USAEO syllabus, from introductory supply and demand to international finance. Self-paced, with problem sets and practice tests. No prior economics background needed.',
+                meta: '6 units Â· 30+ hours Â· Self-paced',
               },
               {
                 title: 'Live Workshops',
                 to: '/workshops',
                 body: 'Expert-led sessions held over Zoom throughout the competition season. Topics include game theory, macroeconomic policy, data analysis, and competition preparation. All sessions are free and recordings are available.',
-                meta: 'Weekly sessions · Free · All levels',
+                meta: 'Weekly sessions Â· Free Â· All levels',
               },
               {
                 title: 'Research Program',
                 to: '/research',
                 body: 'Students interested in academic economics can apply to the USAEO research program, where they conduct original economic research with guidance from mentors in the field. Papers are published in the USAEO student journal.',
-                meta: 'Mentored · Published · Open applications',
+                meta: 'Mentored Â· Published Â· Open applications',
               },
               {
                 title: 'Chapter Program',
                 to: '/chapters',
                 body: 'Start a USAEO chapter at your high school. Chapter Founders lead weekly meetings, organize local study sessions, and connect their peers to the national competition. Active chapters exist in 15+ states.',
-                meta: '50+ active chapters · Applications open',
+                meta: '50+ active chapters Â· Applications open',
               },
             ].map((p, i) => (
               <motion.div key={p.title} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10 group">
@@ -249,19 +250,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── PARTNERS ── */}
+      {/* â”€â”€ PARTNERS â”€â”€ */}
       <section className="py-20 border-t border-b border-border bg-white">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-2 gap-16 items-start mb-12">
             <motion.div {...fadeUp()}>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Partners & Sponsors</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
+              <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-tight">
                 Organizations that share <em>our mission</em>
               </h2>
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
-                The USAEO is supported by organizations committed to economics education and student opportunity. Our partners share our belief that every student — regardless of background or resources — deserves access to rigorous, real-world economic learning. Together, we work to expand the reach and impact of the USAEO mission across the country.
+                The USAEO is supported by organizations committed to economics education and student opportunity. Our partners share our belief that every student, regardless of background or resources, deserves access to rigorous, real-world economic learning. Together, we work to expand the reach and impact of the USAEO mission across the country.
               </p>
             </motion.div>
           </div>
@@ -295,14 +296,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── CHAPTERS ── */}
+      {/* â”€â”€ CHAPTERS â”€â”€ */}
       <section className="py-28 md:py-36 bg-white">
         <div className="max-w-6xl mx-auto px-5">
           {/* Header row: title left, description + CTAs right */}
           <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
             <motion.div {...fadeUp()}>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">School Chapters</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
+              <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-tight">
                 Building economics communities<br /><em>across the country</em>
               </h2>
             </motion.div>
@@ -327,8 +328,8 @@ export default function Home() {
           </div>
 
           {/* Map */}
-          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10" style={{ height: 400 }}>
-            <MapContainer center={[38.5, -96]} zoom={4} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10 aspect-[16/9] md:aspect-[21/9]">
+            <MapContainer center={[38.5, -96]} zoom={4} className="h-full w-full" scrollWheelZoom={false}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -343,7 +344,7 @@ export default function Home() {
             </MapContainer>
           </motion.div>
 
-          {/* Chapter grid — first 6 from canonical seed */}
+          {/* Chapter grid, first 6 from canonical seed */}
           <motion.div {...fadeUp(0.15)} className="grid md:grid-cols-3 gap-4">
             {CHAPTERS_SEED.slice(0, 6).map((c) => (
               <div key={c.id} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
@@ -362,13 +363,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
+      {/* â”€â”€ TESTIMONIALS â”€â”€ */}
       <section className="py-28 md:py-36 bg-muted/30 border-t border-border">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-2 gap-16 items-start mb-16">
             <motion.div {...fadeUp()}>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">From students</p>
-              <h2 className="font-serif text-4xl md:text-5xl text-foreground leading-tight">
+              <h2 className="font-sans text-4xl md:text-5xl text-foreground leading-tight">
                 What competitors<br />say about USAEO
               </h2>
             </motion.div>
@@ -376,7 +377,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { quote: 'USAEO fundamentally changed how I think about economics. The workshops were invaluable prep for both the competition and my AP coursework.', name: 'Aisha T.', school: 'Stuyvesant High School, NY', year: 'Class of 2026' },
-              { quote: "I had no economics background when I registered. Six months later I was competing at the national level. The free curriculum made it genuinely possible — not just in theory.", name: 'Marcus L.', school: 'Phillips Academy, MA', year: 'Class of 2025' },
+              { quote: "I had no economics background when I registered. Six months later I was competing at the national level. The free curriculum made it genuinely possible, not just in theory.", name: 'Marcus L.', school: 'Phillips Academy, MA', year: 'Class of 2025' },
               { quote: "Competing at the National Finals was the most formative academic experience of my life. The community you build with students from across the country is unlike anything in a classroom.", name: 'Sofia R.', school: 'Lowell High School, CA', year: 'National Finals 2025' },
             ].map((t, i) => (
               <motion.div key={t.name} {...fadeUp(i * 0.1)} className="bg-white border border-border rounded-2xl p-8">
@@ -392,16 +393,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── MISSION ── */}
+      {/* â”€â”€ MISSION â”€â”€ */}
       <section className="bg-foreground">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-2 gap-16">
             <motion.div {...fadeUp()} className="md:sticky md:top-24 py-28 md:py-36 self-start">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">Our Mission</p>
-              <blockquote className="font-serif text-3xl md:text-4xl text-white leading-snug mb-6">
-                "We believe every student deserves access to world-class economics education — and the chance to prove themselves on the global stage."
+              <blockquote className="font-sans text-3xl md:text-4xl text-white leading-snug mb-6">
+                "We believe every student deserves access to world-class economics education, and the chance to prove themselves on the global stage."
               </blockquote>
-              <Link to="/about" className="inline-flex items-center gap-2 text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors">
+              <Link to="/about" className="inline-flex items-center gap-2 text-sm font-medium text-orange-400 hover:text-primary/70 transition-colors">
                 About USAEO <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -414,13 +415,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── FAQ ── */}
+      {/* â”€â”€ FAQ â”€â”€ */}
       <section className="py-28 md:py-36 bg-white border-t border-border">
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid md:grid-cols-5 gap-16">
             <motion.div {...fadeUp()} className="md:col-span-2 md:sticky md:top-24">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">FAQ</p>
-              <h2 className="font-serif text-4xl text-foreground leading-tight mb-5">Common questions</h2>
+              <h2 className="font-sans text-4xl text-foreground leading-tight mb-5">Common questions</h2>
               <p className="text-muted-foreground leading-relaxed text-sm">
                 Can't find what you're looking for? Email us at{' '}
                 <a href="mailto:info@usaeo.org" className="text-foreground underline underline-offset-2">info@usaeo.org</a>.
@@ -444,10 +445,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* â”€â”€ CTA â”€â”€ */}
       <section className="py-20 px-5 text-center border-t border-border">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground mb-5">Ready to compete?</h2>
+          <h2 className="font-sans text-4xl md:text-5xl text-foreground mb-5">Ready to compete?</h2>
           <p className="text-muted-foreground leading-relaxed mb-8 max-w-lg mx-auto">
             Registration is free. No economics background required. No teacher nomination needed. Just register and start preparing.
           </p>

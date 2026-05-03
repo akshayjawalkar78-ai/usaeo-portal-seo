@@ -25,10 +25,10 @@ const orangeIcon = L.divIcon({
 });
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const SEED_CHAPTERS = CHAPTERS_SEED.map(c => ({ ...c, name: c.school }));
@@ -60,7 +60,7 @@ export default function Chapters() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Chapters</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               USAEO chapters<br /><em>across the nation</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -69,7 +69,7 @@ export default function Chapters() {
             <div className="flex flex-wrap gap-6 mt-8">
               {[[`${CHAPTERS_SEED.length}`, 'Active chapters'], [`${CHAPTER_STATE_COUNT}`, 'States represented'], ['Open', 'Applications']].map(([v, l]) => (
                 <div key={l}>
-                  <div className="text-3xl font-serif text-primary">{v}</div>
+                  <div className="text-3xl font-sans text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
                 </div>
               ))}
@@ -83,13 +83,13 @@ export default function Chapters() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Active Chapters</p>
-            <h2 className="font-serif text-3xl text-foreground">Find chapters near you</h2>
+            <h2 className="font-sans text-3xl text-foreground">Find chapters near you</h2>
           </motion.div>
-          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10" style={{ height: 440 }}>
+          <motion.div {...fadeUp(0.1)} className="relative z-0 isolate rounded-2xl overflow-hidden border border-border shadow-sm mb-10 aspect-[16/9] md:aspect-[21/9]">
             <MapContainer
               center={[38.5, -96]}
               zoom={4}
-              style={{ height: '100%', width: '100%' }}
+              className="h-full w-full"
               scrollWheelZoom={false}
             >
               <TileLayer
@@ -136,7 +136,7 @@ export default function Chapters() {
             </motion.div>
           )}
           <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
-            Showing {visibleChapters.length} of {chapters.length} active chapters · More joining every week
+            Showing {visibleChapters.length} of {chapters.length} active chapters Â· More joining every week
           </motion.p>
         </div>
       </section>
@@ -147,7 +147,7 @@ export default function Chapters() {
           <motion.div {...fadeUp()} className="grid md:grid-cols-2 gap-16 items-start mb-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Start a Chapter</p>
-              <h2 className="font-serif text-4xl text-foreground leading-tight">Become a Chapter Founder</h2>
+              <h2 className="font-sans text-4xl text-foreground leading-tight">Become a Chapter Founder</h2>
             </div>
             <div className="space-y-4 text-muted-foreground leading-relaxed md:pt-9">
               <p>As a Chapter Founder, you'll lead economics education at your school, organize study sessions, host competition prep workshops, and connect your peers with the nationwide USAEO network.</p>

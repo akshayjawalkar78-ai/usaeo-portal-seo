@@ -129,16 +129,16 @@ export default function QuizBowlRegister() {
             <div className="flex justify-center mb-5">
               <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" />
             </div>
-            <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-            <h2 className="font-serif text-3xl text-foreground mb-3">You're registered!</h2>
+            <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
+            <h2 className="font-sans text-3xl text-foreground mb-3">You're registered!</h2>
             <p className="text-muted-foreground mb-4">
               A confirmation email is on its way to <strong>{form.email}</strong>.
               {showTeam && teamName ? ` Your team "${teamName}" has been created.` : ''}
             </p>
             {!showTeam && (
-              <div className="bg-orange-50 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
+              <div className="bg-primary/5 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
                 <p className="text-sm font-semibold text-orange-900 mb-1">Next step: create or join a team</p>
-                <p className="text-sm text-orange-700">Sign in to your dashboard, go to Competition → Quiz Bowl to create a team or browse open teams.</p>
+                <p className="text-sm text-orange-700">Sign in to your dashboard, go to Competition â†’ Quiz Bowl to create a team or browse open teams.</p>
               </div>
             )}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
@@ -167,13 +167,13 @@ export default function QuizBowlRegister() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
             <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Register</p>
-            <h1 className="font-serif text-3xl text-foreground mb-2">USAEO Quiz Bowl 2026</h1>
-            <p className="text-sm text-muted-foreground">Free registration · Takes under 2 minutes</p>
+            <h1 className="font-sans text-3xl text-foreground mb-2">USAEO Quiz Bowl 2026</h1>
+            <p className="text-sm text-muted-foreground">Free registration Â· Takes under 2 minutes</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             onSubmit={handleSubmit} className="bg-white border border-border rounded-2xl p-8 space-y-4">
-            {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>}
+            {error && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3">{error}</div>}
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">Full Name</label>
@@ -214,7 +214,7 @@ export default function QuizBowlRegister() {
               <button type="button" onClick={() => setShowTeam(v => !v)}
                 className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors">
                 <span className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Build your team now (optional)</span>
-                <span className="text-xs text-muted-foreground">{showTeam ? '▲ Hide' : '▼ Show'}</span>
+                <span className="text-xs text-muted-foreground">{showTeam ? 'â–² Hide' : 'â–¼ Show'}</span>
               </button>
 
               {showTeam && (
@@ -254,7 +254,7 @@ export default function QuizBowlRegister() {
                             <input type="email" value={tm.email} onChange={e => setTeammate(i, 'email', e.target.value)} placeholder="Email"
                               className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
                           </div>
-                          <button type="button" onClick={() => removeTeammate(i)} className="mt-2 p-1.5 hover:bg-red-50 rounded text-muted-foreground hover:text-destructive transition-colors">
+                          <button type="button" onClick={() => removeTeammate(i)} className="mt-2 p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </div>

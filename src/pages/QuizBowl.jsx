@@ -5,10 +5,10 @@ import { ArrowRight, CheckCircle, Trophy, Users, Monitor, Zap, Shield, BookOpen 
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const categories = [
@@ -21,7 +21,7 @@ const categories = [
 
 const software = [
   { name: 'Kahoot', role: 'Regular question delivery', icon: Monitor, desc: 'Questions displayed on the host screen; participants answer on their devices.' },
-  { name: 'Multibuzzer', role: 'Toss-up questions', icon: Zap, desc: 'Online buzzer platform — first team to buzz in earns the right to answer.' },
+  { name: 'Multibuzzer', role: 'Toss-up questions', icon: Zap, desc: 'Online buzzer platform, first team to buzz in earns the right to answer.' },
   { name: 'Google Meet', role: 'Live competition sessions', icon: BookOpen, desc: 'All matches run live via Google Meet, limited to 60 minutes per session.' },
 ];
 
@@ -32,12 +32,12 @@ export default function QuizBowl() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02 — Competition</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02, Competition</p>
             <div className="flex items-center gap-3 mb-4">
-              <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight">
+              <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight">
                 Quiz Bowl
               </h1>
-              <span className="text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full">Open</span>
+              <span className="text-xs font-semibold bg-success/10 text-success border border-green-200 px-3 py-1 rounded-full">Open</span>
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
               Fast-paced live team competition covering microeconomics, macroeconomics, and current events. Teams of 3–5 compete in round-robin matches leading to a single-elimination playoff.
@@ -54,7 +54,7 @@ export default function QuizBowl() {
             <div className="divide-y divide-border mb-10">
               {[
                 { label: 'Date', value: 'Coming Soon' },
-                { label: 'Format', value: 'Virtual — live Google Meet + Kahoot / Multibuzzer' },
+                { label: 'Format', value: 'Virtual, live Google Meet + Kahoot / Multibuzzer' },
                 { label: 'Team Size', value: '3–5 players per team (captain required)' },
                 { label: 'Duration', value: '60 minutes per match' },
                 { label: 'Eligibility', value: 'All registered USAEO students (grades 9–12)' },
@@ -70,17 +70,17 @@ export default function QuizBowl() {
           </motion.div>
 
           <motion.div {...fadeUp(0.1)}>
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-8 mb-6">
+            <div className="bg-success/10 border border-green-200 rounded-2xl p-8 mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle className="w-5 h-5 text-green-700" />
+                <CheckCircle className="w-5 h-5 text-success" />
                 <span className="font-semibold text-green-800">Registration is open</span>
               </div>
-              <p className="text-sm text-green-700 leading-relaxed mb-5">
+              <p className="text-sm text-success leading-relaxed mb-5">
                 Register now to secure your spot in the USAEO Quiz Bowl. The event date will be announced by email.
               </p>
               <Link to="/register/quiz-bowl"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register Now — Free <ArrowRight className="w-4 h-4" />
+                Register Now, Free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="bg-white border border-border rounded-2xl p-8">
@@ -88,7 +88,7 @@ export default function QuizBowl() {
               <div className="space-y-3">
                 {[
                   'Complete the free USAEO curriculum (6 units)',
-                  'Attend live workshops — recordings available',
+                  'Attend live workshops, recordings available',
                   'Practice with past USAEO exam questions',
                   'Review economic news and current events',
                   'Form your team early and select a captain',
@@ -108,7 +108,7 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Tournament Structure</p>
-            <h2 className="font-serif text-4xl text-foreground">How the competition works</h2>
+            <h2 className="font-sans text-4xl text-foreground">How the competition works</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12 items-start">
@@ -124,8 +124,8 @@ export default function QuizBowl() {
                 <div className="space-y-4">
                   {[
                     { label: 'Players', value: '3–5 per team (minimum 3 to compete)' },
-                    { label: 'Alternates', value: 'Up to 2 — substitutions between rounds only' },
-                    { label: 'Captain', value: 'Required — must be selected before start' },
+                    { label: 'Alternates', value: 'Up to 2, substitutions between rounds only' },
+                    { label: 'Captain', value: 'Required, must be selected before start' },
                     { label: 'Minimum teams', value: '16 teams required for the event to run' },
                   ].map((row) => (
                     <div key={row.label} className="flex gap-6">
@@ -178,7 +178,7 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Gameplay</p>
-            <h2 className="font-serif text-4xl text-foreground">Match format & scoring</h2>
+            <h2 className="font-sans text-4xl text-foreground">Match format & scoring</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-10">
@@ -197,7 +197,7 @@ export default function QuizBowl() {
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm flex-shrink-0">5</span>
                   <div>
                     <p className="text-sm font-semibold text-foreground">Toss-Up Questions (Multibuzzer)</p>
-                    <p className="text-sm text-muted-foreground">Read aloud by the moderator. First to buzz in must answer alone — no consulting teammates.</p>
+                    <p className="text-sm text-muted-foreground">Read aloud by the moderator. First to buzz in must answer alone, no consulting teammates.</p>
                   </div>
                 </div>
               </div>
@@ -226,7 +226,7 @@ export default function QuizBowl() {
           <motion.div {...fadeUp(0.12)} className="bg-white border border-border rounded-2xl p-8">
             <h3 className="font-semibold text-foreground mb-4">Bonus Questions</h3>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer — no buzzing required. Incorrect answers incur a point reduction. Scores are tracked and displayed in real time throughout the match.
+              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer, no buzzing required. Incorrect answers incur a point reduction. Scores are tracked and displayed in real time throughout the match.
             </p>
           </motion.div>
         </div>
@@ -237,7 +237,7 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Curriculum</p>
-            <h2 className="font-serif text-4xl text-foreground">Question categories</h2>
+            <h2 className="font-sans text-4xl text-foreground">Question categories</h2>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -257,7 +257,7 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Technology</p>
-            <h2 className="font-serif text-4xl text-foreground">Approved software</h2>
+            <h2 className="font-sans text-4xl text-foreground">Approved software</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -281,20 +281,20 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Prizes</p>
-            <h2 className="font-serif text-4xl text-foreground">Awards & recognition</h2>
+            <h2 className="font-sans text-4xl text-foreground">Awards & recognition</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
-              { place: '1st Place', prize: '$100', icon: '🥇' },
-              { place: '2nd Place', prize: '$75', icon: '🥈' },
-              { place: '3rd Place', prize: '$50', icon: '🥉' },
+              { place: '1st Place', prize: '$100', icon: 'ðŸ¥‡' },
+              { place: '2nd Place', prize: '$75', icon: 'ðŸ¥ˆ' },
+              { place: '3rd Place', prize: '$50', icon: 'ðŸ¥‰' },
             ].map((award, i) => (
               <motion.div key={award.place} {...fadeUp(i * 0.07)}
                 className="bg-white border border-border rounded-2xl p-8 text-center">
                 <div className="text-4xl mb-4">{award.icon}</div>
                 <p className="font-semibold text-foreground mb-1">{award.place}</p>
-                <p className="text-3xl font-serif text-primary">{award.prize}</p>
+                <p className="text-3xl font-sans text-primary">{award.prize}</p>
               </motion.div>
             ))}
           </div>
@@ -323,7 +323,7 @@ export default function QuizBowl() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Conduct</p>
-            <h2 className="font-serif text-4xl text-foreground">Academic integrity</h2>
+            <h2 className="font-sans text-4xl text-foreground">Academic integrity</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -352,8 +352,8 @@ export default function QuizBowl() {
               <div className="space-y-4">
                 {[
                   { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, point deduction of 500–1,000 pts or removal from current round.' },
-                  { tier: 'Clear Cheating', color: 'text-orange-700 bg-orange-50 border-orange-200', desc: 'Team disqualified from the round, score of zero, placed on probation, possible school notification.' },
-                  { tier: 'Severe or Repeated', color: 'text-red-700 bg-red-50 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all points, ban from future competitions.' },
+                  { tier: 'Clear Cheating', color: 'text-orange-700 bg-primary/5 border-orange-200', desc: 'Team disqualified from the round, score of zero, placed on probation, possible school notification.' },
+                  { tier: 'Severe or Repeated', color: 'text-destructive bg-destructive/10 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all points, ban from future competitions.' },
                 ].map((c) => (
                   <div key={c.tier} className={`border rounded-xl p-4 ${c.color}`}>
                     <p className="font-semibold text-sm mb-1">{c.tier}</p>
@@ -372,7 +372,7 @@ export default function QuizBowl() {
       {/* CTA */}
       <section className="py-20 px-5 text-center border-t border-border">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-foreground mb-5">Ready to compete?</h2>
+          <h2 className="font-sans text-4xl text-foreground mb-5">Ready to compete?</h2>
           <p className="text-muted-foreground mb-8">Registration is free and takes under two minutes.</p>
           <Link to="/register/quiz-bowl"
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">

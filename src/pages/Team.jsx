@@ -4,10 +4,10 @@ import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const LOGO = '/logos/USAEOlogo.png';
@@ -60,7 +60,7 @@ export default function Team() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Our Team</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               Driven by students,<br /><em>for students</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -75,7 +75,7 @@ export default function Team() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Leadership</p>
-            <h2 className="font-serif text-3xl text-foreground">Meet the team behind USAEO</h2>
+            <h2 className="font-sans text-3xl text-foreground">Meet the team behind USAEO</h2>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -91,7 +91,7 @@ export default function Team() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Open Roles</p>
-            <h2 className="font-serif text-3xl text-foreground">Find your place on the team</h2>
+            <h2 className="font-sans text-3xl text-foreground">Find your place on the team</h2>
           </motion.div>
           <div className="grid md:grid-cols-2 gap-4">
             {roles.map((r, i) => (
