@@ -34,7 +34,7 @@ export default function Essay() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 03 â€” Competition</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 03, Competition</p>
             <div className="flex items-center gap-3 mb-4">
               <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight">
                 Essay Competition
@@ -55,10 +55,10 @@ export default function Essay() {
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Event Details</p>
             <div className="divide-y divide-border mb-10">
               {[
-                { label: 'Deadline', value: 'TBD â€” announced by email' },
+                { label: 'Deadline', value: 'TBD, announced by email' },
                 { label: 'Format', value: 'Written essay submission via Google Forms' },
-                { label: 'Length', value: '1,500â€“2,000 words (excl. title page & references)' },
-                { label: 'Eligibility', value: 'Individual â€” grades 9â€“12' },
+                { label: 'Length', value: '1,500–2,000 words (excl. title page & references)' },
+                { label: 'Eligibility', value: 'Individual, grades 9–12' },
                 { label: 'Citation Style', value: 'APA, MLA, or Chicago (must be consistent)' },
                 { label: 'Cost', value: 'Free' },
               ].map((row) => (
@@ -81,7 +81,7 @@ export default function Essay() {
               </p>
               <Link to="/register/essay"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register Now â€” Free <ArrowRight className="w-4 h-4" />
+                Register Now, Free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="bg-white border border-border rounded-2xl p-8">
@@ -120,7 +120,7 @@ export default function Essay() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: 'Word count', value: '1,500â€“2,000 words' },
+                  { label: 'Word count', value: '1,500–2,000 words' },
                   { label: 'Spacing', value: 'Double-spaced' },
                   { label: 'Font', value: '12-point Times New Roman or Arial' },
                   { label: 'Margins', value: '1 inch on all sides' },
@@ -143,7 +143,7 @@ export default function Essay() {
               <div className="space-y-5">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Accepted formats</p>
-                  <p className="text-sm text-foreground">PDF or Microsoft Word (.docx) â€” maximum 10 MB</p>
+                  <p className="text-sm text-foreground">PDF or Microsoft Word (.docx), maximum 10 MB</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">File naming convention</p>
@@ -153,7 +153,7 @@ export default function Essay() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Submission platform</p>
-                  <p className="text-sm text-foreground">Official Google Forms portal â€” submissions are time-stamped automatically. Late submissions will not be accepted.</p>
+                  <p className="text-sm text-foreground">Official Google Forms portal, submissions are time-stamped automatically. Late submissions will not be accepted.</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Confirmation</p>
@@ -229,7 +229,7 @@ export default function Essay() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { step: '01', title: 'Write your essay', desc: 'Follow the formatting requirements â€” double-spaced, correct font, 1,500â€“2,000 words.' },
+              { step: '01', title: 'Write your essay', desc: 'Follow the formatting requirements, double-spaced, correct font, 1,500–2,000 words.' },
               { step: '02', title: 'Name your file', desc: 'Use the exact format: LastName_FirstName_Essay_2026.pdf (or .docx, max 10 MB).' },
               { step: '03', title: 'Submit via Google Forms', desc: 'Upload through the official portal before the deadline at 11:59 PM EST. No late submissions accepted.' },
               { step: '04', title: 'Receive confirmation', desc: 'An automated email confirms receipt. Contact the committee if you don\'t receive it within 24 hours.' },
@@ -309,7 +309,7 @@ export default function Essay() {
                   'Copying text from sources without proper citation (plagiarism)',
                   'Submitting work written or substantially edited by another person',
                   'Receiving content suggestions beyond general topic guidance',
-                  'Self-plagiarism â€” submitting previously written work',
+                  'Self-plagiarism, submitting previously written work',
                   'Submitting after the deadline or exceeding the word limit',
                   'Submitting multiple entries when only one is permitted',
                 ].map((item) => (
@@ -324,7 +324,7 @@ export default function Essay() {
               <h3 className="font-semibold text-foreground mb-5">Consequences</h3>
               <div className="space-y-4">
                 {[
-                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, minor citation errors corrected with 5â€“10% point deduction.' },
+                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, minor citation errors corrected with 5–10% point deduction.' },
                   { tier: 'Clear Cheating', color: 'text-orange-700 bg-primary/5 border-orange-200', desc: 'Essay disqualified, score of zero, disqualification from rankings and awards, school notification.' },
                   { tier: 'Severe or Repeated', color: 'text-destructive bg-destructive/10 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all earned points, ban from future competitions.' },
                 ].map((c) => (
@@ -335,7 +335,7 @@ export default function Essay() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                Appeals must be submitted within 24 hours of the disputed incident by the student or their parent/guardian. Final determinations are issued within 48â€“72 hours.
+                Appeals must be submitted within 24 hours of the disputed incident by the student or their parent/guardian. Final determinations are issued within 48–72 hours.
               </p>
             </motion.div>
           </div>

@@ -35,7 +35,7 @@ const fadeUp = (delay = 0) => ({
 const partners = PARTNERS;
 
 const faqs = [
-  { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required â€” we provide all the study materials you need, completely free.' },
+  { q: 'Who can participate?', a: 'Any high school student in the United States. No prior economics knowledge is required, we provide all the study materials you need, completely free.' },
   { q: 'Is there a registration fee?', a: 'No. The USAEO is completely free to participate in at every stage. Our mission is to make economics education accessible to all students regardless of background.' },
   { q: 'What topics are covered?', a: 'Microeconomics, macroeconomics, international trade, data interpretation, and real-world economic analysis. The full syllabus is available to all registered students.' },
   { q: 'How is the competition structured?', a: 'Four stages: National Qualifiers (virtual, February 28, 2026), Quiz Bowl (open now), Essay Competition (open now), and National Finals (in-person, May 2026). Each stage builds on the last.' },
@@ -45,7 +45,7 @@ const faqs = [
 
 const principles = [
   { title: 'Academic excellence', body: 'We set a high standard for economic reasoning, testing theory, data analysis, and real-world problem solving across all competition stages. Students leave the USAEO with analytical skills that extend well beyond economics.' },
-  { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler â€” from any state, any school, any background.' },
+  { title: 'Radical accessibility', body: 'Free registration, free curriculum, free workshops. No school nomination, no entry fees, no prerequisites. The competition is genuinely open to every US high schooler, from any state, any school, any background.' },
   { title: 'Impact-driven', body: "As a 501(c)(3) nonprofit, every dollar we raise goes toward student programming: free workshops, open curriculum, and a competition infrastructure that levels the playing field for students everywhere." },
 ];
 
@@ -83,7 +83,7 @@ export default function Home() {
             </motion.h1>
 
             <motion.p {...fadeUp(0.1)} className="text-xl text-muted-foreground max-w-xl leading-relaxed mb-10">
-              The USAEO is a free national competition that identifies and develops America's top young economists â€” completely free, open to every US high school student, and run by a 501(c)(3) nonprofit.
+              The USAEO is a free national competition that identifies and develops America's top young economists, completely free, open to every US high school student, and run by a 501(c)(3) nonprofit.
             </motion.p>
 
             <motion.div {...fadeUp(0.15)} className="flex flex-wrap gap-3">
@@ -145,7 +145,7 @@ export default function Home() {
                 The USAEO runs a multi-stage competition open to all US high school students: qualifying round, Quiz Bowl, Essay Competition, and National Finals. Each stage is free to enter.
               </p>
               <p className="text-muted-foreground leading-relaxed text-base">
-                Students advance based solely on performance. There are no nominations, no fees, and no prerequisites â€” just a genuine open competition accessible to every US high schooler.
+                Students advance based solely on performance. There are no nominations, no fees, and no prerequisites, just a genuine open competition accessible to every US high schooler.
               </p>
             </motion.div>
 
@@ -153,12 +153,12 @@ export default function Home() {
               {[
                 {
                   n: '01', title: 'National Qualifiers', date: 'February 28, 2026',
-                  body: 'A two-hour virtual exam open to all US high school students covering the full USAEO syllabus. Registration is now closed â€” top scorers have advanced to the next rounds.',
+                  body: 'A two-hour virtual exam open to all US high school students covering the full USAEO syllabus. Registration is now closed, top scorers have advanced to the next rounds.',
                   to: '/competitions',
                 },
                 {
                   n: '02', title: 'Quiz Bowl', date: 'Coming Soon',
-                  body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students â€” register now to secure your spot.',
+                  body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students, register now to secure your spot.',
                   to: '/competitions/quiz-bowl',
                 },
                 {
@@ -203,7 +203,7 @@ export default function Home() {
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
-                The competition is the core of USAEO â€” but the program extends well beyond exam day. Whether you're looking to study, research, connect with peers, or build something at your school, there's a place for you.
+                The competition is the core of USAEO, but the program extends well beyond exam day. Whether you're looking to study, research, connect with peers, or build something at your school, there's a place for you.
               </p>
             </motion.div>
           </div>
@@ -213,7 +213,7 @@ export default function Home() {
               {
                 title: 'Free Curriculum',
                 to: '/curriculum',
-                body: 'Six structured units covering the complete USAEO syllabus â€” from introductory supply and demand to international finance. Self-paced, with problem sets and practice tests. No prior economics background needed.',
+                body: 'Six structured units covering the complete USAEO syllabus, from introductory supply and demand to international finance. Self-paced, with problem sets and practice tests. No prior economics background needed.',
                 meta: '6 units Â· 30+ hours Â· Self-paced',
               },
               {
@@ -262,7 +262,7 @@ export default function Home() {
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="md:pt-9">
               <p className="text-base text-muted-foreground leading-relaxed">
-                The USAEO is supported by organizations committed to economics education and student opportunity. Our partners share our belief that every student â€” regardless of background or resources â€” deserves access to rigorous, real-world economic learning. Together, we work to expand the reach and impact of the USAEO mission across the country.
+                The USAEO is supported by organizations committed to economics education and student opportunity. Our partners share our belief that every student, regardless of background or resources, deserves access to rigorous, real-world economic learning. Together, we work to expand the reach and impact of the USAEO mission across the country.
               </p>
             </motion.div>
           </div>
@@ -344,7 +344,7 @@ export default function Home() {
             </MapContainer>
           </motion.div>
 
-          {/* Chapter grid â€” first 6 from canonical seed */}
+          {/* Chapter grid, first 6 from canonical seed */}
           <motion.div {...fadeUp(0.15)} className="grid md:grid-cols-3 gap-4">
             {CHAPTERS_SEED.slice(0, 6).map((c) => (
               <div key={c.id} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
@@ -377,7 +377,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { quote: 'USAEO fundamentally changed how I think about economics. The workshops were invaluable prep for both the competition and my AP coursework.', name: 'Aisha T.', school: 'Stuyvesant High School, NY', year: 'Class of 2026' },
-              { quote: "I had no economics background when I registered. Six months later I was competing at the national level. The free curriculum made it genuinely possible â€” not just in theory.", name: 'Marcus L.', school: 'Phillips Academy, MA', year: 'Class of 2025' },
+              { quote: "I had no economics background when I registered. Six months later I was competing at the national level. The free curriculum made it genuinely possible, not just in theory.", name: 'Marcus L.', school: 'Phillips Academy, MA', year: 'Class of 2025' },
               { quote: "Competing at the National Finals was the most formative academic experience of my life. The community you build with students from across the country is unlike anything in a classroom.", name: 'Sofia R.', school: 'Lowell High School, CA', year: 'National Finals 2025' },
             ].map((t, i) => (
               <motion.div key={t.name} {...fadeUp(i * 0.1)} className="bg-white border border-border rounded-2xl p-8">
@@ -400,7 +400,7 @@ export default function Home() {
             <motion.div {...fadeUp()} className="md:sticky md:top-24 py-28 md:py-36 self-start">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">Our Mission</p>
               <blockquote className="font-sans text-3xl md:text-4xl text-white leading-snug mb-6">
-                "We believe every student deserves access to world-class economics education â€” and the chance to prove themselves on the global stage."
+                "We believe every student deserves access to world-class economics education, and the chance to prove themselves on the global stage."
               </blockquote>
               <Link to="/about" className="inline-flex items-center gap-2 text-sm font-medium text-orange-400 hover:text-primary/70 transition-colors">
                 About USAEO <ArrowRight className="w-4 h-4" />

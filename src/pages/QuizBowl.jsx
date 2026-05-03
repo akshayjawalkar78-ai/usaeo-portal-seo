@@ -21,7 +21,7 @@ const categories = [
 
 const software = [
   { name: 'Kahoot', role: 'Regular question delivery', icon: Monitor, desc: 'Questions displayed on the host screen; participants answer on their devices.' },
-  { name: 'Multibuzzer', role: 'Toss-up questions', icon: Zap, desc: 'Online buzzer platform â€” first team to buzz in earns the right to answer.' },
+  { name: 'Multibuzzer', role: 'Toss-up questions', icon: Zap, desc: 'Online buzzer platform, first team to buzz in earns the right to answer.' },
   { name: 'Google Meet', role: 'Live competition sessions', icon: BookOpen, desc: 'All matches run live via Google Meet, limited to 60 minutes per session.' },
 ];
 
@@ -32,7 +32,7 @@ export default function QuizBowl() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02 â€” Competition</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02, Competition</p>
             <div className="flex items-center gap-3 mb-4">
               <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight">
                 Quiz Bowl
@@ -40,7 +40,7 @@ export default function QuizBowl() {
               <span className="text-xs font-semibold bg-success/10 text-success border border-green-200 px-3 py-1 rounded-full">Open</span>
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Fast-paced live team competition covering microeconomics, macroeconomics, and current events. Teams of 3â€“5 compete in round-robin matches leading to a single-elimination playoff.
+              Fast-paced live team competition covering microeconomics, macroeconomics, and current events. Teams of 3–5 compete in round-robin matches leading to a single-elimination playoff.
             </p>
           </motion.div>
         </div>
@@ -54,10 +54,10 @@ export default function QuizBowl() {
             <div className="divide-y divide-border mb-10">
               {[
                 { label: 'Date', value: 'Coming Soon' },
-                { label: 'Format', value: 'Virtual â€” live Google Meet + Kahoot / Multibuzzer' },
-                { label: 'Team Size', value: '3â€“5 players per team (captain required)' },
+                { label: 'Format', value: 'Virtual, live Google Meet + Kahoot / Multibuzzer' },
+                { label: 'Team Size', value: '3–5 players per team (captain required)' },
                 { label: 'Duration', value: '60 minutes per match' },
-                { label: 'Eligibility', value: 'All registered USAEO students (grades 9â€“12)' },
+                { label: 'Eligibility', value: 'All registered USAEO students (grades 9–12)' },
                 { label: 'Cost', value: 'Free' },
                 { label: 'Registration', value: 'Open now' },
               ].map((row) => (
@@ -80,7 +80,7 @@ export default function QuizBowl() {
               </p>
               <Link to="/register/quiz-bowl"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register Now â€” Free <ArrowRight className="w-4 h-4" />
+                Register Now, Free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="bg-white border border-border rounded-2xl p-8">
@@ -88,7 +88,7 @@ export default function QuizBowl() {
               <div className="space-y-3">
                 {[
                   'Complete the free USAEO curriculum (6 units)',
-                  'Attend live workshops â€” recordings available',
+                  'Attend live workshops, recordings available',
                   'Practice with past USAEO exam questions',
                   'Review economic news and current events',
                   'Form your team early and select a captain',
@@ -123,9 +123,9 @@ export default function QuizBowl() {
                 </div>
                 <div className="space-y-4">
                   {[
-                    { label: 'Players', value: '3â€“5 per team (minimum 3 to compete)' },
-                    { label: 'Alternates', value: 'Up to 2 â€” substitutions between rounds only' },
-                    { label: 'Captain', value: 'Required â€” must be selected before start' },
+                    { label: 'Players', value: '3–5 per team (minimum 3 to compete)' },
+                    { label: 'Alternates', value: 'Up to 2, substitutions between rounds only' },
+                    { label: 'Captain', value: 'Required, must be selected before start' },
                     { label: 'Minimum teams', value: '16 teams required for the event to run' },
                   ].map((row) => (
                     <div key={row.label} className="flex gap-6">
@@ -144,7 +144,7 @@ export default function QuizBowl() {
                   {
                     phase: '01',
                     title: 'Round-Robin Preliminaries',
-                    desc: 'Teams are split into groups of 4 and play 3â€“5 matches each. Top finishers from each bracket earn guaranteed playoff spots; remaining spots are filled by wildcards based on cumulative scores.',
+                    desc: 'Teams are split into groups of 4 and play 3–5 matches each. Top finishers from each bracket earn guaranteed playoff spots; remaining spots are filled by wildcards based on cumulative scores.',
                   },
                   {
                     phase: '02',
@@ -197,7 +197,7 @@ export default function QuizBowl() {
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm flex-shrink-0">5</span>
                   <div>
                     <p className="text-sm font-semibold text-foreground">Toss-Up Questions (Multibuzzer)</p>
-                    <p className="text-sm text-muted-foreground">Read aloud by the moderator. First to buzz in must answer alone â€” no consulting teammates.</p>
+                    <p className="text-sm text-muted-foreground">Read aloud by the moderator. First to buzz in must answer alone, no consulting teammates.</p>
                   </div>
                 </div>
               </div>
@@ -226,7 +226,7 @@ export default function QuizBowl() {
           <motion.div {...fadeUp(0.12)} className="bg-white border border-border rounded-2xl p-8">
             <h3 className="font-semibold text-foreground mb-4">Bonus Questions</h3>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer â€” no buzzing required. Incorrect answers incur a point reduction. Scores are tracked and displayed in real time throughout the match.
+              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer, no buzzing required. Incorrect answers incur a point reduction. Scores are tracked and displayed in real time throughout the match.
             </p>
           </motion.div>
         </div>
@@ -351,7 +351,7 @@ export default function QuizBowl() {
               <h3 className="font-semibold text-foreground mb-5">Consequences</h3>
               <div className="space-y-4">
                 {[
-                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, point deduction of 500â€“1,000 pts or removal from current round.' },
+                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, point deduction of 500–1,000 pts or removal from current round.' },
                   { tier: 'Clear Cheating', color: 'text-orange-700 bg-primary/5 border-orange-200', desc: 'Team disqualified from the round, score of zero, placed on probation, possible school notification.' },
                   { tier: 'Severe or Repeated', color: 'text-destructive bg-destructive/10 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all points, ban from future competitions.' },
                 ].map((c) => (

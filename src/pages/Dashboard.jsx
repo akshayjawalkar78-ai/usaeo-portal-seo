@@ -272,7 +272,7 @@ export default function Dashboard() {
                   { label: 'National Qualifiers', status: 'Closed', color: 'text-destructive', bg: 'bg-destructive/10 border-red-200' },
                   { label: 'Quiz Bowl', status: 'Open', color: 'text-success', bg: 'bg-success/10 border-green-200' },
                   { label: 'Essay Competition', status: 'Open', color: 'text-success', bg: 'bg-success/10 border-green-200' },
-                  { label: 'National Finals', status: 'Upcoming â€” May 2026', color: 'text-primary', bg: 'bg-primary/5 border-orange-200' },
+                  { label: 'National Finals', status: 'Upcoming, May 2026', color: 'text-primary', bg: 'bg-primary/5 border-orange-200' },
                 ].map((s) => (
                   <div key={s.label} className={`rounded-xl border px-4 py-3 ${s.bg}`}>
                     <p className="text-xs text-muted-foreground mb-0.5">{s.label}</p>
@@ -379,7 +379,7 @@ export default function Dashboard() {
                 );
               })()}
               <div className="bg-white rounded-2xl border border-border p-8">
-                <h2 className="font-semibold text-foreground mb-2">Competition Timeline 2025â€“2026</h2>
+                <h2 className="font-semibold text-foreground mb-2">Competition Timeline 2025–2026</h2>
                 <p className="text-sm text-muted-foreground mb-8">Your full pathway from registration through the National Finals.</p>
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
@@ -713,7 +713,7 @@ export default function Dashboard() {
                         {/* Browse open teams */}
                         {openQBTeams.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams â€” Request to Join</p>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams, Request to Join</p>
                             <div className="space-y-2">
                               {openQBTeams.map(t => {
                                 const activeCount = t.members.filter(m => m.status === 'active').length;
@@ -788,7 +788,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="font-semibold text-foreground">Competition Rankings</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">2025â€“2026 season</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">2025–2026 season</p>
                   </div>
                   <div className="flex bg-muted rounded-lg p-1 gap-1">
                     {['qualifiers', 'finals'].map((s) => (
@@ -932,7 +932,7 @@ export default function Dashboard() {
               </div>
               {pastWorkshops.length > 0 && (
                 <div className="bg-white rounded-2xl border border-border p-8">
-                  <h2 className="font-semibold text-foreground mb-5">Past Workshops â€” Recordings</h2>
+                  <h2 className="font-semibold text-foreground mb-5">Past Workshops, Recordings</h2>
                   <div className="space-y-3">
                     {pastWorkshops.map((w) => (
                       <div key={w.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">

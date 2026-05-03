@@ -38,7 +38,7 @@ export default function Research() {
               Original research,<br /><em>real mentorship</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Conduct original economics research under the guidance of professional economists and academics. Published work appears in the USAEO Research Journal â€” a peer-reviewed publication read by university admissions offices nationwide.
+              Conduct original economics research under the guidance of professional economists and academics. Published work appears in the USAEO Research Journal, a peer-reviewed publication read by university admissions offices nationwide.
             </p>
             <div className="flex flex-wrap gap-6 mt-8">
               {[['Open', 'Applications'], ['30+', 'Faculty mentors'], [`${topics.length}+`, 'Research areas']].map(([v, l]) => (
@@ -67,9 +67,9 @@ export default function Research() {
           <div className="grid md:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden mb-10">
             {[
               { n: '01', title: 'Apply & Get Matched', desc: 'Submit your research interests and a brief statement of purpose. We review applications on a rolling basis and match you with a professional economist mentor whose expertise aligns with your area of focus.', time: '~2 weeks' },
-              { n: '02', title: 'Develop Your Research', desc: 'Work one-on-one with your mentor over 3â€“4 months to develop a rigorous, original research paper. Regular check-ins, feedback sessions, and structured milestones keep your project on track.', time: '3â€“4 months' },
-              { n: '03', title: 'Peer Review Process', desc: 'Your completed paper is submitted to our editorial board of student and faculty reviewers. You\'ll receive detailed, constructive feedback and an opportunity for revision before final acceptance.', time: '4â€“6 weeks' },
-              { n: '04', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal â€” a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
+              { n: '02', title: 'Develop Your Research', desc: 'Work one-on-one with your mentor over 3–4 months to develop a rigorous, original research paper. Regular check-ins, feedback sessions, and structured milestones keep your project on track.', time: '3–4 months' },
+              { n: '03', title: 'Peer Review Process', desc: 'Your completed paper is submitted to our editorial board of student and faculty reviewers. You\'ll receive detailed, constructive feedback and an opportunity for revision before final acceptance.', time: '4–6 weeks' },
+              { n: '04', title: 'Publication', desc: 'Accepted papers are published in the USAEO Research Journal, a formal academic publication with an ISSN that you can cite on college applications and your academic CV.', time: 'Rolling' },
             ].map((s, i) => (
               <motion.div key={s.n} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10">
                 <div className="flex items-start justify-between gap-4 mb-4">

@@ -35,7 +35,7 @@ export default function Workshops() {
               Expert-led sessions,<br /><em>completely free</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Live workshops covering macroeconomics, game theory, data analysis, and competition prep â€” all on Zoom, all free for registered students.
+              Live workshops covering macroeconomics, game theory, data analysis, and competition prep, all on Zoom, all free for registered students.
             </p>
             <div className="flex flex-wrap gap-10 mt-10">
               {[['9', 'Sessions hosted'], ['$0', 'Cost to attend'], ['9', 'Expert instructors'], ['60+', 'Min of content each']].map(([v, l]) => (

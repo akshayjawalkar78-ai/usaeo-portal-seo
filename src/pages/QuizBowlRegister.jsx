@@ -219,7 +219,7 @@ export default function QuizBowlRegister() {
 
               {showTeam && (
                 <div className="px-4 pb-4 pt-1 space-y-4 border-t border-border bg-muted/10">
-                  <p className="text-xs text-muted-foreground">Teams need 3â€“5 players. You can also create or join a team from your dashboard after registering.</p>
+                  <p className="text-xs text-muted-foreground">Teams need 3–5 players. You can also create or join a team from your dashboard after registering.</p>
 
                   <div>
                     <label className="block text-xs font-semibold text-foreground mb-1.5">Team Name</label>

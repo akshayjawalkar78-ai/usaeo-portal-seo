@@ -171,7 +171,7 @@ export default function Admin() {
         curriculumUnit: base44.entities.CurriculumUnit,
       };
       const entity = entityMap[type];
-      // rankings: team_name NOT NULL â€” derive from student_name if not provided
+      // rankings: team_name NOT NULL, derive from student_name if not provided
       const payload = type === 'ranking'
         ? { ...form, team_name: form.team_name || form.student_name || form.school || 'Individual' }
         : form;
@@ -348,7 +348,7 @@ export default function Admin() {
                 <Field label="Unit Number (e.g. 01)" value={form.unit_number} onChange={v => setForm(p => ({ ...p, unit_number: v }))} />
                 <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
                 <Field label="Topics (comma-separated)" value={form.topics} onChange={v => setForm(p => ({ ...p, topics: v }))} />
-                <Field label="Hours (e.g. 4â€“6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
+                <Field label="Hours (e.g. 4–6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
                 <Field label="URL" value={form.url} onChange={v => setForm(p => ({ ...p, url: v }))} />
                 <Field label="Order (sort position)" type="number" value={form.order} onChange={v => setForm(p => ({ ...p, order: parseInt(v) }))} />
               </>}
@@ -356,7 +356,7 @@ export default function Admin() {
                 <button onClick={() => setModal(null)} className="px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">Cancel</button>
                 <button onClick={handleSave} disabled={saving}
                   className="px-5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60">
-                  {saving ? 'Savingâ€¦' : 'Save'}
+                  {saving ? 'Saving…' : 'Save'}
                 </button>
               </div>
             </div>
@@ -373,7 +373,7 @@ export default function Admin() {
                 <h3 className="font-semibold text-foreground">Duplicate Registrations Found</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-2">
-                <strong>{dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''}</strong> detected in the current view â€” same email registered for the same event more than once.
+                <strong>{dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''}</strong> detected in the current view, same email registered for the same event more than once.
               </p>
               <p className="text-sm text-muted-foreground mb-5">
                 Removing keeps the <strong>earliest</strong> registration per email + event type and permanently deletes the rest.
@@ -857,19 +857,19 @@ export default function Admin() {
                               <td className="px-4 py-3 font-medium text-foreground">
                                 <span className="flex items-center gap-1.5">
                                   {isDup && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
-                                  {r.user_name || 'â€”'}
+                                  {r.user_name || '—'}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                              <td className="px-4 py-3 text-foreground">{r.event_name || 'â€”'}</td>
+                              <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
                               <td className="px-4 py-3">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-primary/5 text-primary border border-orange-200'}`}>
-                                  {r.event_type || 'â€”'}
+                                  {r.event_type || '—'}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.school || 'â€”'}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.state || 'â€”'}</td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : 'â€”'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
                               <td className={`sticky right-0 px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] ${isDup ? 'bg-amber-50 group-hover:bg-amber-100' : 'bg-white group-hover:bg-muted/20'}`}>
                                 <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
                                   className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -1006,10 +1006,10 @@ export default function Admin() {
                     <tbody className="divide-y divide-border">
                       {applications.map(a => (
                         <tr key={a.id} className="hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-medium text-foreground">{a.user_name || 'â€”'}</td>
+                          <td className="px-4 py-3 font-medium text-foreground">{a.user_name || '—'}</td>
                           <td className="px-4 py-3 text-muted-foreground">{a.user_email}</td>
                           <td className="px-4 py-3 text-foreground capitalize">{a.program}</td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.payload?.school ? `${a.payload.school}${a.payload.state ? `, ${a.payload.state}` : ''}` : 'â€”'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.payload?.school ? `${a.payload.school}${a.payload.state ? `, ${a.payload.state}` : ''}` : '—'}</td>
                           <td className="px-4 py-3">
                             <select value={a.status || 'pending'} onChange={async e => {
                               await base44.entities.Application.update(a.id, { status: e.target.value });
@@ -1020,7 +1020,7 @@ export default function Admin() {
                               <option value="rejected">Rejected</option>
                             </select>
                           </td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'â€”'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
                           <td className="px-4 py-3 text-right">
                             <button onClick={() => setDeleteTarget({ entity: base44.entities.Application, id: a.id, label: a.user_name || a.user_email })}
                               className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>

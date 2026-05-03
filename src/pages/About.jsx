@@ -15,7 +15,7 @@ const values = [
   { title: 'Academic Excellence', desc: 'We set the highest standard in economics education, challenging students with rigorous micro and macroeconomic theory, data analysis, and real-world problem solving.' },
   { title: 'Radical Accessibility', desc: 'The USAEO is 100% free. We believe financial barriers should never prevent a talented student from competing at the national level.' },
   { title: 'Community & Leadership', desc: 'We foster a nationwide network of students, chapter founders, mentors, and economists who share a passion for understanding how the world works.' },
-  { title: 'Impact-Driven', desc: 'As a 501(c)(3) nonprofit, every dollar we raise goes directly toward student programming â€” free workshops, curriculum, and competition infrastructure.' },
+  { title: 'Impact-Driven', desc: 'As a 501(c)(3) nonprofit, every dollar we raise goes directly toward student programming, free workshops, curriculum, and competition infrastructure.' },
 ];
 
 export default function About() {
@@ -30,7 +30,7 @@ export default function About() {
               Elevating economics<br /><em>education nationwide</em>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              The USA Economics Olympiad (USAEO) is a 501(c)(3) nonprofit organization dedicated to identifying and developing the nation's top high school economists â€” completely free, open to every student.
+              The USA Economics Olympiad (USAEO) is a 501(c)(3) nonprofit organization dedicated to identifying and developing the nation's top high school economists, completely free, open to every student.
             </p>
           </motion.div>
         </div>
@@ -47,7 +47,7 @@ export default function About() {
             <div className="space-y-4 text-muted-foreground leading-relaxed text-base">
               <p>The USAEO identifies and rewards the nation's top high school economists through rigorous competition. We emphasize <strong className="text-foreground">academic excellence</strong> through micro and macroeconomic theory, data interpretation, and real-world problem solving.</p>
               <p>As a registered <strong className="text-foreground">501(c)(3) nonprofit</strong>, our activities include: hosting free national competitions (Quiz Bowl, Essay, National Finals), offering free live workshops taught by university economists, providing a complete open curriculum, supporting student-led chapters in high schools across the country, and running a student research program.</p>
-              <p>We foster <strong className="text-foreground">leadership and outreach</strong> through mentorship and connections with economists and institutions â€” building the pipeline from classroom curiosity to national competition.</p>
+              <p>We foster <strong className="text-foreground">leadership and outreach</strong> through mentorship and connections with economists and institutions, building the pipeline from classroom curiosity to national competition.</p>
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
@@ -78,7 +78,7 @@ export default function About() {
       <section className="py-20 px-5 text-center">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
           <h2 className="font-sans text-4xl text-foreground mb-5">Want to get involved?</h2>
-          <p className="text-muted-foreground mb-8">Whether you want to compete, volunteer, sponsor, or start a chapter â€” there's a place for you in the USAEO community.</p>
+          <p className="text-muted-foreground mb-8">Whether you want to compete, volunteer, sponsor, or start a chapter, there's a place for you in the USAEO community.</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/register/quiz-bowl"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">

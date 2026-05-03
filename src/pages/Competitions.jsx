@@ -21,7 +21,7 @@ const phases = [
   {
     n: '02', status: 'open', badge: 'Coming Soon Â· Virtual',
     title: 'Quiz Bowl',
-    desc: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students â€” register now to secure your spot.',
+    desc: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students, register now to secure your spot.',
     cta: { label: 'Register for Quiz Bowl', to: '/register/quiz-bowl' },
   },
   {
@@ -33,7 +33,7 @@ const phases = [
   {
     n: '04', status: 'future', badge: 'May 2026 Â· In-Person',
     title: 'National Finals',
-    desc: 'An intensive in-person competition featuring a comprehensive written examination and real-world case study analysis. Invitation only â€” top scorers from qualifier rounds are selected.',
+    desc: 'An intensive in-person competition featuring a comprehensive written examination and real-world case study analysis. Invitation only, top scorers from qualifier rounds are selected.',
     cta: { label: 'Learn More', to: '/competitions/finals' },
   },
 ];

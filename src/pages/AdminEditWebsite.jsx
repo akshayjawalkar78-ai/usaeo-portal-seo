@@ -59,7 +59,7 @@ function ContentEditor({ value, onChange }) {
           <ImageIcon className="w-3.5 h-3.5" /> Image URL (for image blocks)
         </label>
         <input type="url" value={c.imageUrl || ''} onChange={e => set('imageUrl', e.target.value)}
-          placeholder="https://images.unsplash.com/â€¦"
+          placeholder="https://images.unsplash.com/…"
           className="w-full border border-border rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/30" />
       </div>
     </div>
@@ -166,7 +166,7 @@ export default function AdminEditWebsite() {
 
           <button type="button" onClick={save} disabled={saving}
             className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-60 transition-colors">
-            {saved ? <><CheckCircle className="w-3.5 h-3.5" /> Saved!</> : <><Save className="w-3.5 h-3.5" /> {saving ? 'Savingâ€¦' : 'Save block'}</>}
+            {saved ? <><CheckCircle className="w-3.5 h-3.5" /> Saved!</> : <><Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save block'}</>}
           </button>
         </div>
 

@@ -29,13 +29,13 @@ const contributionSections = [
     id: 'awareness',
     eyebrow: 'Awareness',
     title: 'Bringing the competition\nto more students',
-    body: 'These partners amplify the USAEO across their networks â€” clubs, classrooms, and regional communities â€” so every student hears about us on time.',
+    body: 'These partners amplify the USAEO across their networks, clubs, classrooms, and regional communities, so every student hears about us on time.',
     stories: [
       { partner: 'Fintech Scholars', headline: 'Campus outreach', body: 'Fintech Scholars drove 200+ new registrations through their club network in a single month.' },
       { partner: 'FYC', headline: 'Local chapter activation', body: 'FYC activated five new city chapters to promote the Quiz Bowl and host study halls.' },
       { partner: 'A-Warded', headline: 'Credential surface', body: 'A-Warded surfaced the USAEO on every relevant student profile, widening the applicant funnel by 30%.' },
       { partner: 'Southeast Asian Economics Project', headline: 'Regional reach', body: 'SEAE organized info-sessions across their international network to extend USAEO visibility.' },
-      { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter â€” twice.' },
+      { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter, twice.' },
     ],
   },
   {
@@ -134,9 +134,9 @@ function ContributionSection({ section, index }) {
                 <StoryCard key={s.partner + i} story={s} />
               ))}
             </motion.div>
-            {/* Left-edge fade â€” masks clipped content on left */}
+            {/* Left-edge fade, masks clipped content on left */}
             <div className={`pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r ${index % 2 === 0 ? 'from-white' : 'from-[#f4f4f2]'} to-transparent`} />
-            {/* Right-edge fade â€” indicates more cards available */}
+            {/* Right-edge fade, indicates more cards available */}
             <div className={`pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l ${index % 2 === 0 ? 'from-white' : 'from-[#f4f4f2]'} to-transparent`} />
             <div className="absolute top-2 right-0 flex gap-1.5">
               {section.stories.map((_, i) => (
@@ -214,7 +214,7 @@ export default function Partners() {
         </div>
       </section>
 
-      {/* Become a Partner â€” header only, tier cards intentionally removed. */}
+      {/* Become a Partner, header only, tier cards intentionally removed. */}
       <section className="py-20 px-5 bg-muted/30">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div {...fadeUp()}>

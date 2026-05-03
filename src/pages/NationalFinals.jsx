@@ -18,7 +18,7 @@ export default function NationalFinals() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02 â€” Competition</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 02, Competition</p>
             <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6">
               National Finals
             </h1>
@@ -38,7 +38,7 @@ export default function NationalFinals() {
               The national stage<br /><em>for America's best</em>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students â€” top scorers from the Quiz Bowl and Essay rounds â€” are notified by email and invited to attend at no cost.</p>
+              <p>The National Finals is an invitation-only in-person event held at a US university campus in May 2026. Qualified students, top scorers from the Quiz Bowl and Essay rounds, are notified by email and invited to attend at no cost.</p>
               <p>The Finals combines a comprehensive written examination with a structured case study analysis. Top performers across both sections are named National Champions of the USA Economics Olympiad.</p>
               <p>USAEO provides a dedicated Finals preparation workshop series in April and May, covering advanced topics and case study methodology. All recordings are available to qualified students through the student portal.</p>
             </div>
@@ -94,7 +94,7 @@ export default function NationalFinals() {
           <motion.div {...fadeUp(0.1)} className="divide-y divide-border">
             {[
               { label: 'Date', value: 'May 2026 (exact date TBA)' },
-              { label: 'Format', value: 'In-person â€” location TBA' },
+              { label: 'Format', value: 'In-person, location TBA' },
               { label: 'Eligibility', value: 'Invitation only (top Quiz Bowl & Essay scorers)' },
               { label: 'Sections', value: 'Written exam + case study analysis' },
               { label: 'Duration', value: 'Full day event' },
@@ -121,7 +121,7 @@ export default function NationalFinals() {
           </motion.div>
           <motion.div {...fadeUp(0.1)} className="space-y-10">
             {[
-              { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization â€” students are expected to reason through complex economic scenarios.' },
+              { step: '01', title: 'Written Examination', body: 'A comprehensive exam covering the full USAEO syllabus at advanced depth. Tests application and analysis rather than memorization, students are expected to reason through complex economic scenarios.' },
               { step: '02', title: 'Case Study Analysis', body: 'Students are presented with a real-world economic policy challenge and must produce a structured written analysis within a time limit. Evaluated on economic reasoning, use of evidence, and policy recommendations.' },
               { step: '03', title: 'National Champion Selection', body: 'Combined scores from both sections determine the National Finals ranking. The highest-ranked students are named National Champions of the USA Economics Olympiad.' },
             ].map((s) => (
@@ -168,9 +168,9 @@ export default function NationalFinals() {
       {/* CTA */}
       <section className="py-20 px-5 text-center">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-sans text-4xl text-foreground mb-5">Compete now â€” Quiz Bowl & Essay are open</h2>
+          <h2 className="font-sans text-4xl text-foreground mb-5">Compete now, Quiz Bowl & Essay are open</h2>
           <p className="text-muted-foreground mb-8">
-            Register for Quiz Bowl or Essay Competition â€” both are free and open to all high school students.
+            Register for Quiz Bowl or Essay Competition, both are free and open to all high school students.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/register/quiz-bowl"
