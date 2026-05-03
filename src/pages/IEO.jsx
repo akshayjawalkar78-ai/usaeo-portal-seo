@@ -4,10 +4,10 @@ import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 export default function IEO() {
@@ -17,7 +17,7 @@ export default function IEO() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">International</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-3xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-3xl">
               International Economics<br /><em>Olympiad</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -31,7 +31,7 @@ export default function IEO() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">What is the IEO?</p>
-            <h2 className="font-serif text-4xl text-foreground leading-tight mb-6">
+            <h2 className="font-sans text-4xl text-foreground leading-tight mb-6">
               The global stage for<br /><em>young economists</em>
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
@@ -48,7 +48,7 @@ export default function IEO() {
       <section className="py-20 px-5 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12 text-center">
-            <h2 className="font-serif text-4xl text-foreground">By the numbers</h2>
+            <h2 className="font-sans text-4xl text-foreground">By the numbers</h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -58,7 +58,7 @@ export default function IEO() {
               { value: 'Annual', label: 'Global event' },
             ].map((s, i) => (
               <motion.div key={s.label} {...fadeUp(i * 0.08)} className="bg-white border border-border rounded-2xl p-6 text-center">
-                <div className="font-serif text-4xl text-primary mb-2">{s.value}</div>
+                <div className="font-sans text-4xl text-primary mb-2">{s.value}</div>
                 <div className="text-sm text-muted-foreground">{s.label}</div>
               </motion.div>
             ))}
@@ -69,7 +69,7 @@ export default function IEO() {
       <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
-            <h2 className="font-serif text-4xl text-foreground mb-4">How to qualify</h2>
+            <h2 className="font-sans text-4xl text-foreground mb-4">How to qualify</h2>
             <p className="text-muted-foreground max-w-xl">The path to the IEO runs through the USAEO.</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden">
@@ -79,7 +79,7 @@ export default function IEO() {
               { step: '3', title: 'Represent the USA', desc: 'Top performers at Nationals earn a spot on the IEO team' },
             ].map((s, i) => (
               <motion.div key={s.step} {...fadeUp(i * 0.1)} className="bg-white p-8">
-                <span className="font-serif text-5xl text-orange-100 block mb-4">{s.step}</span>
+                <span className="font-sans text-5xl text-orange-100 block mb-4">{s.step}</span>
                 <h3 className="font-semibold text-foreground mb-2">{s.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
               </motion.div>

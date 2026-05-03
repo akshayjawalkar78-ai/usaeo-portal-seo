@@ -4,40 +4,40 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const units = [
   {
-    n: '01', title: 'Supply, Demand & Markets', hrs: '4–6 hrs',
+    n: '01', title: 'Supply, Demand & Markets', hrs: '4â€“6 hrs',
     desc: 'The foundation of economic analysis. Learn how prices are determined through the interaction of buyers and sellers, why markets sometimes fail, and how elasticity measures responsiveness to price changes.',
     topics: ['Law of supply & demand', 'Market equilibrium', 'Price elasticity', 'Market failures'],
   },
   {
-    n: '02', title: 'Consumer & Producer Theory', hrs: '5–7 hrs',
+    n: '02', title: 'Consumer & Producer Theory', hrs: '5â€“7 hrs',
     desc: 'Explore the mathematical foundations of microeconomics. Understand how consumers maximize utility under budget constraints and how firms choose production levels to minimize cost.',
     topics: ['Utility maximization', 'Budget constraints', 'Production functions', 'Cost curves'],
   },
   {
-    n: '03', title: 'Market Structures', hrs: '6–8 hrs',
+    n: '03', title: 'Market Structures', hrs: '6â€“8 hrs',
     desc: 'From perfect competition to monopoly, this unit examines how market power shapes pricing and output decisions. Game theory fundamentals are introduced through oligopoly models.',
     topics: ['Perfect competition', 'Monopoly & oligopoly', 'Game theory basics', 'Pricing strategies'],
   },
   {
-    n: '04', title: 'Macroeconomic Foundations', hrs: '5–7 hrs',
+    n: '04', title: 'Macroeconomic Foundations', hrs: '5â€“7 hrs',
     desc: 'Shift from individual markets to the entire economy. Learn to measure economic output, understand the causes of unemployment and inflation, and analyze the business cycle.',
     topics: ['GDP & national accounts', 'Unemployment', 'Inflation', 'Business cycles'],
   },
   {
-    n: '05', title: 'Monetary & Fiscal Policy', hrs: '5–7 hrs',
+    n: '05', title: 'Monetary & Fiscal Policy', hrs: '5â€“7 hrs',
     desc: 'Examine the tools governments and central banks use to stabilize the economy. Understand how interest rates, money supply, and government spending affect output and inflation.',
     topics: ['Central banking', 'Money supply', 'Fiscal multipliers', 'Stabilization policy'],
   },
   {
-    n: '06', title: 'International Trade & Finance', hrs: '5–7 hrs',
+    n: '06', title: 'International Trade & Finance', hrs: '5â€“7 hrs',
     desc: 'The final unit covers the global economy. From comparative advantage to exchange rate dynamics, this unit prepares you for the international economics questions at the National Qualifiers and Finals.',
     topics: ['Comparative advantage', 'Trade policy', 'Exchange rates', 'Balance of payments'],
   },
@@ -50,10 +50,10 @@ function CurriculumUnit({ unit, index }) {
       <button
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        className="w-full bg-orange-50/70 border-b border-border px-8 py-6 flex items-center justify-between gap-4 text-left"
+        className="w-full bg-primary/5/70 border-b border-border px-8 py-6 flex items-center justify-between gap-4 text-left"
       >
         <div className="flex items-center gap-5">
-          <span className="font-serif text-5xl text-orange-200 leading-none flex-shrink-0">{unit.n}</span>
+          <span className="font-sans text-5xl text-orange-200 leading-none flex-shrink-0">{unit.n}</span>
           <div>
             <h3 className="font-semibold text-foreground text-xl">{unit.title}</h3>
             <div className="flex items-center gap-3 mt-1">
@@ -103,11 +103,11 @@ export default function Curriculum() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Curriculum</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               Free economics<br /><em>education for all</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              6 comprehensive units covering everything from introductory micro to international finance — designed specifically to prepare you for the USAEO competition.
+              6 comprehensive units covering everything from introductory micro to international finance â€” designed specifically to prepare you for the USAEO competition.
             </p>
             <div className="inline-flex items-center gap-2 mt-8 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
@@ -132,14 +132,14 @@ export default function Curriculum() {
           <motion.div {...fadeUp()} className="flex flex-wrap gap-10 mb-16 pb-16 border-b border-border">
             {[['100%', 'Free to access'], ['6', 'Units'], ['30+', 'Hours of content'], ['0', 'Prerequisites']].map(([v, l]) => (
               <div key={l}>
-                <div className="font-serif text-3xl text-primary mb-1">{v}</div>
+                <div className="font-sans text-3xl text-primary mb-1">{v}</div>
                 <div className="text-sm text-muted-foreground">{l}</div>
               </div>
             ))}
           </motion.div>
 
           <motion.div {...fadeUp()} className="mb-10">
-            <h2 className="font-serif text-3xl text-foreground">Course units</h2>
+            <h2 className="font-sans text-3xl text-foreground">Course units</h2>
           </motion.div>
 
           <div className="space-y-4">

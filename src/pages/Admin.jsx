@@ -104,7 +104,7 @@ export default function Admin() {
   const [registrations, setRegistrations] = useState([]);
   const [applications, setApplications] = useState([]);
   const [qbTeams, setQbTeams] = useState([]);
-  const [qbTeamMembers, setQbTeamMembers] = useState({}); // teamId → members[]
+  const [qbTeamMembers, setQbTeamMembers] = useState({}); // teamId â†’ members[]
   const [expandedQBTeam, setExpandedQBTeam] = useState(null);
   const [chapterMembers, setChapterMembers] = useState({});
   const [chapterAnns, setChapterAnns] = useState({});
@@ -171,7 +171,7 @@ export default function Admin() {
         curriculumUnit: base44.entities.CurriculumUnit,
       };
       const entity = entityMap[type];
-      // rankings: team_name NOT NULL — derive from student_name if not provided
+      // rankings: team_name NOT NULL â€” derive from student_name if not provided
       const payload = type === 'ranking'
         ? { ...form, team_name: form.team_name || form.student_name || form.school || 'Individual' }
         : form;
@@ -348,7 +348,7 @@ export default function Admin() {
                 <Field label="Unit Number (e.g. 01)" value={form.unit_number} onChange={v => setForm(p => ({ ...p, unit_number: v }))} />
                 <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
                 <Field label="Topics (comma-separated)" value={form.topics} onChange={v => setForm(p => ({ ...p, topics: v }))} />
-                <Field label="Hours (e.g. 4–6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
+                <Field label="Hours (e.g. 4â€“6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
                 <Field label="URL" value={form.url} onChange={v => setForm(p => ({ ...p, url: v }))} />
                 <Field label="Order (sort position)" type="number" value={form.order} onChange={v => setForm(p => ({ ...p, order: parseInt(v) }))} />
               </>}
@@ -356,7 +356,7 @@ export default function Admin() {
                 <button onClick={() => setModal(null)} className="px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">Cancel</button>
                 <button onClick={handleSave} disabled={saving}
                   className="px-5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60">
-                  {saving ? 'Saving…' : 'Save'}
+                  {saving ? 'Savingâ€¦' : 'Save'}
                 </button>
               </div>
             </div>
@@ -373,7 +373,7 @@ export default function Admin() {
                 <h3 className="font-semibold text-foreground">Duplicate Registrations Found</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-2">
-                <strong>{dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''}</strong> detected in the current view — same email registered for the same event more than once.
+                <strong>{dupExportModal.filteredDupIds.length} duplicate{dupExportModal.filteredDupIds.length !== 1 ? 's' : ''}</strong> detected in the current view â€” same email registered for the same event more than once.
               </p>
               <p className="text-sm text-muted-foreground mb-5">
                 Removing keeps the <strong>earliest</strong> registration per email + event type and permanently deletes the rest.
@@ -415,19 +415,19 @@ export default function Admin() {
               {navItems.find(n => n.id === active)?.label ?? 'Admin'}
             </h1>
           </div>
-          <span className="text-xs bg-orange-50 text-primary border border-orange-200 px-3 py-1 rounded-full font-semibold">Admin Console</span>
+          <span className="text-xs bg-primary/5 text-primary border border-orange-200 px-3 py-1 rounded-full font-semibold">Admin Console</span>
         </header>
 
         <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto">
 
-          {/* ── OVERVIEW ── */}
+          {/* â”€â”€ OVERVIEW â”€â”€ */}
           {active === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {stats.map(s => (
                   <button key={s.id} onClick={() => navigate(s.id)}
                     className="bg-white border border-border rounded-xl px-4 py-4 text-left hover:border-primary/30 hover:shadow-sm transition-all group">
-                    <div className="text-2xl font-serif text-foreground mb-1">{s.value}</div>
+                    <div className="text-2xl font-sans text-foreground mb-1">{s.value}</div>
                     <div className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{s.label}</div>
                   </button>
                 ))}
@@ -454,7 +454,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── ANNOUNCEMENTS ── */}
+          {/* â”€â”€ ANNOUNCEMENTS â”€â”€ */}
           {active === 'announcements' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -471,7 +471,7 @@ export default function Admin() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-semibold text-sm text-foreground">{a.title}</p>
-                        {a.urgent && <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Urgent</span>}
+                        {a.urgent && <span className="text-xs font-semibold text-primary bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Urgent</span>}
                         {!a.published && <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full">Draft</span>}
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed">{a.body}</p>
@@ -479,7 +479,7 @@ export default function Admin() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button onClick={() => openEdit('announcement', a)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setDeleteTarget({ entity: base44.entities.Announcement, id: a.id, label: a.title })}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                        className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
                 ))}
@@ -487,7 +487,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── WORKSHOPS ── */}
+          {/* â”€â”€ WORKSHOPS â”€â”€ */}
           {active === 'workshops' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -504,16 +504,16 @@ export default function Admin() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-semibold text-sm text-foreground">{w.title}</p>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${w.status === 'upcoming' ? 'bg-orange-50 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{w.status}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${w.status === 'upcoming' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{w.status}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{w.date} · {w.time} · {w.instructor}</p>
+                      <p className="text-xs text-muted-foreground">{w.date} Â· {w.time} Â· {w.instructor}</p>
                       {w.zoom_link && <p className="text-xs text-primary mt-1">Zoom: {w.zoom_link}</p>}
                       {w.recording_url && <p className="text-xs text-primary mt-1">Recording: {w.recording_url}</p>}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button onClick={() => openEdit('workshop', w)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setDeleteTarget({ entity: base44.entities.Workshop, id: w.id, label: w.title })}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                        className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
                 ))}
@@ -521,7 +521,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── RESOURCES ── */}
+          {/* â”€â”€ RESOURCES â”€â”€ */}
           {active === 'resources' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -537,15 +537,15 @@ export default function Admin() {
                   <div key={r.id} className="flex items-center gap-4 p-5">
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{r.title}</p>
-                      <p className="text-xs text-muted-foreground">{r.file_type} · {r.file_size} · {r.tag}</p>
+                      <p className="text-xs text-muted-foreground">{r.file_type} Â· {r.file_size} Â· {r.tag}</p>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${r.public ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-muted text-muted-foreground border border-border'}`}>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${r.public ? 'bg-success/10 text-success border border-green-200' : 'bg-muted text-muted-foreground border border-border'}`}>
                       {r.public ? 'Public' : 'Registered only'}
                     </span>
                     <div className="flex items-center gap-2">
                       <button onClick={() => openEdit('resource', r)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setDeleteTarget({ entity: base44.entities.Resource, id: r.id, label: r.title })}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                        className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
                 ))}
@@ -553,7 +553,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── RANKINGS ── */}
+          {/* â”€â”€ RANKINGS â”€â”€ */}
           {active === 'rankings' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -570,7 +570,7 @@ export default function Admin() {
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-sm text-foreground flex-shrink-0">{r.rank}</div>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{r.student_name}</p>
-                      <p className="text-xs text-muted-foreground">{r.school} · {r.state} · {r.stage} · {r.year}</p>
+                      <p className="text-xs text-muted-foreground">{r.school} Â· {r.state} Â· {r.stage} Â· {r.year}</p>
                     </div>
                     <span className="text-sm font-semibold text-foreground">{r.score}</span>
                     <button onClick={() => base44.entities.Ranking.update(r.id, { visible: !r.visible }).then(loadAll)}
@@ -579,14 +579,14 @@ export default function Admin() {
                     </button>
                     <button onClick={() => openEdit('ranking', r)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ entity: base44.entities.Ranking, id: r.id, label: r.student_name })}
-                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                      className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── CHAPTERS ── */}
+          {/* â”€â”€ CHAPTERS â”€â”€ */}
           {active === 'chapters' && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
@@ -603,9 +603,9 @@ export default function Admin() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-semibold text-foreground">{c.school}</p>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${c.status === 'active' ? 'bg-green-50 text-green-700 border border-green-200' : c.status === 'pending' ? 'bg-orange-50 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{c.status}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${c.status === 'active' ? 'bg-success/10 text-success border border-green-200' : c.status === 'pending' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{c.status}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{c.city}, {c.state} · Founder: {c.founder_name} ({c.founder_email}) · {c.member_count} members · Code: <span className="font-mono font-semibold text-foreground">{c.invite_code}</span></p>
+                      <p className="text-xs text-muted-foreground">{c.city}, {c.state} Â· Founder: {c.founder_name} ({c.founder_email}) Â· {c.member_count} members Â· Code: <span className="font-mono font-semibold text-foreground">{c.invite_code}</span></p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button onClick={() => { setSelectedChapter(c); loadChapterDetails(c.id); }}
@@ -614,7 +614,7 @@ export default function Admin() {
                       </button>
                       <button onClick={() => openEdit('chapter', c)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => setDeleteTarget({ entity: base44.entities.Chapter, id: c.id, label: c.school })}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                        className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
 
@@ -696,7 +696,7 @@ export default function Admin() {
                                 <p className="text-xs text-muted-foreground">{a.body}</p>
                               </div>
                               <button onClick={() => setDeleteTarget({ entity: base44.entities.ChapterAnnouncement, id: a.id, label: a.title })}
-                                className="flex-shrink-0 p-1 hover:bg-red-50 rounded transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                                className="flex-shrink-0 p-1 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           ))}
                         </div>
@@ -708,7 +708,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── COMPETITION ── */}
+          {/* â”€â”€ COMPETITION â”€â”€ */}
           {active === 'competition' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -722,22 +722,22 @@ export default function Admin() {
                 {competitionEvents.length === 0 && <p className="p-6 text-sm text-muted-foreground">No timeline events yet.</p>}
                 {competitionEvents.map(e => (
                   <div key={e.id} className="flex items-center gap-4 p-4">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${e.status === 'done' ? 'bg-green-500' : e.status === 'current' ? 'bg-primary' : 'bg-border'}`} />
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${e.status === 'done' ? 'bg-success/100' : e.status === 'current' ? 'bg-primary' : 'bg-border'}`} />
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{e.phase}</p>
-                      <p className="text-xs text-muted-foreground">{e.date} · order {e.order}</p>
+                      <p className="text-xs text-muted-foreground">{e.date} Â· order {e.order}</p>
                     </div>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${e.status === 'done' ? 'bg-green-50 text-green-700 border border-green-200' : e.status === 'current' ? 'bg-orange-50 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{e.status}</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${e.status === 'done' ? 'bg-success/10 text-success border border-green-200' : e.status === 'current' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{e.status}</span>
                     <button onClick={() => openEdit('competitionEvent', e)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ entity: base44.entities.CompetitionEvent, id: e.id, label: e.phase })}
-                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                      className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── CURRICULUM ── */}
+          {/* â”€â”€ CURRICULUM â”€â”€ */}
           {active === 'curriculum' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -754,23 +754,23 @@ export default function Admin() {
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs text-foreground flex-shrink-0">{u.unit_number}</div>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{u.title}</p>
-                      <p className="text-xs text-muted-foreground">{u.topics}{u.hours ? ` · ${u.hours}` : ''}</p>
+                      <p className="text-xs text-muted-foreground">{u.topics}{u.hours ? ` Â· ${u.hours}` : ''}</p>
                     </div>
                     <button onClick={() => openEdit('curriculumUnit', u)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ entity: base44.entities.CurriculumUnit, id: u.id, label: u.title })}
-                      className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                      className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── REGISTRATIONS ── */}
+          {/* â”€â”€ REGISTRATIONS â”€â”€ */}
           {active === 'registrations' && (() => {
             const nonChapter = registrations.filter(r => r.event_type !== 'chapter');
             const filtered = regFilter === 'all' ? nonChapter : nonChapter.filter(r => r.event_type === regFilter);
 
-            // Detect duplicates: same email + event_type → keep earliest, mark rest as dup
+            // Detect duplicates: same email + event_type â†’ keep earliest, mark rest as dup
             const groupMap = {};
             nonChapter.forEach(r => {
               const key = `${r.user_email}::${r.event_type}`;
@@ -778,7 +778,7 @@ export default function Admin() {
               groupMap[key].push(r);
             });
             const dupIds = new Set();
-            const dupReasons = {}; // id → reason string
+            const dupReasons = {}; // id â†’ reason string
             Object.values(groupMap).forEach(group => {
               if (group.length > 1) {
                 const sorted = [...group].sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
@@ -857,22 +857,22 @@ export default function Admin() {
                               <td className="px-4 py-3 font-medium text-foreground">
                                 <span className="flex items-center gap-1.5">
                                   {isDup && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
-                                  {r.user_name || '—'}
+                                  {r.user_name || 'â€”'}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                              <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                              <td className="px-4 py-3 text-foreground">{r.event_name || 'â€”'}</td>
                               <td className="px-4 py-3">
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-orange-50 text-primary border border-orange-200'}`}>
-                                  {r.event_type || '—'}
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-primary/5 text-primary border border-orange-200'}`}>
+                                  {r.event_type || 'â€”'}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.school || 'â€”'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.state || 'â€”'}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : 'â€”'}</td>
                               <td className={`sticky right-0 px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] ${isDup ? 'bg-amber-50 group-hover:bg-amber-100' : 'bg-white group-hover:bg-muted/20'}`}>
                                 <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
-                                  className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                               </td>
                             </tr>
                           );
@@ -885,7 +885,7 @@ export default function Admin() {
             );
           })()}
 
-          {/* ── QB TEAMS ── */}
+          {/* â”€â”€ QB TEAMS â”€â”€ */}
           {active === 'qb-teams' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -909,20 +909,20 @@ export default function Admin() {
                           <p className="font-semibold text-foreground">{team.team_name}</p>
                           {team.locked
                             ? <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1"><Lock className="w-3 h-3" /> Locked</span>
-                            : <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Open</span>
+                            : <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Open</span>
                           }
                           {activeCount >= 3 && <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">Ready</span>}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Captain: {team.captain_email} · {activeCount} active member{activeCount !== 1 ? 's' : ''}
-                          {team.school ? ` · ${team.school}` : ''}
+                          Captain: {team.captain_email} Â· {activeCount} active member{activeCount !== 1 ? 's' : ''}
+                          {team.school ? ` Â· ${team.school}` : ''}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button onClick={async () => {
                           await base44.entities.QuizBowlTeam.update(team.id, { locked: !team.locked });
                           loadAll();
-                        }} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${team.locked ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100' : 'border-border bg-muted text-foreground hover:bg-muted/70'}`}>
+                        }} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${team.locked ? 'border-green-200 bg-success/10 text-success hover:bg-success/15' : 'border-border bg-muted text-foreground hover:bg-muted/70'}`}>
                           {team.locked ? <><Unlock className="w-3 h-3" /> Unlock</> : <><Lock className="w-3 h-3" /> Lock</>}
                         </button>
                         <button onClick={() => {
@@ -933,7 +933,7 @@ export default function Admin() {
                           <Users className="w-3.5 h-3.5" /> {isExpanded ? 'Hide' : 'Members'}
                         </button>
                         <button onClick={() => setDeleteTarget({ entity: base44.entities.QuizBowlTeam, id: team.id, label: team.team_name })}
-                          className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                          className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -957,7 +957,7 @@ export default function Admin() {
                               </div>
                               <div className="flex items-center gap-2">
                                 {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${m.status === 'active' ? 'bg-green-50 text-green-700 border border-green-200' : m.status === 'pending' ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${m.status === 'active' ? 'bg-success/10 text-success border border-green-200' : m.status === 'pending' ? 'bg-primary/5 text-orange-700 border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>
                                   {m.status}
                                 </span>
                                 {!team.locked && (
@@ -965,7 +965,7 @@ export default function Admin() {
                                     await base44.entities.QuizBowlTeamMember.delete(m.id);
                                     loadQBTeamMembers(team.id);
                                     loadAll();
-                                  }} className="p-1 hover:bg-red-50 rounded text-muted-foreground hover:text-destructive transition-colors">
+                                  }} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 )}
@@ -981,7 +981,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── APPLICATIONS ── */}
+          {/* â”€â”€ APPLICATIONS â”€â”€ */}
           {active === 'applications' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -1006,10 +1006,10 @@ export default function Admin() {
                     <tbody className="divide-y divide-border">
                       {applications.map(a => (
                         <tr key={a.id} className="hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-medium text-foreground">{a.user_name || '—'}</td>
+                          <td className="px-4 py-3 font-medium text-foreground">{a.user_name || 'â€”'}</td>
                           <td className="px-4 py-3 text-muted-foreground">{a.user_email}</td>
                           <td className="px-4 py-3 text-foreground capitalize">{a.program}</td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.payload?.school ? `${a.payload.school}${a.payload.state ? `, ${a.payload.state}` : ''}` : '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.payload?.school ? `${a.payload.school}${a.payload.state ? `, ${a.payload.state}` : ''}` : 'â€”'}</td>
                           <td className="px-4 py-3">
                             <select value={a.status || 'pending'} onChange={async e => {
                               await base44.entities.Application.update(a.id, { status: e.target.value });
@@ -1020,10 +1020,10 @@ export default function Admin() {
                               <option value="rejected">Rejected</option>
                             </select>
                           </td>
-                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_at ? new Date(a.created_at).toLocaleDateString() : 'â€”'}</td>
                           <td className="px-4 py-3 text-right">
                             <button onClick={() => setDeleteTarget({ entity: base44.entities.Application, id: a.id, label: a.user_name || a.user_email })}
-                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                              className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                           </td>
                         </tr>
                       ))}
@@ -1034,7 +1034,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* ── EDIT WEBSITE ── */}
+          {/* â”€â”€ EDIT WEBSITE â”€â”€ */}
           {active === 'edit-website' && <AdminEditWebsite />}
 
         </main>

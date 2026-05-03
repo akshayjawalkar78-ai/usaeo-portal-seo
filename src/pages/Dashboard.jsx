@@ -264,15 +264,15 @@ export default function Dashboard() {
 
         <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto">
 
-          {/* ── OVERVIEW ── */}
+          {/* â”€â”€ OVERVIEW â”€â”€ */}
           {active === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'National Qualifiers', status: 'Closed', color: 'text-red-700', bg: 'bg-red-50 border-red-200' },
-                  { label: 'Quiz Bowl', status: 'Open', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
-                  { label: 'Essay Competition', status: 'Open', color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
-                  { label: 'National Finals', status: 'Upcoming — May 2026', color: 'text-primary', bg: 'bg-orange-50 border-orange-200' },
+                  { label: 'National Qualifiers', status: 'Closed', color: 'text-destructive', bg: 'bg-destructive/10 border-red-200' },
+                  { label: 'Quiz Bowl', status: 'Open', color: 'text-success', bg: 'bg-success/10 border-green-200' },
+                  { label: 'Essay Competition', status: 'Open', color: 'text-success', bg: 'bg-success/10 border-green-200' },
+                  { label: 'National Finals', status: 'Upcoming â€” May 2026', color: 'text-primary', bg: 'bg-primary/5 border-orange-200' },
                 ].map((s) => (
                   <div key={s.label} className={`rounded-xl border px-4 py-3 ${s.bg}`}>
                     <p className="text-xs text-muted-foreground mb-0.5">{s.label}</p>
@@ -289,7 +289,7 @@ export default function Dashboard() {
                   <div className="space-y-3">
                     {announcements.length === 0 && <p className="text-sm text-muted-foreground">No announcements yet.</p>}
                     {announcements.map((a) => (
-                      <div key={a.id} className={`p-4 rounded-xl ${a.urgent ? 'bg-orange-50 border border-orange-200' : 'border border-border'}`}>
+                      <div key={a.id} className={`p-4 rounded-xl ${a.urgent ? 'bg-primary/5 border border-orange-200' : 'border border-border'}`}>
                         <div className="flex justify-between items-start gap-3 mb-1">
                           <p className="font-semibold text-sm text-foreground leading-snug">{a.title}</p>
                           {a.urgent && <span className="text-xs font-semibold text-primary bg-orange-100 px-2 py-0.5 rounded-full flex-shrink-0">Urgent</span>}
@@ -302,8 +302,8 @@ export default function Dashboard() {
                 <div className="md:col-span-2 space-y-4">
                   <div className="bg-foreground rounded-2xl p-5">
                     <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Registration open</p>
-                    <h3 className="font-serif text-2xl text-white mb-1">Quiz Bowl</h3>
-                    <p className="text-sm text-white/60 mb-4">Timed quiz · Open to all</p>
+                    <h3 className="font-sans text-2xl text-white mb-1">Quiz Bowl</h3>
+                    <p className="text-sm text-white/60 mb-4">Timed quiz Â· Open to all</p>
                     <Link to="/register?event=quiz-bowl"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                       Register <ArrowRight className="w-3 h-3" />
@@ -316,13 +316,13 @@ export default function Dashboard() {
                         {myPendingMemberships.map(m => (
                           <div key={`mem-${m.id}`} className="flex items-center justify-between text-xs">
                             <span className="text-foreground truncate">Chapter membership</span>
-                            <span className="font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Pending</span>
+                            <span className="font-semibold text-orange-700 bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Pending</span>
                           </div>
                         ))}
                         {myApplications.map(a => (
                           <div key={`app-${a.id}`} className="flex items-center justify-between text-xs">
                             <span className="text-foreground truncate capitalize">{a.program?.replace('-', ' ') || 'Application'}</span>
-                            <span className={`font-semibold px-2 py-0.5 rounded-full border ${a.status === 'approved' ? 'text-green-700 bg-green-50 border-green-200' : a.status === 'rejected' ? 'text-red-700 bg-red-50 border-red-200' : 'text-orange-700 bg-orange-50 border-orange-200'}`}>{a.status || 'Pending'}</span>
+                            <span className={`font-semibold px-2 py-0.5 rounded-full border ${a.status === 'approved' ? 'text-success bg-success/10 border-green-200' : a.status === 'rejected' ? 'text-destructive bg-destructive/10 border-red-200' : 'text-orange-700 bg-primary/5 border-orange-200'}`}>{a.status || 'Pending'}</span>
                           </div>
                         ))}
                       </div>
@@ -351,7 +351,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── COMPETITION ── */}
+          {/* â”€â”€ COMPETITION â”€â”€ */}
           {active === 'competition' && (
             <div className="space-y-6">
               {/* My Registrations */}
@@ -367,11 +367,11 @@ export default function Dashboard() {
                           <div>
                             <p className="font-medium text-sm text-foreground">{reg.event_name}</p>
                             <p className="text-xs text-muted-foreground capitalize">
-                              {reg.event_type?.replace('-', ' ')} · Registered {new Date(reg.registered_at).toLocaleDateString()}
-                              {reg.school ? ` · ${reg.school}` : ''}
+                              {reg.event_type?.replace('-', ' ')} Â· Registered {new Date(reg.registered_at).toLocaleDateString()}
+                              {reg.school ? ` Â· ${reg.school}` : ''}
                             </p>
                           </div>
-                          <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
+                          <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
                         </div>
                       ))}
                     </div>
@@ -379,7 +379,7 @@ export default function Dashboard() {
                 );
               })()}
               <div className="bg-white rounded-2xl border border-border p-8">
-                <h2 className="font-semibold text-foreground mb-2">Competition Timeline 2025–2026</h2>
+                <h2 className="font-semibold text-foreground mb-2">Competition Timeline 2025â€“2026</h2>
                 <p className="text-sm text-muted-foreground mb-8">Your full pathway from registration through the National Finals.</p>
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
@@ -387,17 +387,17 @@ export default function Dashboard() {
                     {competitionEvents.length === 0 && <p className="text-sm text-muted-foreground">Timeline not yet published.</p>}
                     {competitionEvents.map((t) => (
                       <div key={t.id} className="relative flex gap-6 pl-12">
-                        <div className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${t.status === 'done' ? 'bg-green-50 border-green-300' : t.status === 'current' ? 'bg-primary border-primary' : 'bg-white border-border'}`}>
-                          {t.status === 'done' && <CheckCircle className="w-3.5 h-3.5 text-green-600" />}
+                        <div className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${t.status === 'done' ? 'bg-success/10 border-green-300' : t.status === 'current' ? 'bg-primary border-primary' : 'bg-white border-border'}`}>
+                          {t.status === 'done' && <CheckCircle className="w-3.5 h-3.5 text-success" />}
                           {t.status === 'current' && <span className="w-2 h-2 rounded-full bg-white" />}
                           {t.status === 'future' && <Clock className="w-3.5 h-3.5 text-muted-foreground" />}
                         </div>
                         <div className="flex-1 pb-1">
                           <div className="flex items-center gap-3">
                             <p className={`font-semibold text-sm ${t.status === 'future' ? 'text-muted-foreground' : 'text-foreground'}`}>{t.phase}</p>
-                            {t.status === 'current' && <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Current</span>}
+                            {t.status === 'current' && <span className="text-xs font-semibold text-primary bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Current</span>}
                           </div>
-                          <p className={`text-xs mt-0.5 ${t.status === 'done' ? 'text-green-600' : 'text-muted-foreground'}`}>{t.date}</p>
+                          <p className={`text-xs mt-0.5 ${t.status === 'done' ? 'text-success' : 'text-muted-foreground'}`}>{t.date}</p>
                         </div>
                       </div>
                     ))}
@@ -409,12 +409,12 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-foreground">Quiz Bowl</h3>
                     {myRegistrations.some(r => r.event_type === 'quiz-bowl') && (
-                      <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Registered</span>
+                      <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Registered</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students.</p>
                   {myRegistrations.some(r => r.event_type === 'quiz-bowl') ? (
-                    <span className="text-xs text-muted-foreground">You're registered ✓</span>
+                    <span className="text-xs text-muted-foreground">You're registered âœ“</span>
                   ) : (
                     <Link to="/competitions/quiz-bowl" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
                       Register now <ArrowRight className="w-3.5 h-3.5" />
@@ -425,12 +425,12 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-foreground">Essay Competition</h3>
                     {myRegistrations.some(r => r.event_type === 'essay') && (
-                      <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Registered</span>
+                      <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Registered</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">Submit a research essay on an economics topic. Judged on economic reasoning, evidence, and clarity of argument.</p>
                   {myRegistrations.some(r => r.event_type === 'essay') ? (
-                    <span className="text-xs text-muted-foreground">You're registered ✓</span>
+                    <span className="text-xs text-muted-foreground">You're registered âœ“</span>
                   ) : (
                     <Link to="/competitions/essay" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
                       Register now <ArrowRight className="w-3.5 h-3.5" />
@@ -446,16 +446,16 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* ── QUIZ BOWL INVITATIONS (visible to all logged-in users) ── */}
+              {/* â”€â”€ QUIZ BOWL INVITATIONS (visible to all logged-in users) â”€â”€ */}
               {authUser && myQBInvites.length > 0 && !myQBTeam && (
                 <div className="bg-white rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Users className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-foreground">Quiz Bowl Team Invitations</h3>
-                    <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">{myQBInvites.length}</span>
+                    <span className="text-xs font-semibold text-primary bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">{myQBInvites.length}</span>
                   </div>
-                  {qbError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-3">{qbError}</div>}
-                  {qbSuccess && <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3 mb-3">{qbSuccess}</div>}
+                  {qbError && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3 mb-3">{qbError}</div>}
+                  {qbSuccess && <div className="bg-success/10 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3 mb-3">{qbSuccess}</div>}
                   <div className="space-y-2">
                     {myQBInvites.map(inv => {
                       const activeCount = 0;
@@ -463,7 +463,7 @@ export default function Dashboard() {
                         <div key={inv.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                           <div>
                             <p className="font-medium text-sm text-foreground">{inv.team.team_name}</p>
-                            <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` · ${inv.team.state}` : ''}</p>
+                            <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` Â· ${inv.team.state}` : ''}</p>
                           </div>
                           <div className="flex gap-2">
                             <button onClick={async () => {
@@ -488,13 +488,13 @@ export default function Dashboard() {
                                 setQbSuccess(`Joined ${inv.team.team_name}!`);
                                 loadQBData(authUser.email);
                               } catch { setQbError('Something went wrong. Try again.'); }
-                            }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Accept</button>
+                            }} className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15 transition-colors">Accept</button>
                             <button onClick={async () => {
                               setQbError(''); setQbSuccess('');
                               await base44.entities.QuizBowlTeamMember.delete(inv.id);
                               setQbSuccess('Invitation declined.');
                               loadQBData(authUser.email);
-                            }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Decline</button>
+                            }} className="px-3 py-1.5 text-xs font-semibold bg-destructive/10 text-destructive border border-red-200 rounded-lg hover:bg-destructive/15 transition-colors">Decline</button>
                           </div>
                         </div>
                       );
@@ -503,7 +503,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* ── QUIZ BOWL TEAMS ── */}
+              {/* â”€â”€ QUIZ BOWL TEAMS â”€â”€ */}
               {authUser && myRegistrations.some(r => r.event_type === 'quiz-bowl') && (() => {
                 const email = authUser.email;
                 const isCaptain = myQBTeam?.myMembership?.role === 'captain';
@@ -520,8 +520,8 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    {qbError && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{qbError}</div>}
-                    {qbSuccess && <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}
+                    {qbError && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3">{qbError}</div>}
+                    {qbSuccess && <div className="bg-success/10 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}
 
                     {/* Has a team */}
                     {myQBTeam && (
@@ -552,8 +552,8 @@ export default function Dashboard() {
                                 )}
                               </div>
                             )}
-                            <p className="text-xs text-muted-foreground mt-0.5">{myQBTeam.team.school} · {activeMembers.length}/5 members
-                              {activeMembers.length < 3 && <span className="text-orange-600"> · Need {3 - activeMembers.length} more to be ready</span>}
+                            <p className="text-xs text-muted-foreground mt-0.5">{myQBTeam.team.school} Â· {activeMembers.length}/5 members
+                              {activeMembers.length < 3 && <span className="text-orange-600"> Â· Need {3 - activeMembers.length} more to be ready</span>}
                             </p>
                           </div>
                           {isCaptain && !myQBTeam.team.locked && (
@@ -562,7 +562,7 @@ export default function Dashboard() {
                               await base44.entities.QuizBowlTeam.delete(myQBTeam.team.id);
                               setMyQBTeam(null);
                               loadQBData(email);
-                            }} className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                            }} className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           )}
@@ -584,12 +584,12 @@ export default function Dashboard() {
                               <div className="flex items-center gap-2">
                                 {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
                                 {m.status === 'invited' && <span className="text-xs text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full">Invited</span>}
-                                {m.status === 'pending' && <span className="text-xs text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Requested</span>}
+                                {m.status === 'pending' && <span className="text-xs text-orange-700 bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Requested</span>}
                                 {isCaptain && !myQBTeam.team.locked && m.user_email !== email && (
                                   <button onClick={async () => {
                                     await base44.entities.QuizBowlTeamMember.delete(m.id);
                                     loadQBData(email);
-                                  }} className="p-1 hover:bg-red-50 rounded text-muted-foreground hover:text-destructive transition-colors">
+                                  }} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
                                     <X className="w-3.5 h-3.5" />
                                   </button>
                                 )}
@@ -614,11 +614,11 @@ export default function Dashboard() {
                                       if (activeMembers.length >= 5) { setQbError('Team is full (5 members max).'); return; }
                                       await base44.entities.QuizBowlTeamMember.update(req.id, { status: 'active' });
                                       loadQBData(email);
-                                    }} className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">Approve</button>
+                                    }} className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15 transition-colors">Approve</button>
                                     <button onClick={async () => {
                                       await base44.entities.QuizBowlTeamMember.delete(req.id);
                                       loadQBData(email);
-                                    }} className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">Deny</button>
+                                    }} className="px-3 py-1.5 text-xs font-semibold bg-destructive/10 text-destructive border border-red-200 rounded-lg hover:bg-destructive/15 transition-colors">Deny</button>
                                   </div>
                                 </div>
                               ))}
@@ -713,7 +713,7 @@ export default function Dashboard() {
                         {/* Browse open teams */}
                         {openQBTeams.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams — Request to Join</p>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams â€” Request to Join</p>
                             <div className="space-y-2">
                               {openQBTeams.map(t => {
                                 const activeCount = t.members.filter(m => m.status === 'active').length;
@@ -722,10 +722,10 @@ export default function Dashboard() {
                                   <div key={t.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                                     <div>
                                       <p className="font-medium text-sm text-foreground">{t.team_name}</p>
-                                      <p className="text-xs text-muted-foreground">{t.school} · {activeCount}/5 members</p>
+                                      <p className="text-xs text-muted-foreground">{t.school} Â· {activeCount}/5 members</p>
                                     </div>
                                     {alreadyRequested ? (
-                                      <span className="text-xs text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">Requested</span>
+                                      <span className="text-xs text-orange-700 bg-primary/5 border border-orange-200 px-2.5 py-1 rounded-full">Requested</span>
                                     ) : (
                                       <button onClick={async () => {
                                         setQbError(''); setQbSuccess('');
@@ -738,7 +738,7 @@ export default function Dashboard() {
                                         });
                                         setQbSuccess(`Join request sent to ${t.team_name}.`);
                                         loadQBData(email);
-                                      }} className="px-3 py-1.5 text-xs font-semibold border border-primary text-primary rounded-lg hover:bg-orange-50 transition-colors">
+                                      }} className="px-3 py-1.5 text-xs font-semibold border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors">
                                         Request to Join
                                       </button>
                                     )}
@@ -756,7 +756,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── RANKINGS ── */}
+          {/* â”€â”€ RANKINGS â”€â”€ */}
           {active === 'rankings' && (
             <div className="space-y-5">
               <div className="bg-white rounded-2xl border border-border p-8">
@@ -766,7 +766,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">Your Standing</p>
                       <p className="font-semibold text-lg">Rank #{myRankingEntry.rank}</p>
-                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts · {myRankingEntry.stage}</p>
+                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts Â· {myRankingEntry.stage}</p>
                     </div>
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">
                       {myRankingEntry.rank}
@@ -780,7 +780,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Link to="/register/quiz-bowl" className="text-xs font-semibold text-primary hover:underline">Quiz Bowl</Link>
-                      <span className="text-muted-foreground text-xs">·</span>
+                      <span className="text-muted-foreground text-xs">Â·</span>
                       <Link to="/register/essay" className="text-xs font-semibold text-primary hover:underline">Essay</Link>
                     </div>
                   </div>
@@ -788,7 +788,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="font-semibold text-foreground">Competition Rankings</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">2025–2026 season</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">2025â€“2026 season</p>
                   </div>
                   <div className="flex bg-muted rounded-lg p-1 gap-1">
                     {['qualifiers', 'finals'].map((s) => (
@@ -802,7 +802,7 @@ export default function Dashboard() {
                 {filteredRankings.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">Rankings for this stage have not been published yet.</p>
                 ) : (() => {
-                  // Build tie map: rank → count of entries sharing it
+                  // Build tie map: rank â†’ count of entries sharing it
                   const rankCount = filteredRankings.reduce((acc, r) => {
                     acc[r.rank] = (acc[r.rank] || 0) + 1;
                     return acc;
@@ -833,7 +833,7 @@ export default function Dashboard() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={`font-semibold text-sm ${isTop10 ? 'text-foreground' : 'text-foreground'}`}>{r.student_name || r.team_name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{r.school}{r.state ? ` · ${r.state}` : ''}</p>
+                              <p className="text-xs text-muted-foreground truncate">{r.school}{r.state ? ` Â· ${r.state}` : ''}</p>
                             </div>
                             <div className="text-right flex-shrink-0">
                               <p className="font-semibold text-sm text-foreground">{r.score}</p>
@@ -857,7 +857,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── RESOURCES ── */}
+          {/* â”€â”€ RESOURCES â”€â”€ */}
           {active === 'resources' && (
             <div className="bg-white rounded-2xl border border-border p-8">
               <h2 className="font-semibold text-foreground mb-1">Resources & Downloads</h2>
@@ -871,7 +871,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-foreground">{r.title}</p>
-                        <p className="text-xs text-muted-foreground">{r.file_type} · {r.file_size}</p>
+                        <p className="text-xs text-muted-foreground">{r.file_type} Â· {r.file_size}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -894,7 +894,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── WORKSHOPS ── */}
+          {/* â”€â”€ WORKSHOPS â”€â”€ */}
           {active === 'workshops' && (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl border border-border p-8">
@@ -905,13 +905,13 @@ export default function Dashboard() {
                   {upcomingWorkshops.map((w) => (
                     <div key={w.id} className="border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-center flex-shrink-0 w-16">
+                        <div className="bg-primary/5 border border-orange-200 rounded-lg px-3 py-2 text-center flex-shrink-0 w-16">
                           <p className="text-base font-bold text-primary leading-tight">{w.date?.split(', ')[0]?.split(' ')[1]}</p>
                           <p className="text-xs text-primary/70">{w.date?.split(', ')[0]?.split(' ')[0]}</p>
                         </div>
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground text-sm mb-1">{w.title}</h3>
-                          <p className="text-xs text-muted-foreground mb-2">{w.time} · {w.instructor}</p>
+                          <p className="text-xs text-muted-foreground mb-2">{w.time} Â· {w.instructor}</p>
                           <p className="text-sm text-muted-foreground leading-relaxed">{w.description}</p>
                         </div>
                         {w.zoom_link ? (
@@ -932,18 +932,18 @@ export default function Dashboard() {
               </div>
               {pastWorkshops.length > 0 && (
                 <div className="bg-white rounded-2xl border border-border p-8">
-                  <h2 className="font-semibold text-foreground mb-5">Past Workshops — Recordings</h2>
+                  <h2 className="font-semibold text-foreground mb-5">Past Workshops â€” Recordings</h2>
                   <div className="space-y-3">
                     {pastWorkshops.map((w) => (
                       <div key={w.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                         <div>
                           <p className="text-sm font-medium text-foreground">{w.title}</p>
-                          <p className="text-xs text-muted-foreground">{w.date} · {w.instructor}</p>
+                          <p className="text-xs text-muted-foreground">{w.date} Â· {w.instructor}</p>
                         </div>
                         {w.recording_url ? (
                           <a href={w.recording_url} target="_blank" rel="noopener noreferrer"
                             className="text-xs font-semibold text-primary hover:underline">
-                            Watch recording →
+                            Watch recording â†’
                           </a>
                         ) : (
                           <span className="text-xs text-muted-foreground">Recording pending</span>
@@ -956,19 +956,19 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── CURRICULUM ── */}
+          {/* â”€â”€ CURRICULUM â”€â”€ */}
           {active === 'curriculum' && (
             <div className="bg-white rounded-2xl border border-border p-8">
               <div className="flex items-center gap-3 mb-1">
                 <h2 className="font-semibold text-foreground">Study Curriculum</h2>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">Releasing soon</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Releasing soon</span>
               </div>
               <p className="text-sm text-muted-foreground mb-6">Six units covering the full USAEO syllabus. Free for all students at usaeo.org/curriculum.</p>
               <div className="space-y-0 divide-y divide-border">
                 {curriculumUnits.length === 0 && <p className="text-sm text-muted-foreground">Curriculum not yet published.</p>}
                 {curriculumUnits.map((u) => (
                   <div key={u.id} className="flex items-center gap-5 py-4">
-                    <span className="font-serif text-3xl text-orange-100 w-10 flex-shrink-0 text-center leading-none">{u.unit_number}</span>
+                    <span className="font-sans text-3xl text-orange-100 w-10 flex-shrink-0 text-center leading-none">{u.unit_number}</span>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{u.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{u.topics}</p>
@@ -976,7 +976,7 @@ export default function Dashboard() {
                     <span className="text-xs text-muted-foreground hidden md:block">{u.hours}</span>
                     <a href={u.url || 'https://usaeo.org/curriculum'} target="_blank" rel="noopener noreferrer"
                       className="text-xs font-semibold text-primary hover:underline flex-shrink-0">
-                      Start →
+                      Start â†’
                     </a>
                   </div>
                 ))}
@@ -984,7 +984,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── CHAPTERS ── */}
+          {/* â”€â”€ CHAPTERS â”€â”€ */}
           {active === 'chapters' && (
             <div className="space-y-6">
               {/* Join a Chapter */}
@@ -996,7 +996,7 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground mb-6">Join a USAEO chapter at your school using an invite code from your chapter founder. Once joined, you can view announcements and your chapter community.</p>
 
                 {joinSuccess && (
-                  <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3 mb-4">{joinSuccess}</div>
+                  <div className="bg-success/10 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3 mb-4">{joinSuccess}</div>
                 )}
 
                 <div className="flex gap-3 mb-2">
@@ -1024,7 +1024,7 @@ export default function Dashboard() {
                       <h3 className="font-semibold text-lg text-foreground">{myChapter.school}</h3>
                       <p className="text-sm text-muted-foreground">{myChapter.city}, {myChapter.state}</p>
                     </div>
-                    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full font-medium">Active</span>
+                    <span className="text-xs bg-success/10 text-success border border-green-200 px-2.5 py-1 rounded-full font-medium">Active</span>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
@@ -1089,7 +1089,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── CALENDAR ── */}
+          {/* â”€â”€ CALENDAR â”€â”€ */}
           {active === 'calendar' && (
             <div className="space-y-6">
               {/* My Registered Events */}
@@ -1105,7 +1105,7 @@ export default function Dashboard() {
                       <Link to="/register/quiz-bowl" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                         Register for Quiz Bowl <ArrowRight className="w-3 h-3" />
                       </Link>
-                      <Link to="/register/essay" className="inline-flex items-center gap-1.5 px-4 py-2 border border-primary text-primary rounded-full text-xs font-semibold hover:bg-orange-50 transition-colors">
+                      <Link to="/register/essay" className="inline-flex items-center gap-1.5 px-4 py-2 border border-primary text-primary rounded-full text-xs font-semibold hover:bg-primary/5 transition-colors">
                         Register for Essay <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
@@ -1116,9 +1116,9 @@ export default function Dashboard() {
                       <div key={reg.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                         <div>
                           <p className="font-medium text-sm text-foreground">{reg.event_name}</p>
-                          <p className="text-xs text-muted-foreground capitalize">{reg.event_type?.replace('-', ' ')} · Registered {new Date(reg.registered_at).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{reg.event_type?.replace('-', ' ')} Â· Registered {new Date(reg.registered_at).toLocaleDateString()}</p>
                         </div>
-                        <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
+                        <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
                       </div>
                     ))}
                   </div>
@@ -1144,8 +1144,8 @@ export default function Dashboard() {
                           <p className="text-xs text-muted-foreground">{e.date}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          {isRegistered && <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">Registered</span>}
-                          {e.status === 'current' && <span className="text-xs font-semibold text-primary bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">Open</span>}
+                          {isRegistered && <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2.5 py-1 rounded-full">Registered</span>}
+                          {e.status === 'current' && <span className="text-xs font-semibold text-primary bg-primary/5 border border-orange-200 px-2.5 py-1 rounded-full">Open</span>}
                         </div>
                       </div>
                     );
@@ -1154,7 +1154,7 @@ export default function Dashboard() {
                     <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                       <div>
                         <p className="font-medium text-sm text-foreground">{w.title}</p>
-                        <p className="text-xs text-muted-foreground">Workshop · {w.date}</p>
+                        <p className="text-xs text-muted-foreground">Workshop Â· {w.date}</p>
                       </div>
                     </div>
                   ))}
@@ -1166,7 +1166,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── CHAPTER ADMIN ── */}
+          {/* â”€â”€ CHAPTER ADMIN â”€â”€ */}
           {active === 'chapter-admin' && isChapterAdmin && (
             <div className="space-y-6">
               <div>
@@ -1189,11 +1189,11 @@ export default function Dashboard() {
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => handleMemberRequest(m, true)}
-                          className="px-3 py-1.5 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                          className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15 transition-colors">
                           Approve
                         </button>
                         <button onClick={() => handleMemberRequest(m, false)}
-                          className="px-3 py-1.5 text-xs font-semibold bg-red-50 text-destructive border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                          className="px-3 py-1.5 text-xs font-semibold bg-destructive/10 text-destructive border border-red-200 rounded-lg hover:bg-destructive/15 transition-colors">
                           Deny
                         </button>
                       </div>
@@ -1266,7 +1266,7 @@ export default function Dashboard() {
                           {a.body && <p className="text-xs text-muted-foreground mt-1">{a.body}</p>}
                         </div>
                         <button onClick={async () => { await base44.entities.ChapterAnnouncement.delete(a.id); loadAdminChapterData(adminChapter.id); }}
-                          className="flex-shrink-0 p-1 hover:bg-red-50 rounded transition-colors text-muted-foreground hover:text-destructive">
+                          className="flex-shrink-0 p-1 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>

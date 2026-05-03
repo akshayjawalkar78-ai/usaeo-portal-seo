@@ -5,10 +5,10 @@ import { ArrowRight, CheckCircle, Trophy, FileText, Shield } from 'lucide-react'
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const promptCategories = [
@@ -34,12 +34,12 @@ export default function Essay() {
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 03 — Competition</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Stage 03 â€” Competition</p>
             <div className="flex items-center gap-3 mb-4">
-              <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight">
+              <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight">
                 Essay Competition
               </h1>
-              <span className="text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full">Open</span>
+              <span className="text-xs font-semibold bg-success/10 text-success border border-green-200 px-3 py-1 rounded-full">Open</span>
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
               Submit a research essay on an economics topic of your choice. Judged on economic reasoning, evidence quality, and clarity of argument. Individual competition open to all registered USAEO students.
@@ -55,10 +55,10 @@ export default function Essay() {
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-5">Event Details</p>
             <div className="divide-y divide-border mb-10">
               {[
-                { label: 'Deadline', value: 'TBD — announced by email' },
+                { label: 'Deadline', value: 'TBD â€” announced by email' },
                 { label: 'Format', value: 'Written essay submission via Google Forms' },
-                { label: 'Length', value: '1,500–2,000 words (excl. title page & references)' },
-                { label: 'Eligibility', value: 'Individual — grades 9–12' },
+                { label: 'Length', value: '1,500â€“2,000 words (excl. title page & references)' },
+                { label: 'Eligibility', value: 'Individual â€” grades 9â€“12' },
                 { label: 'Citation Style', value: 'APA, MLA, or Chicago (must be consistent)' },
                 { label: 'Cost', value: 'Free' },
               ].map((row) => (
@@ -71,17 +71,17 @@ export default function Essay() {
           </motion.div>
 
           <motion.div {...fadeUp(0.1)}>
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-8 mb-6">
+            <div className="bg-success/10 border border-green-200 rounded-2xl p-8 mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle className="w-5 h-5 text-green-700" />
+                <CheckCircle className="w-5 h-5 text-success" />
                 <span className="font-semibold text-green-800">Registration is open</span>
               </div>
-              <p className="text-sm text-green-700 leading-relaxed mb-5">
+              <p className="text-sm text-success leading-relaxed mb-5">
                 Register now to enter the USAEO Essay Competition. The submission deadline will be announced by email.
               </p>
               <Link to="/register/essay"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register Now — Free <ArrowRight className="w-4 h-4" />
+                Register Now â€” Free <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="bg-white border border-border rounded-2xl p-8">
@@ -109,7 +109,7 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Requirements</p>
-            <h2 className="font-serif text-4xl text-foreground">Essay specifications</h2>
+            <h2 className="font-sans text-4xl text-foreground">Essay specifications</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -120,7 +120,7 @@ export default function Essay() {
               </div>
               <div className="space-y-4">
                 {[
-                  { label: 'Word count', value: '1,500–2,000 words' },
+                  { label: 'Word count', value: '1,500â€“2,000 words' },
                   { label: 'Spacing', value: 'Double-spaced' },
                   { label: 'Font', value: '12-point Times New Roman or Arial' },
                   { label: 'Margins', value: '1 inch on all sides' },
@@ -143,7 +143,7 @@ export default function Essay() {
               <div className="space-y-5">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Accepted formats</p>
-                  <p className="text-sm text-foreground">PDF or Microsoft Word (.docx) — maximum 10 MB</p>
+                  <p className="text-sm text-foreground">PDF or Microsoft Word (.docx) â€” maximum 10 MB</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">File naming convention</p>
@@ -153,7 +153,7 @@ export default function Essay() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Submission platform</p>
-                  <p className="text-sm text-foreground">Official Google Forms portal — submissions are time-stamped automatically. Late submissions will not be accepted.</p>
+                  <p className="text-sm text-foreground">Official Google Forms portal â€” submissions are time-stamped automatically. Late submissions will not be accepted.</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Confirmation</p>
@@ -170,7 +170,7 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Topics</p>
-            <h2 className="font-serif text-4xl text-foreground">Prompt categories</h2>
+            <h2 className="font-sans text-4xl text-foreground">Prompt categories</h2>
             <p className="text-muted-foreground mt-3 max-w-2xl">
               Choose one of the following economic themes. Your essay must address the selected theme directly with a clear, arguable thesis.
             </p>
@@ -193,7 +193,7 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Judging</p>
-            <h2 className="font-serif text-4xl text-foreground">Evaluation criteria</h2>
+            <h2 className="font-sans text-4xl text-foreground">Evaluation criteria</h2>
           </motion.div>
 
           <div className="space-y-4 max-w-3xl">
@@ -205,7 +205,7 @@ export default function Essay() {
                     <p className="font-semibold text-foreground">{item.criterion}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
                   </div>
-                  <span className="text-2xl font-serif text-primary flex-shrink-0">{item.weight}%</span>
+                  <span className="text-2xl font-sans text-primary flex-shrink-0">{item.weight}%</span>
                 </div>
                 <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                   <div
@@ -224,12 +224,12 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Process</p>
-            <h2 className="font-serif text-4xl text-foreground">Submission steps</h2>
+            <h2 className="font-sans text-4xl text-foreground">Submission steps</h2>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { step: '01', title: 'Write your essay', desc: 'Follow the formatting requirements — double-spaced, correct font, 1,500–2,000 words.' },
+              { step: '01', title: 'Write your essay', desc: 'Follow the formatting requirements â€” double-spaced, correct font, 1,500â€“2,000 words.' },
               { step: '02', title: 'Name your file', desc: 'Use the exact format: LastName_FirstName_Essay_2026.pdf (or .docx, max 10 MB).' },
               { step: '03', title: 'Submit via Google Forms', desc: 'Upload through the official portal before the deadline at 11:59 PM EST. No late submissions accepted.' },
               { step: '04', title: 'Receive confirmation', desc: 'An automated email confirms receipt. Contact the committee if you don\'t receive it within 24 hours.' },
@@ -252,20 +252,20 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Prizes</p>
-            <h2 className="font-serif text-4xl text-foreground">Awards & recognition</h2>
+            <h2 className="font-sans text-4xl text-foreground">Awards & recognition</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
-              { place: '1st Place', prize: '$100', icon: '🥇' },
-              { place: '2nd Place', prize: '$75', icon: '🥈' },
-              { place: '3rd Place', prize: '$50', icon: '🥉' },
+              { place: '1st Place', prize: '$100', icon: 'ðŸ¥‡' },
+              { place: '2nd Place', prize: '$75', icon: 'ðŸ¥ˆ' },
+              { place: '3rd Place', prize: '$50', icon: 'ðŸ¥‰' },
             ].map((award, i) => (
               <motion.div key={award.place} {...fadeUp(i * 0.07)}
                 className="bg-white border border-border rounded-2xl p-8 text-center">
                 <div className="text-4xl mb-4">{award.icon}</div>
                 <p className="font-semibold text-foreground mb-1">{award.place}</p>
-                <p className="text-3xl font-serif text-primary">{award.prize}</p>
+                <p className="text-3xl font-sans text-primary">{award.prize}</p>
               </motion.div>
             ))}
           </div>
@@ -294,7 +294,7 @@ export default function Essay() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Conduct</p>
-            <h2 className="font-serif text-4xl text-foreground">Academic integrity</h2>
+            <h2 className="font-sans text-4xl text-foreground">Academic integrity</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -309,7 +309,7 @@ export default function Essay() {
                   'Copying text from sources without proper citation (plagiarism)',
                   'Submitting work written or substantially edited by another person',
                   'Receiving content suggestions beyond general topic guidance',
-                  'Self-plagiarism — submitting previously written work',
+                  'Self-plagiarism â€” submitting previously written work',
                   'Submitting after the deadline or exceeding the word limit',
                   'Submitting multiple entries when only one is permitted',
                 ].map((item) => (
@@ -324,9 +324,9 @@ export default function Essay() {
               <h3 className="font-semibold text-foreground mb-5">Consequences</h3>
               <div className="space-y-4">
                 {[
-                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, minor citation errors corrected with 5–10% point deduction.' },
-                  { tier: 'Clear Cheating', color: 'text-orange-700 bg-orange-50 border-orange-200', desc: 'Essay disqualified, score of zero, disqualification from rankings and awards, school notification.' },
-                  { tier: 'Severe or Repeated', color: 'text-red-700 bg-red-50 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all earned points, ban from future competitions.' },
+                  { tier: 'Minor Violation', color: 'text-yellow-700 bg-yellow-50 border-yellow-200', desc: 'Formal warning, incident documented, minor citation errors corrected with 5â€“10% point deduction.' },
+                  { tier: 'Clear Cheating', color: 'text-orange-700 bg-primary/5 border-orange-200', desc: 'Essay disqualified, score of zero, disqualification from rankings and awards, school notification.' },
+                  { tier: 'Severe or Repeated', color: 'text-destructive bg-destructive/10 border-red-200', desc: 'Immediate permanent disqualification, forfeiture of all earned points, ban from future competitions.' },
                 ].map((c) => (
                   <div key={c.tier} className={`border rounded-xl p-4 ${c.color}`}>
                     <p className="font-semibold text-sm mb-1">{c.tier}</p>
@@ -335,7 +335,7 @@ export default function Essay() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                Appeals must be submitted within 24 hours of the disputed incident by the student or their parent/guardian. Final determinations are issued within 48–72 hours.
+                Appeals must be submitted within 24 hours of the disputed incident by the student or their parent/guardian. Final determinations are issued within 48â€“72 hours.
               </p>
             </motion.div>
           </div>
@@ -345,7 +345,7 @@ export default function Essay() {
       {/* CTA */}
       <section className="py-20 px-5 text-center border-t border-border">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-serif text-4xl text-foreground mb-5">Ready to write?</h2>
+          <h2 className="font-sans text-4xl text-foreground mb-5">Ready to write?</h2>
           <p className="text-muted-foreground mb-8">Registration is free and takes under two minutes.</p>
           <Link to="/register/essay"
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">

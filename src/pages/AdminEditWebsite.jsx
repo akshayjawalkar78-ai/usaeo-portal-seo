@@ -59,7 +59,7 @@ function ContentEditor({ value, onChange }) {
           <ImageIcon className="w-3.5 h-3.5" /> Image URL (for image blocks)
         </label>
         <input type="url" value={c.imageUrl || ''} onChange={e => set('imageUrl', e.target.value)}
-          placeholder="https://images.unsplash.com/…"
+          placeholder="https://images.unsplash.com/â€¦"
           className="w-full border border-border rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/30" />
       </div>
     </div>
@@ -166,7 +166,7 @@ export default function AdminEditWebsite() {
 
           <button type="button" onClick={save} disabled={saving}
             className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-60 transition-colors">
-            {saved ? <><CheckCircle className="w-3.5 h-3.5" /> Saved!</> : <><Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save block'}</>}
+            {saved ? <><CheckCircle className="w-3.5 h-3.5" /> Saved!</> : <><Save className="w-3.5 h-3.5" /> {saving ? 'Savingâ€¦' : 'Save block'}</>}
           </button>
         </div>
 
@@ -179,7 +179,7 @@ export default function AdminEditWebsite() {
           {blocks.map(b => (
             <div key={b.id}
               onClick={() => setActiveBlock(b.block)}
-              className={`cursor-pointer rounded-xl border p-3 transition-colors ${activeBlock === b.block ? 'border-primary bg-orange-50' : 'border-border hover:border-primary/30'}`}>
+              className={`cursor-pointer rounded-xl border p-3 transition-colors ${activeBlock === b.block ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold text-foreground">{b.block}</span>
                 <span className="text-[10px] text-muted-foreground">{b.updated_at ? new Date(b.updated_at).toLocaleDateString() : ''}</span>

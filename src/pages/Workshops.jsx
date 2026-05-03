@@ -4,10 +4,10 @@ import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User } from 'luci
 import PageLayout from '../components/layout/PageLayout';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
+  whileInView: { opacity: 1, transform: 'translate3d(0,0,0)' },
   viewport: { once: true },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], delay },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
 const upcoming = [];
@@ -31,16 +31,16 @@ export default function Workshops() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">Workshops</p>
-            <h1 className="font-serif text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
+            <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight mb-6 max-w-2xl">
               Expert-led sessions,<br /><em>completely free</em>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Live workshops covering macroeconomics, game theory, data analysis, and competition prep — all on Zoom, all free for registered students.
+              Live workshops covering macroeconomics, game theory, data analysis, and competition prep â€” all on Zoom, all free for registered students.
             </p>
             <div className="flex flex-wrap gap-10 mt-10">
               {[['9', 'Sessions hosted'], ['$0', 'Cost to attend'], ['9', 'Expert instructors'], ['60+', 'Min of content each']].map(([v, l]) => (
                 <div key={l}>
-                  <div className="text-3xl font-serif text-primary">{v}</div>
+                  <div className="text-3xl font-sans text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
                 </div>
               ))}
@@ -54,7 +54,7 @@ export default function Workshops() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Upcoming Sessions</p>
-            <h2 className="font-serif text-3xl text-foreground">Register for a free workshop</h2>
+            <h2 className="font-sans text-3xl text-foreground">Register for a free workshop</h2>
           </motion.div>
           {upcoming.length === 0 ? (
             <motion.div {...fadeUp(0.1)} className="bg-white border border-border rounded-2xl p-12 text-center">
@@ -69,9 +69,9 @@ export default function Workshops() {
                   <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} · {w.time}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} Â· {w.time}</span>
                       </div>
-                      <h3 className="font-serif text-2xl text-foreground mb-3">{w.title}</h3>
+                      <h3 className="font-sans text-2xl text-foreground mb-3">{w.title}</h3>
                       <p className="text-xs text-muted-foreground mb-4"><span className="font-medium text-foreground">Instructor:</span> {w.instructor}</p>
                     </div>
                     <a href="/register" className="self-start inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition-colors">
@@ -90,7 +90,7 @@ export default function Workshops() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()} className="mb-10">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Past Sessions</p>
-            <h2 className="font-serif text-3xl text-foreground">Previous workshops</h2>
+            <h2 className="font-sans text-3xl text-foreground">Previous workshops</h2>
           </motion.div>
           <div className="space-y-3">
             {past.map((w, i) => (
@@ -113,7 +113,7 @@ export default function Workshops() {
       <section className="py-20 px-5">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
           <motion.div {...fadeUp()}>
-            <h2 className="font-serif text-3xl text-foreground mb-8">What we cover</h2>
+            <h2 className="font-sans text-3xl text-foreground mb-8">What we cover</h2>
             <div className="space-y-3">
               {['Microeconomics', 'Macroeconomics', 'International Trade', 'Game Theory', 'Data Analysis', 'Competition Prep', 'Behavioral Economics', 'Economic Policy'].map((topic) => (
                 <div key={topic} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
@@ -124,7 +124,7 @@ export default function Workshops() {
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
-            <h2 className="font-serif text-3xl text-foreground mb-8">Why attend?</h2>
+            <h2 className="font-sans text-3xl text-foreground mb-8">Why attend?</h2>
             <div className="space-y-6">
               {[
                 { icon: BookOpen, title: 'Competition-aligned content', desc: 'Every session is specifically designed to build skills tested in USAEO competitions.' },

@@ -7,7 +7,7 @@ export default function Unauthorized() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-md bg-white border border-border rounded-2xl shadow-sm p-8 text-center">
         <div className="flex justify-center mb-4">
-          <span className="p-3 bg-orange-50 rounded-full">
+          <span className="p-3 bg-primary/5 rounded-full">
             <ShieldAlert className="w-6 h-6 text-orange-500" />
           </span>
         </div>
