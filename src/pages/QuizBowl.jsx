@@ -210,7 +210,7 @@ export default function QuizBowl() {
                 {[
                   { rule: 'Correct toss-up answer', points: '+1,000 pts' },
                   { rule: 'Correct bonus answer', points: '+1,000 pts' },
-                  { rule: 'Incorrect answer', points: 'Point reduction (amount TBD)' },
+                  { rule: 'Incorrect answer', points: 'Point reduction' },
                   { rule: 'Tie-break', points: 'Sudden-death toss-up' },
                 ].map((item) => (
                   <div key={item.rule} className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
