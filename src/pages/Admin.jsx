@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
+import { UPCOMING_PARTNER_EVENTS, PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
 
@@ -436,6 +437,42 @@ export default function Admin() {
                   </button>
                 ))}
               </div>
+              {/* Partner Events */}
+              {(UPCOMING_PARTNER_EVENTS.length > 0 || PARTNER_WORKSHOPS.length > 0) && (
+                <div className="bg-white rounded-2xl border border-border p-6">
+                  <h2 className="font-semibold text-foreground mb-1">Partner Events</h2>
+                  <p className="text-xs text-muted-foreground mb-4">Upcoming events from partner organizations. These are static and managed in <code className="bg-muted px-1 rounded">partnerEventsSeed.js</code>.</p>
+                  <div className="space-y-2">
+                    {UPCOMING_PARTNER_EVENTS.map(e => (
+                      <div key={e.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {e.partnerLogo && <img src={e.partnerLogo} alt={e.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70" />}
+                            <p className="font-medium text-sm text-foreground">{e.title}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{e.partner} · {e.category} · {e.date}</p>
+                        </div>
+                        <a href={e.externalUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-xs font-semibold text-primary hover:underline flex-shrink-0 ml-4">
+                          {e.partnerShort} ↗
+                        </a>
+                      </div>
+                    ))}
+                    {PARTNER_WORKSHOPS.slice(0, 2).map(w => (
+                      <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3 opacity-70">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {w.partnerLogo && <img src={w.partnerLogo} alt={w.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70" />}
+                            <p className="font-medium text-sm text-foreground">{w.title}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{w.partner} · Partner Workshop · {w.date}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground flex-shrink-0 ml-4">Past</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="bg-white rounded-2xl border border-border p-6">
                 <h2 className="font-semibold text-foreground mb-4">Quick actions</h2>
                 <div className="grid md:grid-cols-3 gap-3">

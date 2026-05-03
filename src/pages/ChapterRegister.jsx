@@ -69,7 +69,7 @@ export default function ChapterRegister() {
             <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Apply</p>
             <h1 className="font-sans text-3xl text-foreground mb-2">Start a USAEO Chapter</h1>
-            <p className="text-sm text-muted-foreground">Applications reviewed on a rolling basis Â· Free</p>
+            <p className="text-sm text-muted-foreground">Applications reviewed on a rolling basis · Free</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}

@@ -32,6 +32,8 @@ import EssayRegister from './pages/EssayRegister';
 import ChapterRegister from './pages/ChapterRegister';
 import CareersApply from './pages/CareersApply';
 import Legal from './pages/Legal';
+import PartnerCompetitions from './pages/PartnerCompetitions';
+import PartnerPrograms from './pages/PartnerPrograms';
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
 function CodeRedirect({ element }) {
@@ -58,6 +60,8 @@ function App() {
             <Route path="/competitions/essay" element={<Essay />} />
             <Route path="/competitions/qualifiers" element={<NationalQualifiers />} />
             <Route path="/competitions/finals" element={<NationalFinals />} />
+            <Route path="/competitions/partner-competitions" element={<PartnerCompetitions />} />
+            <Route path="/partner-programs" element={<PartnerPrograms />} />
             <Route path="/register/quiz-bowl" element={<QuizBowlRegister />} />
             <Route path="/register/essay" element={<EssayRegister />} />
             <Route path="/register/chapter" element={<ChapterRegister />} />

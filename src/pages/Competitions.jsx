@@ -13,25 +13,25 @@ const fadeUp = (delay = 0) => ({
 
 const phases = [
   {
-    n: '01', status: 'closed', badge: 'Feb 28, 2026 Â· Virtual',
+    n: '01', status: 'closed', badge: 'Feb 28, 2026 · Virtual',
     title: 'National Qualifiers',
     desc: 'A two-hour virtual exam with multiple-choice and short-answer questions. Registration is now closed. Top scorers have advanced to the next stage.',
     cta: null,
   },
   {
-    n: '02', status: 'open', badge: 'Coming Soon Â· Virtual',
+    n: '02', status: 'open', badge: 'Coming Soon · Virtual',
     title: 'Quiz Bowl',
     desc: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students, register now to secure your spot.',
     cta: { label: 'Register for Quiz Bowl', to: '/register/quiz-bowl' },
   },
   {
-    n: '03', status: 'open', badge: 'Coming Soon Â· Virtual',
+    n: '03', status: 'open', badge: 'Coming Soon · Virtual',
     title: 'Essay Competition',
     desc: 'Submit a research essay on an economics topic of your choice. Judged on economic reasoning, quality of evidence, and clarity of argument. Open to all registered students.',
     cta: { label: 'Register for Essay', to: '/register/essay' },
   },
   {
-    n: '04', status: 'future', badge: 'May 2026 Â· In-Person',
+    n: '04', status: 'future', badge: 'May 2026 · In-Person',
     title: 'National Finals',
     desc: 'An intensive in-person competition featuring a comprehensive written examination and real-world case study analysis. Invitation only, top scorers from qualifier rounds are selected.',
     cta: { label: 'Learn More', to: '/competitions/finals' },

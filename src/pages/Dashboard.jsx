@@ -10,6 +10,7 @@ import {
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/supabaseClient';
+import { UPCOMING_PARTNER_EVENTS } from '@/lib/partnerEventsSeed';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -1158,7 +1159,19 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
-                  {competitionEvents.filter(e => e.status !== 'done').length === 0 && upcomingWorkshops.length === 0 && (
+                  {UPCOMING_PARTNER_EVENTS.map((e) => (
+                    <div key={e.id} className="flex items-center justify-between border border-orange-100 bg-orange-50/40 rounded-xl px-4 py-3">
+                      <div>
+                        <p className="font-medium text-sm text-foreground">{e.title}</p>
+                        <p className="text-xs text-muted-foreground">Partner {e.category} · {e.date}</p>
+                      </div>
+                      <a href={e.externalUrl} target="_blank" rel="noopener noreferrer"
+                        className="text-xs font-semibold text-primary hover:underline flex-shrink-0 ml-3">
+                        {e.partnerShort} ↗
+                      </a>
+                    </div>
+                  ))}
+                  {competitionEvents.filter(e => e.status !== 'done').length === 0 && upcomingWorkshops.length === 0 && UPCOMING_PARTNER_EVENTS.length === 0 && (
                     <p className="text-sm text-muted-foreground">No upcoming events at this time.</p>
                   )}
                 </div>

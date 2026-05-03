@@ -119,7 +119,7 @@ export default function Research() {
               <motion.div key={p.title} {...fadeUp()} className="bg-white border border-border rounded-2xl p-6 md:p-8">
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground">
-                    <Lock className="w-3 h-3" /> Private Â· Internal
+                    <Lock className="w-3 h-3" /> Private · Internal
                   </span>
                 </div>
                 <h3 className="font-semibold text-foreground text-base md:text-lg leading-snug mb-3">{p.title}</h3>

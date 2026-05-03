@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User } from 'lucide-react';
+import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User, ExternalLink } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import { PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -69,7 +70,7 @@ export default function Workshops() {
                   <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} Â· {w.time}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} · {w.time}</span>
                       </div>
                       <h3 className="font-sans text-2xl text-foreground mb-3">{w.title}</h3>
                       <p className="text-xs text-muted-foreground mb-4"><span className="font-medium text-foreground">Instructor:</span> {w.instructor}</p>
@@ -103,6 +104,42 @@ export default function Workshops() {
                   <div className="text-xs text-muted-foreground mt-0.5 italic">{w.topic}</div>
                 </div>
                 <span className="text-xs text-muted-foreground flex-shrink-0">{w.date}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Partner Workshops */}
+      <section className="py-20 px-5 border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <motion.div {...fadeUp()} className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Partner Sessions</p>
+            <h2 className="font-sans text-3xl text-foreground">Workshops hosted by partners</h2>
+            <p className="text-muted-foreground mt-2 max-w-xl">Our partner organizations also run their own workshops open to USAEO students.</p>
+          </motion.div>
+          <div className="space-y-3">
+            {PARTNER_WORKSHOPS.map((w, i) => (
+              <motion.div key={w.id} {...fadeUp(i * 0.05)} className="flex items-start justify-between bg-white border border-border rounded-xl px-6 py-4 gap-4">
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {w.partnerLogo && (
+                    <img src={w.partnerLogo} alt={w.partnerShort} className="h-7 w-auto max-w-[32px] object-contain flex-shrink-0 mt-0.5 opacity-70" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm text-foreground">{w.title}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                      <User className="w-3 h-3 flex-shrink-0" />{w.partner}
+                    </div>
+                    {w.topic && <div className="text-xs text-muted-foreground mt-0.5 italic">{w.topic}</div>}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                  <span className="text-xs text-muted-foreground">{w.date}</span>
+                  <a href={w.partnerUrl} target="_blank" rel="noopener noreferrer"
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                    Visit {w.partnerShort} <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </motion.div>
             ))}
           </div>

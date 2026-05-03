@@ -214,25 +214,25 @@ export default function Home() {
                 title: 'Free Curriculum',
                 to: '/curriculum',
                 body: 'Six structured units covering the complete USAEO syllabus, from introductory supply and demand to international finance. Self-paced, with problem sets and practice tests. No prior economics background needed.',
-                meta: '6 units Â· 30+ hours Â· Self-paced',
+                meta: '6 units · 30+ hours · Self-paced',
               },
               {
                 title: 'Live Workshops',
                 to: '/workshops',
                 body: 'Expert-led sessions held over Zoom throughout the competition season. Topics include game theory, macroeconomic policy, data analysis, and competition preparation. All sessions are free and recordings are available.',
-                meta: 'Weekly sessions Â· Free Â· All levels',
+                meta: 'Weekly sessions · Free · All levels',
               },
               {
                 title: 'Research Program',
                 to: '/research',
                 body: 'Students interested in academic economics can apply to the USAEO research program, where they conduct original economic research with guidance from mentors in the field. Papers are published in the USAEO student journal.',
-                meta: 'Mentored Â· Published Â· Open applications',
+                meta: 'Mentored · Published · Open applications',
               },
               {
                 title: 'Chapter Program',
                 to: '/chapters',
                 body: 'Start a USAEO chapter at your high school. Chapter Founders lead weekly meetings, organize local study sessions, and connect their peers to the national competition. Active chapters exist in 15+ states.',
-                meta: '50+ active chapters Â· Applications open',
+                meta: '50+ active chapters · Applications open',
               },
             ].map((p, i) => (
               <motion.div key={p.title} {...fadeUp(i * 0.08)} className="bg-white p-8 md:p-10 group">
