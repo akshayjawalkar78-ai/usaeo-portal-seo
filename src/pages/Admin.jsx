@@ -5,11 +5,12 @@ import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
   Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download,
-  Lock, Unlock, Crown
+  Lock, Unlock, Crown, TrendingUp,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 import AdminEditWebsite from './AdminEditWebsite';
+import AdminAnalytics from './AdminAnalytics';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -112,6 +113,9 @@ export default function Admin() {
   const [assignAdminEmail, setAssignAdminEmail] = useState('');
   const [regFilter, setRegFilter] = useState('all');
   const [dupExportModal, setDupExportModal] = useState(null); // { filtered, dupIds, filteredDupIds }
+  const [colFilters, setColFilters] = useState({ name: '', email: '', event: '', eventType: 'all', school: '', state: '', date: '' });
+  const [showDupsOnly, setShowDupsOnly] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -768,7 +772,6 @@ export default function Admin() {
           {/* â”€â”€ REGISTRATIONS â”€â”€ */}
           {active === 'registrations' && (() => {
             const nonChapter = registrations.filter(r => r.event_type !== 'chapter');
-            const filtered = regFilter === 'all' ? nonChapter : nonChapter.filter(r => r.event_type === regFilter);
 
             // Detect duplicates: same email + event_type â†’ keep earliest, mark rest as dup
             const groupMap = {};
@@ -778,18 +781,44 @@ export default function Admin() {
               groupMap[key].push(r);
             });
             const dupIds = new Set();
-            const dupReasons = {}; // id â†’ reason string
+            const originalIds = new Set();
+            const dupReasons = {};
             Object.values(groupMap).forEach(group => {
               if (group.length > 1) {
                 const sorted = [...group].sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
+                originalIds.add(sorted[0].id);
                 sorted.slice(1).forEach(r => {
                   dupIds.add(r.id);
                   dupReasons[r.id] = `Duplicate: ${sorted[0].user_name || sorted[0].user_email} registered for ${r.event_type} on ${new Date(sorted[0].registered_at).toLocaleDateString()} (kept). This entry registered ${new Date(r.registered_at).toLocaleDateString()}.`;
                 });
               }
             });
+            const dupGroupIds = new Set([...originalIds, ...dupIds]);
+
+            // Apply filters
+            let filtered = nonChapter;
+            if (regFilter !== ‘all’) filtered = filtered.filter(r => r.event_type === regFilter);
+            if (colFilters.name) filtered = filtered.filter(r => (r.user_name || ‘’).toLowerCase().includes(colFilters.name.toLowerCase()));
+            if (colFilters.email) filtered = filtered.filter(r => (r.user_email || ‘’).toLowerCase().includes(colFilters.email.toLowerCase()));
+            if (colFilters.event) filtered = filtered.filter(r => (r.event_name || ‘’).toLowerCase().includes(colFilters.event.toLowerCase()));
+            if (colFilters.eventType !== ‘all’) filtered = filtered.filter(r => r.event_type === colFilters.eventType);
+            if (colFilters.school) filtered = filtered.filter(r => (r.school || ‘’).toLowerCase().includes(colFilters.school.toLowerCase()));
+            if (colFilters.state) filtered = filtered.filter(r => (r.state || ‘’).toLowerCase().includes(colFilters.state.toLowerCase()));
+            if (colFilters.date) filtered = filtered.filter(r => r.registered_at && new Date(r.registered_at).toLocaleDateString().includes(colFilters.date));
+            if (showDupsOnly) {
+              filtered = filtered.filter(r => dupGroupIds.has(r.id));
+              filtered = [...filtered].sort((a, b) => {
+                const ka = `${a.user_email}::${a.event_type}`;
+                const kb = `${b.user_email}::${b.event_type}`;
+                if (ka !== kb) return ka.localeCompare(kb);
+                return new Date(a.registered_at) - new Date(b.registered_at);
+              });
+            }
+
+            const hasColFilters = colFilters.name || colFilters.email || colFilters.event || colFilters.eventType !== ‘all’ || colFilters.school || colFilters.state || colFilters.date;
             const filteredDupIds = filtered.filter(r => dupIds.has(r.id)).map(r => r.id);
             const dupCount = filteredDupIds.length;
+            const setCol = col => e => setColFilters(f => ({ ...f, [col]: e.target.value }));
 
             const handleExportClick = () => {
               if (dupCount > 0) {
@@ -799,40 +828,58 @@ export default function Admin() {
               }
             };
 
+            const inputCls = ‘w-full border border-border rounded-md px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary’;
 
             return (
               <div className="space-y-4">
+                {showAnalytics && <AdminAnalytics registrations={nonChapter} onClose={() => setShowAnalytics(false)} />}
+
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <h2 className="font-semibold text-foreground">Event Registrations</h2>
                     <span className="text-sm text-muted-foreground">{filtered.length} of {nonChapter.length}</span>
                     {dupCount > 0 && (
                       <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> {dupCount} duplicate{dupCount !== 1 ? 's' : ''}
+                        <AlertTriangle className="w-3 h-3" /> {dupCount} dup{dupCount !== 1 ? ‘s’ : ‘’}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex bg-muted rounded-lg p-1 gap-1">
-                      {[
-                        { id: 'all', label: 'All' },
-                        { id: 'quiz-bowl', label: 'Quiz Bowl' },
-                        { id: 'essay', label: 'Essay' },
-                      ].map(f => (
+                      {[{ id: ‘all’, label: ‘All’ }, { id: ‘quiz-bowl’, label: ‘Quiz Bowl’ }, { id: ‘essay’, label: ‘Essay’ }].map(f => (
                         <button key={f.id} onClick={() => setRegFilter(f.id)}
-                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${regFilter === f.id ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${regFilter === f.id ? ‘bg-white text-foreground shadow-sm’ : ‘text-muted-foreground hover:text-foreground’}`}>
                           {f.label}
                         </button>
                       ))}
                     </div>
+                    <button onClick={() => setShowDupsOnly(v => !v)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${showDupsOnly ? ‘bg-amber-50 border-amber-200 text-amber-700’ : ‘border-border text-foreground hover:bg-muted’}`}>
+                      <AlertTriangle className="w-3.5 h-3.5" /> {showDupsOnly ? ‘Show all’ : ‘Dups only’}
+                    </button>
+                    <button onClick={() => setShowAnalytics(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-xs font-semibold text-foreground hover:bg-muted transition-colors">
+                      <TrendingUp className="w-3.5 h-3.5" /> Analytics
+                    </button>
+                    {hasColFilters && (
+                      <button onClick={() => setColFilters({ name: ‘’, email: ‘’, event: ‘’, eventType: ‘all’, school: ‘’, state: ‘’, date: ‘’ })}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        <X className="w-3 h-3" /> Clear filters
+                      </button>
+                    )}
                     <button onClick={handleExportClick}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-xs font-semibold text-foreground hover:bg-muted transition-colors">
                       <Download className="w-3.5 h-3.5" /> Export CSV
                     </button>
                   </div>
                 </div>
+
                 <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  {filtered.length === 0 && <p className="p-6 text-sm text-muted-foreground">No registrations{regFilter !== 'all' ? ` for ${regFilter}` : ''} yet.</p>}
+                  {filtered.length === 0 && (
+                    <p className="p-6 text-sm text-muted-foreground">
+                      {hasColFilters || showDupsOnly ? ‘No registrations match the current filters.’ : `No registrations${regFilter !== ‘all’ ? ` for ${regFilter}` : ‘’} yet.`}
+                    </p>
+                  )}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -846,31 +893,48 @@ export default function Admin() {
                           <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
                           <th className="sticky right-0 bg-muted/30 px-4 py-3 w-12 shadow-[-1px_0_0_0_#e5e7eb]"></th>
                         </tr>
+                        <tr className="border-b border-border bg-white">
+                          <th className="px-3 py-2"><input value={colFilters.name} onChange={setCol(‘name’)} placeholder="Search..." className={inputCls} /></th>
+                          <th className="px-3 py-2"><input value={colFilters.email} onChange={setCol(‘email’)} placeholder="Search..." className={inputCls} /></th>
+                          <th className="px-3 py-2"><input value={colFilters.event} onChange={setCol(‘event’)} placeholder="Search..." className={inputCls} /></th>
+                          <th className="px-3 py-2">
+                            <select value={colFilters.eventType} onChange={setCol(‘eventType’)} className={`${inputCls} bg-white`}>
+                              <option value="all">All types</option>
+                              <option value="quiz-bowl">Quiz Bowl</option>
+                              <option value="essay">Essay</option>
+                            </select>
+                          </th>
+                          <th className="px-3 py-2"><input value={colFilters.school} onChange={setCol(‘school’)} placeholder="Search..." className={inputCls} /></th>
+                          <th className="px-3 py-2"><input value={colFilters.state} onChange={setCol(‘state’)} placeholder="Search..." className={inputCls} /></th>
+                          <th className="px-3 py-2"><input value={colFilters.date} onChange={setCol(‘date’)} placeholder="MM/DD/YY..." className={inputCls} /></th>
+                          <th className="sticky right-0 bg-white shadow-[-1px_0_0_0_#e5e7eb] px-3 py-2"></th>
+                        </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {filtered.map(r => {
                           const isDup = dupIds.has(r.id);
+                          const isOriginalInGroup = showDupsOnly && originalIds.has(r.id);
                           return (
                             <tr key={r.id}
                               title={isDup ? dupReasons[r.id] : undefined}
-                              className={`group transition-colors ${isDup ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-muted/20'}`}>
+                              className={`group transition-colors ${isDup ? ‘bg-amber-50 hover:bg-amber-100’ : isOriginalInGroup ? ‘bg-blue-50/40 hover:bg-blue-50’ : ‘hover:bg-muted/20’}`}>
                               <td className="px-4 py-3 font-medium text-foreground">
                                 <span className="flex items-center gap-1.5">
                                   {isDup && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
-                                  {r.user_name || '—'}
+                                  {r.user_name || ‘—‘}
                                 </span>
                               </td>
                               <td className="px-4 py-3 text-muted-foreground">{r.user_email}</td>
-                              <td className="px-4 py-3 text-foreground">{r.event_name || '—'}</td>
+                              <td className="px-4 py-3 text-foreground">{r.event_name || ‘—‘}</td>
                               <td className="px-4 py-3">
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === 'quiz-bowl' ? 'bg-blue-50 text-blue-700 border border-blue-200' : r.event_type === 'essay' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-primary/5 text-primary border border-orange-200'}`}>
-                                  {r.event_type || '—'}
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.event_type === ‘quiz-bowl’ ? ‘bg-blue-50 text-blue-700 border border-blue-200’ : r.event_type === ‘essay’ ? ‘bg-purple-50 text-purple-700 border border-purple-200’ : ‘bg-primary/5 text-primary border border-orange-200’}`}>
+                                  {r.event_type || ‘—‘}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.school || '—'}</td>
-                              <td className="px-4 py-3 text-muted-foreground">{r.state || '—'}</td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : '—'}</td>
-                              <td className={`sticky right-0 px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] ${isDup ? 'bg-amber-50 group-hover:bg-amber-100' : 'bg-white group-hover:bg-muted/20'}`}>
+                              <td className="px-4 py-3 text-muted-foreground">{r.school || ‘—‘}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{r.state || ‘—‘}</td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">{r.registered_at ? new Date(r.registered_at).toLocaleDateString() : ‘—‘}</td>
+                              <td className={`sticky right-0 px-4 py-3 text-right shadow-[-1px_0_0_0_#e5e7eb] ${isDup ? ‘bg-amber-50 group-hover:bg-amber-100’ : isOriginalInGroup ? ‘bg-blue-50/40 group-hover:bg-blue-50’ : ‘bg-white group-hover:bg-muted/20’}`}>
                                 <button onClick={() => setDeleteTarget({ entity: base44.entities.EventRegistration, id: r.id, label: r.user_name || r.user_email })}
                                   className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                               </td>
