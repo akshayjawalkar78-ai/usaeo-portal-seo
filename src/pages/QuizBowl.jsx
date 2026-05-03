@@ -210,7 +210,7 @@ export default function QuizBowl() {
                 {[
                   { rule: 'Correct toss-up answer', points: '+1,000 pts' },
                   { rule: 'Correct bonus answer', points: '+1,000 pts' },
-                  { rule: 'Incorrect toss-up', points: 'Team disqualified from that question' },
+                  { rule: 'Incorrect answer', points: 'Point reduction (amount TBD)' },
                   { rule: 'Tie-break', points: 'Sudden-death toss-up' },
                 ].map((item) => (
                   <div key={item.rule} className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
@@ -226,7 +226,7 @@ export default function QuizBowl() {
           <motion.div {...fadeUp(0.12)} className="bg-white border border-border rounded-2xl p-8">
             <h3 className="font-semibold text-foreground mb-4">Bonus Questions</h3>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer — no buzzing required. Scores are tracked and displayed in real time throughout the match.
+              A correct toss-up answer unlocks a bonus question for that team. During bonus questions, team members may confer before the captain delivers the final answer — no buzzing required. Incorrect answers incur a point reduction. Scores are tracked and displayed in real time throughout the match.
             </p>
           </motion.div>
         </div>
