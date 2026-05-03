@@ -303,7 +303,7 @@ export default function Dashboard() {
                   <div className="bg-foreground rounded-2xl p-5">
                     <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Registration open</p>
                     <h3 className="font-sans text-2xl text-white mb-1">Quiz Bowl</h3>
-                    <p className="text-sm text-white/60 mb-4">Timed quiz Â· Open to all</p>
+                    <p className="text-sm text-white/60 mb-4">Timed quiz · Open to all</p>
                     <Link to="/register?event=quiz-bowl"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors">
                       Register <ArrowRight className="w-3 h-3" />
@@ -367,8 +367,8 @@ export default function Dashboard() {
                           <div>
                             <p className="font-medium text-sm text-foreground">{reg.event_name}</p>
                             <p className="text-xs text-muted-foreground capitalize">
-                              {reg.event_type?.replace('-', ' ')} Â· Registered {new Date(reg.registered_at).toLocaleDateString()}
-                              {reg.school ? ` Â· ${reg.school}` : ''}
+                              {reg.event_type?.replace('-', ' ')} · Registered {new Date(reg.registered_at).toLocaleDateString()}
+                              {reg.school ? ` · ${reg.school}` : ''}
                             </p>
                           </div>
                           <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
@@ -463,7 +463,7 @@ export default function Dashboard() {
                         <div key={inv.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                           <div>
                             <p className="font-medium text-sm text-foreground">{inv.team.team_name}</p>
-                            <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` Â· ${inv.team.state}` : ''}</p>
+                            <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` · ${inv.team.state}` : ''}</p>
                           </div>
                           <div className="flex gap-2">
                             <button onClick={async () => {
@@ -552,8 +552,8 @@ export default function Dashboard() {
                                 )}
                               </div>
                             )}
-                            <p className="text-xs text-muted-foreground mt-0.5">{myQBTeam.team.school} Â· {activeMembers.length}/5 members
-                              {activeMembers.length < 3 && <span className="text-orange-600"> Â· Need {3 - activeMembers.length} more to be ready</span>}
+                            <p className="text-xs text-muted-foreground mt-0.5">{myQBTeam.team.school} · {activeMembers.length}/5 members
+                              {activeMembers.length < 3 && <span className="text-orange-600"> · Need {3 - activeMembers.length} more to be ready</span>}
                             </p>
                           </div>
                           {isCaptain && !myQBTeam.team.locked && (
@@ -722,7 +722,7 @@ export default function Dashboard() {
                                   <div key={t.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                                     <div>
                                       <p className="font-medium text-sm text-foreground">{t.team_name}</p>
-                                      <p className="text-xs text-muted-foreground">{t.school} Â· {activeCount}/5 members</p>
+                                      <p className="text-xs text-muted-foreground">{t.school} · {activeCount}/5 members</p>
                                     </div>
                                     {alreadyRequested ? (
                                       <span className="text-xs text-orange-700 bg-primary/5 border border-orange-200 px-2.5 py-1 rounded-full">Requested</span>
@@ -766,7 +766,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">Your Standing</p>
                       <p className="font-semibold text-lg">Rank #{myRankingEntry.rank}</p>
-                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts Â· {myRankingEntry.stage}</p>
+                      <p className="text-white/70 text-sm">{myRankingEntry.score} pts · {myRankingEntry.stage}</p>
                     </div>
                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">
                       {myRankingEntry.rank}
@@ -780,7 +780,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Link to="/register/quiz-bowl" className="text-xs font-semibold text-primary hover:underline">Quiz Bowl</Link>
-                      <span className="text-muted-foreground text-xs">Â·</span>
+                      <span className="text-muted-foreground text-xs">·</span>
                       <Link to="/register/essay" className="text-xs font-semibold text-primary hover:underline">Essay</Link>
                     </div>
                   </div>
@@ -833,7 +833,7 @@ export default function Dashboard() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={`font-semibold text-sm ${isTop10 ? 'text-foreground' : 'text-foreground'}`}>{r.student_name || r.team_name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{r.school}{r.state ? ` Â· ${r.state}` : ''}</p>
+                              <p className="text-xs text-muted-foreground truncate">{r.school}{r.state ? ` · ${r.state}` : ''}</p>
                             </div>
                             <div className="text-right flex-shrink-0">
                               <p className="font-semibold text-sm text-foreground">{r.score}</p>
@@ -871,7 +871,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-foreground">{r.title}</p>
-                        <p className="text-xs text-muted-foreground">{r.file_type} Â· {r.file_size}</p>
+                        <p className="text-xs text-muted-foreground">{r.file_type} · {r.file_size}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -911,7 +911,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground text-sm mb-1">{w.title}</h3>
-                          <p className="text-xs text-muted-foreground mb-2">{w.time} Â· {w.instructor}</p>
+                          <p className="text-xs text-muted-foreground mb-2">{w.time} · {w.instructor}</p>
                           <p className="text-sm text-muted-foreground leading-relaxed">{w.description}</p>
                         </div>
                         {w.zoom_link ? (
@@ -938,7 +938,7 @@ export default function Dashboard() {
                       <div key={w.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                         <div>
                           <p className="text-sm font-medium text-foreground">{w.title}</p>
-                          <p className="text-xs text-muted-foreground">{w.date} Â· {w.instructor}</p>
+                          <p className="text-xs text-muted-foreground">{w.date} · {w.instructor}</p>
                         </div>
                         {w.recording_url ? (
                           <a href={w.recording_url} target="_blank" rel="noopener noreferrer"
@@ -1116,7 +1116,7 @@ export default function Dashboard() {
                       <div key={reg.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                         <div>
                           <p className="font-medium text-sm text-foreground">{reg.event_name}</p>
-                          <p className="text-xs text-muted-foreground capitalize">{reg.event_type?.replace('-', ' ')} Â· Registered {new Date(reg.registered_at).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{reg.event_type?.replace('-', ' ')} · Registered {new Date(reg.registered_at).toLocaleDateString()}</p>
                         </div>
                         <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2.5 py-1 rounded-full capitalize">{reg.status}</span>
                       </div>
@@ -1154,7 +1154,7 @@ export default function Dashboard() {
                     <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                       <div>
                         <p className="font-medium text-sm text-foreground">{w.title}</p>
-                        <p className="text-xs text-muted-foreground">Workshop Â· {w.date}</p>
+                        <p className="text-xs text-muted-foreground">Workshop · {w.date}</p>
                       </div>
                     </div>
                   ))}

@@ -506,7 +506,7 @@ export default function Admin() {
                         <p className="font-semibold text-sm text-foreground">{w.title}</p>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${w.status === 'upcoming' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{w.status}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{w.date} Â· {w.time} Â· {w.instructor}</p>
+                      <p className="text-xs text-muted-foreground">{w.date} · {w.time} · {w.instructor}</p>
                       {w.zoom_link && <p className="text-xs text-primary mt-1">Zoom: {w.zoom_link}</p>}
                       {w.recording_url && <p className="text-xs text-primary mt-1">Recording: {w.recording_url}</p>}
                     </div>
@@ -537,7 +537,7 @@ export default function Admin() {
                   <div key={r.id} className="flex items-center gap-4 p-5">
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{r.title}</p>
-                      <p className="text-xs text-muted-foreground">{r.file_type} Â· {r.file_size} Â· {r.tag}</p>
+                      <p className="text-xs text-muted-foreground">{r.file_type} · {r.file_size} · {r.tag}</p>
                     </div>
                     <span className={`text-xs font-medium px-2 py-1 rounded-full ${r.public ? 'bg-success/10 text-success border border-green-200' : 'bg-muted text-muted-foreground border border-border'}`}>
                       {r.public ? 'Public' : 'Registered only'}
@@ -570,7 +570,7 @@ export default function Admin() {
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-sm text-foreground flex-shrink-0">{r.rank}</div>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{r.student_name}</p>
-                      <p className="text-xs text-muted-foreground">{r.school} Â· {r.state} Â· {r.stage} Â· {r.year}</p>
+                      <p className="text-xs text-muted-foreground">{r.school} · {r.state} · {r.stage} · {r.year}</p>
                     </div>
                     <span className="text-sm font-semibold text-foreground">{r.score}</span>
                     <button onClick={() => base44.entities.Ranking.update(r.id, { visible: !r.visible }).then(loadAll)}
@@ -605,7 +605,7 @@ export default function Admin() {
                         <p className="font-semibold text-foreground">{c.school}</p>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${c.status === 'active' ? 'bg-success/10 text-success border border-green-200' : c.status === 'pending' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{c.status}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{c.city}, {c.state} Â· Founder: {c.founder_name} ({c.founder_email}) Â· {c.member_count} members Â· Code: <span className="font-mono font-semibold text-foreground">{c.invite_code}</span></p>
+                      <p className="text-xs text-muted-foreground">{c.city}, {c.state} · Founder: {c.founder_name} ({c.founder_email}) · {c.member_count} members · Code: <span className="font-mono font-semibold text-foreground">{c.invite_code}</span></p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button onClick={() => { setSelectedChapter(c); loadChapterDetails(c.id); }}
@@ -725,7 +725,7 @@ export default function Admin() {
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${e.status === 'done' ? 'bg-success/100' : e.status === 'current' ? 'bg-primary' : 'bg-border'}`} />
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{e.phase}</p>
-                      <p className="text-xs text-muted-foreground">{e.date} Â· order {e.order}</p>
+                      <p className="text-xs text-muted-foreground">{e.date} · order {e.order}</p>
                     </div>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${e.status === 'done' ? 'bg-success/10 text-success border border-green-200' : e.status === 'current' ? 'bg-primary/5 text-primary border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>{e.status}</span>
                     <button onClick={() => openEdit('competitionEvent', e)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
@@ -754,7 +754,7 @@ export default function Admin() {
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs text-foreground flex-shrink-0">{u.unit_number}</div>
                     <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{u.title}</p>
-                      <p className="text-xs text-muted-foreground">{u.topics}{u.hours ? ` Â· ${u.hours}` : ''}</p>
+                      <p className="text-xs text-muted-foreground">{u.topics}{u.hours ? ` · ${u.hours}` : ''}</p>
                     </div>
                     <button onClick={() => openEdit('curriculumUnit', u)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ entity: base44.entities.CurriculumUnit, id: u.id, label: u.title })}
@@ -914,8 +914,8 @@ export default function Admin() {
                           {activeCount >= 3 && <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">Ready</span>}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Captain: {team.captain_email} Â· {activeCount} active member{activeCount !== 1 ? 's' : ''}
-                          {team.school ? ` Â· ${team.school}` : ''}
+                          Captain: {team.captain_email} · {activeCount} active member{activeCount !== 1 ? 's' : ''}
+                          {team.school ? ` · ${team.school}` : ''}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
