@@ -30,6 +30,7 @@ import Unauthorized from './pages/Unauthorized';
 import QuizBowlRegister from './pages/QuizBowlRegister';
 import EssayRegister from './pages/EssayRegister';
 import ChapterRegister from './pages/ChapterRegister';
+import CareersApply from './pages/CareersApply';
 import Legal from './pages/Legal';
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
@@ -60,6 +61,7 @@ function App() {
             <Route path="/register/quiz-bowl" element={<QuizBowlRegister />} />
             <Route path="/register/essay" element={<EssayRegister />} />
             <Route path="/register/chapter" element={<ChapterRegister />} />
+            <Route path="/careers/apply" element={<CareersApply />} />
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/research" element={<Research />} />
