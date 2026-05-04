@@ -10,7 +10,7 @@ import {
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/supabaseClient';
-import { UPCOMING_PARTNER_EVENTS } from '@/lib/partnerEventsSeed';
+import { UPCOMING_PARTNER_EVENTS, UPCOMING_PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },

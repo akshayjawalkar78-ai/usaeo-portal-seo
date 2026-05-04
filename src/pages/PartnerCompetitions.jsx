@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ExternalLink, Lock, ChevronDown } from 'lucide-react';
+import { ArrowRight, ExternalLink, Lock, CheckCircle } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNER_COMPETITIONS } from '@/lib/partnerEventsSeed';
-import { PARTNER_BY_NAME } from '@/lib/partnersSeed';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -17,13 +16,20 @@ const past = PARTNER_COMPETITIONS.filter(e => e.status === 'past');
 
 function CompetitionCard({ event, i }) {
   return (
-    <motion.div key={event.id} {...fadeUp(i * 0.08)}
+    <motion.div {...fadeUp(i * 0.08)}
       className="border border-border rounded-2xl bg-white hover:border-primary/30 hover:shadow-md transition-all duration-200 overflow-hidden">
       <div className="p-8 md:p-10">
         <div className="flex flex-col md:flex-row md:items-start gap-6">
-          <div className="flex-shrink-0 flex items-center gap-3 min-w-[120px]">
+          {/* Partner logos */}
+          <div className="flex-shrink-0 flex flex-col gap-3 min-w-[100px]">
             {event.partnerLogo && (
-              <img src={event.partnerLogo} alt={event.partnerShort} className="h-10 w-auto max-w-[80px] object-contain opacity-80" />
+              <img src={event.partnerLogo} alt={event.partnerShort} className="h-9 w-auto max-w-[80px] object-contain opacity-85" />
+            )}
+            {event.coPartnerLogo && (
+              <>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">in partnership with</span>
+                <img src={event.coPartnerLogo} alt={event.coPartner} className="h-7 w-auto max-w-[80px] object-contain opacity-70" />
+              </>
             )}
           </div>
           <div className="flex-1">
@@ -40,7 +46,17 @@ function CompetitionCard({ event, i }) {
             </div>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">{event.partner}</p>
             <h2 className="font-sans text-2xl md:text-3xl text-foreground mb-3">{event.title}</h2>
-            <p className="text-muted-foreground leading-relaxed mb-6 max-w-2xl">{event.desc}</p>
+            <p className="text-muted-foreground leading-relaxed mb-5 max-w-2xl">{event.desc}</p>
+            {event.highlights && event.highlights.length > 0 && (
+              <ul className="space-y-1.5 mb-6">
+                {event.highlights.map((h, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                    <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            )}
             <a href={event.externalUrl} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
               View on {event.partnerShort} website <ExternalLink className="w-4 h-4" />
