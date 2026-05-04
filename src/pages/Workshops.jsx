@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User } from 'lucide-react';
+import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User, ExternalLink } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import { UPCOMING_PARTNER_WORKSHOPS, PAST_PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -69,7 +70,7 @@ export default function Workshops() {
                   <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} Â· {w.time}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} · {w.time}</span>
                       </div>
                       <h3 className="font-sans text-2xl text-foreground mb-3">{w.title}</h3>
                       <p className="text-xs text-muted-foreground mb-4"><span className="font-medium text-foreground">Instructor:</span> {w.instructor}</p>
@@ -108,6 +109,95 @@ export default function Workshops() {
           </div>
         </div>
       </section>
+
+      {/* Partner Workshops — Upcoming */}
+      {UPCOMING_PARTNER_WORKSHOPS.length > 0 && (
+        <section className="py-20 px-5 border-t border-border">
+          <div className="max-w-6xl mx-auto">
+            <motion.div {...fadeUp()} className="mb-10">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Partner Sessions</p>
+              <h2 className="font-sans text-3xl text-foreground">Upcoming partner workshops</h2>
+              <p className="text-muted-foreground mt-2 max-w-xl">Free sessions hosted by our partner organizations — open to all students.</p>
+            </motion.div>
+            <div className="space-y-6">
+              {UPCOMING_PARTNER_WORKSHOPS.map((w, i) => (
+                <motion.div key={w.id} {...fadeUp(i * 0.08)} className="grid md:grid-cols-5 border border-green-200 rounded-2xl overflow-hidden hover:shadow-md transition-colors bg-white">
+                  <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                        {w.partnerLogo && (
+                          <img src={w.partnerLogo} alt={w.partnerShort} className="h-8 w-auto max-w-[40px] object-contain opacity-80" />
+                        )}
+                        <span className="text-xs font-semibold uppercase tracking-widest text-primary">{w.partner}</span>
+                        {w.free && (
+                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-success/10 text-success border border-green-200">Free</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} · {w.time}</span>
+                      </div>
+                      <h3 className="font-sans text-2xl text-foreground mb-3">{w.title}</h3>
+                      <p className="text-xs text-muted-foreground mb-2"><span className="font-medium text-foreground">Speaker:</span> {w.instructor} — {w.role}</p>
+                      {w.desc && <p className="text-sm text-muted-foreground leading-relaxed mb-2">{w.desc}</p>}
+                      {w.openTo && <p className="text-xs text-muted-foreground italic">Open to: {w.openTo}</p>}
+                    </div>
+                    <a href={w.zoomUrl || w.partnerUrl} target="_blank" rel="noopener noreferrer"
+                      className="self-start mt-6 inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition-colors">
+                      {w.zoomUrl ? 'Register on Zoom' : 'Learn More'} <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                  <div className="md:col-span-2 bg-muted/30 p-8 md:p-10 flex flex-col justify-center gap-3 border-t md:border-t-0 md:border-l border-border">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">What to expect</p>
+                    {(w.topic || '').split(', ').filter(Boolean).map((t, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-sm text-foreground">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Partner Workshops — Past */}
+      {PAST_PARTNER_WORKSHOPS.length > 0 && (
+        <section className="py-20 px-5 border-t border-border bg-muted/30">
+          <div className="max-w-6xl mx-auto">
+            <motion.div {...fadeUp()} className="mb-10">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Partner Sessions · Past</p>
+              <h2 className="font-sans text-3xl text-foreground">Previous partner workshops</h2>
+            </motion.div>
+            <div className="space-y-3">
+              {PAST_PARTNER_WORKSHOPS.map((w, i) => (
+                <motion.div key={w.id} {...fadeUp(i * 0.05)} className="flex items-start justify-between bg-white border border-border rounded-xl px-6 py-4 gap-4">
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    {w.partnerLogo && (
+                      <img src={w.partnerLogo} alt={w.partnerShort} className="h-7 w-auto max-w-[32px] object-contain flex-shrink-0 mt-0.5 opacity-70" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-foreground">{w.title}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                        <User className="w-3 h-3 flex-shrink-0" />{w.instructor} · {w.partner}
+                      </div>
+                      {w.topic && <div className="text-xs text-muted-foreground mt-0.5 italic">{w.topic}</div>}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span className="text-xs text-muted-foreground">{w.date}</span>
+                    <a href={w.partnerUrl} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                      Visit {w.partnerShort} <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* What we cover / Why attend */}
       <section className="py-20 px-5">

@@ -136,7 +136,7 @@ export default function Chapters() {
             </motion.div>
           )}
           <motion.p {...fadeUp(0.3)} className="text-sm text-muted-foreground mt-6 text-center">
-            Showing {visibleChapters.length} of {chapters.length} active chapters Â· More joining every week
+            Showing {visibleChapters.length} of {chapters.length} active chapters · More joining every week
           </motion.p>
         </div>
       </section>

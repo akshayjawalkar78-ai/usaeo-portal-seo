@@ -10,6 +10,7 @@ const competitionsLinks = [
   { label: 'Quiz Bowl', to: '/competitions/quiz-bowl' },
   { label: 'Essay Competition', to: '/competitions/essay' },
   { label: 'National Finals', to: '/competitions/finals' },
+  { label: 'Partner Competitions', to: '/competitions/partner-competitions' },
 ];
 
 const programsLinks = [
@@ -17,6 +18,7 @@ const programsLinks = [
   { label: 'Curriculum', to: '/curriculum' },
   { label: 'Research Program', to: '/research' },
   { label: 'Chapter Program', to: '/chapters' },
+  { label: 'Partner Programs', to: '/partner-programs' },
 ];
 
 function DropdownMenu({ links, onClose }) {

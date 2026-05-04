@@ -168,7 +168,7 @@ export default function QuizBowlRegister() {
             <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Register</p>
             <h1 className="font-sans text-3xl text-foreground mb-2">USAEO Quiz Bowl 2026</h1>
-            <p className="text-sm text-muted-foreground">Free registration Â· Takes under 2 minutes</p>
+            <p className="text-sm text-muted-foreground">Free registration · Takes under 2 minutes</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
