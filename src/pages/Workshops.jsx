@@ -117,7 +117,7 @@ export default function Workshops() {
             <motion.div {...fadeUp()} className="mb-10">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Partner Sessions</p>
               <h2 className="font-sans text-3xl text-foreground">Upcoming partner workshops</h2>
-              <p className="text-muted-foreground mt-2 max-w-xl">Free sessions hosted by our partner organizations — open to all students.</p>
+              <p className="text-muted-foreground mt-2 max-w-xl">Free sessions hosted by our partner organizations, open to all students.</p>
             </motion.div>
             <div className="space-y-6">
               {UPCOMING_PARTNER_WORKSHOPS.map((w, i) => (
@@ -137,7 +137,8 @@ export default function Workshops() {
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{w.date} · {w.time}</span>
                       </div>
                       <h3 className="font-sans text-2xl text-foreground mb-3">{w.title}</h3>
-                      <p className="text-xs text-muted-foreground mb-2"><span className="font-medium text-foreground">Speaker:</span> {w.instructor} — {w.role}</p>
+                      <p className="text-xs text-muted-foreground mb-2"><span className="font-medium text-foreground">Speaker:</span> {w.instructor}</p>
+                      {w.role && <p className="text-xs text-muted-foreground mb-2">{w.role}</p>}
                       {w.desc && <p className="text-sm text-muted-foreground leading-relaxed mb-2">{w.desc}</p>}
                       {w.openTo && <p className="text-xs text-muted-foreground italic">Open to: {w.openTo}</p>}
                     </div>

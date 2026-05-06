@@ -1,0 +1,8 @@
+{
+  "name": "EmailSubscriber",
+  "fields": [
+    { "name": "email", "type": "string", "required": true },
+    { "name": "source", "type": "string" },
+    { "name": "subscribed_at", "type": "string" }
+  ]
+}

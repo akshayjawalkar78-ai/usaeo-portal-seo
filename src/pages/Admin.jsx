@@ -5,13 +5,15 @@ import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
   Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download,
-  Lock, Unlock, Crown, TrendingUp,
+  Lock, Unlock, Crown, TrendingUp, Newspaper, Copy, Mail,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 import { UPCOMING_PARTNER_EVENTS, PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
+import AdminNews from './AdminNews';
+import SoloRegistrantsPanel from './SoloRegistrantsPanel';
 
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
@@ -25,8 +27,22 @@ const navItems = [
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
   { label: 'QB Teams', id: 'qb-teams', icon: Users },
   { label: 'Applications', id: 'applications', icon: ShieldCheck },
+  { label: 'News', id: 'news', icon: Newspaper },
   { label: 'Edit Website', id: 'edit-website', icon: Pencil },
 ];
+
+const ECON_TEAM_NAMES = [
+  'Invisible Hand','Nash Equilibrium','Keynesian Crusaders','Supply Siders','The Marginalists',
+  'Rational Actors','Pareto Optimizers','The Arbitrageurs','Comparative Advantage','The Elastics',
+  'Marginal Revolution','Creative Destroyers','The Multipliers','Market Makers','The Equilibrium',
+  'Fiscal Hawks','The Monetarists','Opportunity Costs','The Ricardians','Coase Theorem',
+  'The Externalities','Game Theorists','Austrian School','Chicago School','The Laissez-Faire',
+  'Price Discoverers','The Oligopolists','Moral Hazard','Deadweight Avoiders','The Incentivists',
+];
+function randomEconTeamName() {
+  const base = ECON_TEAM_NAMES[Math.floor(Math.random() * ECON_TEAM_NAMES.length)];
+  return `${base} ${Math.floor(Math.random() * 90 + 10)}`;
+}
 
 function Modal({ title, onClose, children }) {
   return (
@@ -117,6 +133,9 @@ export default function Admin() {
   const [colFilters, setColFilters] = useState({ name: '', email: '', event: '', eventType: 'all', school: '', state: '', date: '' });
   const [showDupsOnly, setShowDupsOnly] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [backfillStatus, setBackfillStatus] = useState('idle'); // idle | running | done
+  const [backfillLog, setBackfillLog] = useState([]);
+  const [copiedEmails, setCopiedEmails] = useState(false);
 
   // Modal states
   const [modal, setModal] = useState(null); // { type, data }
@@ -246,6 +265,10 @@ export default function Admin() {
   };
 
   const navigate = (id) => { setActive(id); setSidebarOpen(false); };
+
+  // Solo QB panel — computed from state, no IIFE in JSX
+  const soloTeams = qbTeams.filter(t => (qbTeamMembers[t.id] || []).filter(m => m.status === 'active').length <= 1);
+  const soloEmails = [...new Set(soloTeams.map(t => t.captain_email).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-[#f9f9f8] flex font-inter">
@@ -1079,6 +1102,19 @@ export default function Admin() {
                   </div>
                 );
               })}
+
+              {/* Solo registrants panel */}
+              <SoloRegistrantsPanel
+                soloEmails={soloEmails}
+                copiedEmails={copiedEmails}
+                setCopiedEmails={setCopiedEmails}
+                backfillStatus={backfillStatus}
+                setBackfillStatus={setBackfillStatus}
+                backfillLog={backfillLog}
+                setBackfillLog={setBackfillLog}
+                registrations={registrations}
+                loadAll={loadAll}
+              />
             </div>
           )}
 
@@ -1134,6 +1170,9 @@ export default function Admin() {
               </div>
             </div>
           )}
+
+          {/* â”€â”€ NEWS â”€â”€ */}
+          {active === 'news' && <AdminNews />}
 
           {/* â”€â”€ EDIT WEBSITE â”€â”€ */}
           {active === 'edit-website' && <AdminEditWebsite />}

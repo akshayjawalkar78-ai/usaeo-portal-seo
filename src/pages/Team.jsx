@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
@@ -102,10 +103,10 @@ export default function Team() {
             ))}
           </div>
           <motion.div {...fadeUp(0.3)} className="mt-8 text-center">
-            <a href="mailto:info@usaeo.org"
+            <Link to="/careers/apply"
               className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white rounded-full font-medium text-sm hover:bg-foreground/85 transition-colors">
               Apply Now <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>

@@ -18,7 +18,7 @@ export const PARTNER_COMPETITIONS = [
     status: 'upcoming',
     badge: 'Ongoing · Virtual · Global',
     category: 'Research Proposal Competition',
-    desc: 'Submit an original economics or finance research proposal — just 1–2 pages. Top 5 winners earn guaranteed admission to the Synthica Research Cohort (normally ~2% acceptance), academic publication mentorship, and signed certificates from YEL and Synthica. Open to high school students worldwide. Co-hosted with Synthica Research Group.',
+    desc: 'Submit an original economics or finance research proposal (1-2 pages). Top 5 winners earn guaranteed admission to the Synthica Research Cohort (normally ~2% acceptance), academic publication mentorship, and signed certificates from YEL and Synthica. Open to high school students worldwide. Co-hosted with Synthica Research Group.',
     highlights: [
       'Top 5 → guaranteed Synthica Research Cohort admission',
       'Publication pathway to indexed academic journals',
@@ -64,7 +64,7 @@ export const PARTNER_WORKSHOPS = [
     instructor: 'Mr. Mukesh Agarwal',
     role: 'CFO, Spinneys Group; Former EY Executive',
     topic: 'Career pathways in finance and economics, the Spinneys IPO, breaking into Finance from high school',
-    desc: 'Join CFO of Spinneys Group — one of the largest premium food retail chains in the Middle East and a former EY executive — as he breaks down his career journey, his role in launching the Spinneys IPO, and practical pathways for students to break into Finance and Economics. Free and open to all high school and university students and recent graduates.',
+    desc: 'Join CFO of Spinneys Group (one of the largest premium food retail chains in the Middle East and a former EY executive) as he breaks down his career journey, his role in launching the Spinneys IPO, and practical pathways for students to break into Finance and Economics. Free and open to all high school and university students and recent graduates.',
     zoomUrl: 'https://us06web.zoom.us/meeting/register/DV9X8YOpRWGFFiVD10lEpw',
     free: true,
     openTo: 'High school students, university students, recent graduates',
