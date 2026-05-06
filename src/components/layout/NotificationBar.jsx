@@ -10,8 +10,8 @@ export function AnnouncementNotifBar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] h-10 bg-primary text-white flex items-center justify-center gap-4 text-sm px-10">
-      <span className="font-medium hidden sm:inline">Quiz Bowl &amp; Essay Challenge are now open —</span>
-      <span className="font-medium sm:hidden">Competitions open —</span>
+      <span className="font-medium hidden sm:inline">Quiz Bowl &amp; Essay Challenge are now open:</span>
+      <span className="font-medium sm:hidden">Competitions open:</span>
       <div className="flex items-center gap-3">
         <Link to="/register/quiz-bowl" className="flex items-center gap-1 font-semibold hover:underline whitespace-nowrap">
           Quiz Bowl <ArrowRight className="w-3.5 h-3.5" />
@@ -63,7 +63,7 @@ export function EmailSubBar() {
         <span className="font-medium">You're subscribed!</span>
       ) : (
         <>
-          <span className="font-medium hidden sm:inline">Stay informed —</span>
+          <span className="font-medium hidden sm:inline">Stay informed:</span>
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <input
               type="email"
