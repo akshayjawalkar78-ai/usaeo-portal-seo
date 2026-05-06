@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { easeOut, easeDrawer } from '@/lib/motion';
+import { useNotification } from '@/lib/NotificationContext';
 
 const competitionsLinks = [
   { label: 'Overview', to: '/competitions' },
@@ -53,6 +54,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, profile, signOut } = useAuth();
+  const { barHeight } = useNotification();
 
   const handleLogout = async () => {
     await signOut();
@@ -72,7 +74,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-base ease-out ${scrolled ? 'bg-white/95 backdrop-blur-md border-b border-border shadow-sm' : 'bg-white/80 backdrop-blur-sm border-b border-transparent'}`}>
+      <nav style={{ top: `${barHeight}px` }} className={`fixed left-0 right-0 z-50 transition-[background-color,box-shadow,border-color,backdrop-filter,top] duration-base ease-out ${scrolled ? 'bg-white/95 backdrop-blur-md border-b border-border shadow-sm' : 'bg-white/80 backdrop-blur-sm border-b border-transparent'}`}>
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
@@ -83,6 +85,7 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             <Link to="/about" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-fast ease-out">About</Link>
+            <Link to="/news" className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-fast ease-out">News</Link>
 
             {/* Competitions Dropdown */}
             <div className="relative" onMouseEnter={() => setActiveDropdown('competitions')} onMouseLeave={() => setActiveDropdown(null)}>
@@ -163,10 +166,12 @@ export default function Navbar() {
             animate={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
             exit={{ opacity: 0, transform: 'translate3d(0,-8px,0)' }}
             transition={{ duration: 0.32, ease: easeDrawer }}
-            className="fixed inset-0 z-40 bg-white pt-14 overflow-y-auto"
+            style={{ paddingTop: `calc(3.5rem + ${barHeight}px)` }}
+            className="fixed inset-0 z-40 bg-white overflow-y-auto"
           >
             <div className="p-5 flex flex-col divide-y divide-border">
               <Link to="/about" className="py-3.5 text-base text-foreground font-medium">About</Link>
+              <Link to="/news" className="py-3.5 text-base text-foreground font-medium">News</Link>
 
               {/* Competitions collapsible */}
               <div>

@@ -1,0 +1,15 @@
+{
+  "name": "NewsArticle",
+  "fields": [
+    { "name": "title", "type": "string", "required": true },
+    { "name": "slug", "type": "string" },
+    { "name": "section", "type": "enum", "options": ["updates", "blog", "publications"] },
+    { "name": "author", "type": "string" },
+    { "name": "excerpt", "type": "string" },
+    { "name": "thumbnail_url", "type": "string" },
+    { "name": "content_json", "type": "string" },
+    { "name": "layout", "type": "enum", "options": ["standard", "wide"] },
+    { "name": "published", "type": "boolean" },
+    { "name": "published_at", "type": "string" }
+  ]
+}

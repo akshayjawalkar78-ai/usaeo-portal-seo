@@ -4,6 +4,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
+import { NotificationProvider } from '@/lib/NotificationContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ScrollToTop from '@/components/ScrollToTop';
 import Home from './pages/Home';
@@ -34,6 +35,7 @@ import CareersApply from './pages/CareersApply';
 import Legal from './pages/Legal';
 import PartnerCompetitions from './pages/PartnerCompetitions';
 import PartnerPrograms from './pages/PartnerPrograms';
+import News from './pages/News';
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
 function CodeRedirect({ element }) {
@@ -48,6 +50,7 @@ function CodeRedirect({ element }) {
 function App() {
   return (
     <AuthProvider>
+      <NotificationProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
@@ -62,6 +65,7 @@ function App() {
             <Route path="/competitions/finals" element={<NationalFinals />} />
             <Route path="/competitions/partner-competitions" element={<PartnerCompetitions />} />
             <Route path="/partner-programs" element={<PartnerPrograms />} />
+            <Route path="/news" element={<News />} />
             <Route path="/register/quiz-bowl" element={<QuizBowlRegister />} />
             <Route path="/register/essay" element={<EssayRegister />} />
             <Route path="/register/chapter" element={<ChapterRegister />} />
@@ -95,6 +99,7 @@ function App() {
         </Router>
         <Toaster />
       </QueryClientProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

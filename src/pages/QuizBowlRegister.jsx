@@ -1,23 +1,38 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowLeft, ArrowRight, Plus, X, Users } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ArrowRight, Plus, X, Users, AlertCircle } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 
 const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 const GRADES = ['9th Grade','10th Grade','11th Grade','12th Grade'];
-
 const MAX_TEAM_SIZE = 5;
+
+const ECON_TEAM_NAMES = [
+  'Invisible Hand','Nash Equilibrium','Keynesian Crusaders','Supply Siders','The Marginalists',
+  'Rational Actors','Pareto Optimizers','The Arbitrageurs','Comparative Advantage','The Elastics',
+  'Marginal Revolution','Creative Destroyers','The Multipliers','Market Makers','The Equilibrium',
+  'Fiscal Hawks','The Monetarists','Opportunity Costs','The Ricardians','Coase Theorem',
+  'The Externalities','Game Theorists','Austrian School','Chicago School','The Laissez-Faire',
+  'Price Discoverers','The Oligopolists','Moral Hazard','Deadweight Avoiders','The Incentivists',
+];
+
+function randomEconTeamName() {
+  const base = ECON_TEAM_NAMES[Math.floor(Math.random() * ECON_TEAM_NAMES.length)];
+  return `${base} ${Math.floor(Math.random() * 90 + 10)}`;
+}
 
 export default function QuizBowlRegister() {
   const [form, setForm] = useState({ name: '', email: '', school: '', grade: '', state: '' });
   const [showTeam, setShowTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [teammates, setTeammates] = useState([{ name: '', email: '' }]);
-  const [captainIndex, setCaptainIndex] = useState(-1); // -1 = registrant is captain
+  const [captainIndex, setCaptainIndex] = useState(-1);
   const [submitted, setSubmitted] = useState(false);
+  const [assignedTeamName, setAssignedTeamName] = useState('');
+  const [isSolo, setIsSolo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -64,55 +79,54 @@ export default function QuizBowlRegister() {
         status: 'registered',
       });
 
-      if (showTeam && teamName.trim()) {
-        const validTeammates = teammates.filter(t => t.email.trim());
-        const captainEmail = captainIndex === -1 ? form.email : (validTeammates[captainIndex]?.email || form.email);
+      const usedTeamName = showTeam && teamName.trim() ? teamName.trim() : randomEconTeamName();
+      const solo = !showTeam || !teamName.trim();
+      const validTeammates = showTeam ? teammates.filter(t => t.email.trim()) : [];
+      const captainEmail = captainIndex === -1 ? form.email : (validTeammates[captainIndex]?.email || form.email);
 
-        const team = await base44.entities.QuizBowlTeam.create({
-          team_name: teamName.trim(),
-          captain_email: captainEmail,
-          school: form.school,
-          state: form.state,
-          locked: false,
-        });
+      const team = await base44.entities.QuizBowlTeam.create({
+        team_name: usedTeamName,
+        captain_email: captainEmail,
+        school: form.school,
+        state: form.state,
+        locked: false,
+      });
 
-        // Add registrant
+      await base44.entities.QuizBowlTeamMember.create({
+        team_id: team.id,
+        user_email: form.email,
+        user_name: form.name,
+        role: captainIndex === -1 ? 'captain' : 'member',
+        status: 'active',
+      });
+
+      for (let i = 0; i < validTeammates.length; i++) {
+        const t = validTeammates[i];
         await base44.entities.QuizBowlTeamMember.create({
           team_id: team.id,
-          user_email: form.email,
-          user_name: form.name,
-          role: captainIndex === -1 ? 'captain' : 'member',
-          status: 'active',
+          user_email: t.email.trim(),
+          user_name: t.name.trim() || null,
+          role: captainIndex === i ? 'captain' : 'member',
+          status: 'invited',
         });
-
-        // Add teammates as invited
-        for (let i = 0; i < validTeammates.length; i++) {
-          const t = validTeammates[i];
-          await base44.entities.QuizBowlTeamMember.create({
-            team_id: team.id,
-            user_email: t.email.trim(),
-            user_name: t.name.trim() || null,
-            role: captainIndex === i ? 'captain' : 'member',
-            status: 'invited',
-          });
-          // Fire invite email
-          supabase.functions.invoke('send-registration-email', {
-            body: {
-              name: t.name.trim() || t.email,
-              email: t.email.trim(),
-              event_type: 'team-invite',
-              event_name: 'USAEO Quiz Bowl 2026',
-              team_name: teamName.trim(),
-              invited_by: form.name,
-            },
-          }).catch(() => {});
-        }
+        supabase.functions.invoke('send-registration-email', {
+          body: {
+            name: t.name.trim() || t.email,
+            email: t.email.trim(),
+            event_type: 'team-invite',
+            event_name: 'USAEO Quiz Bowl 2026',
+            team_name: usedTeamName,
+            invited_by: form.name,
+          },
+        }).catch(() => {});
       }
 
       supabase.functions.invoke('send-registration-email', {
         body: { name: form.name, email: form.email, event_type: 'quiz-bowl', event_name: 'USAEO Quiz Bowl 2026' },
       }).catch(() => {});
 
+      setAssignedTeamName(usedTeamName);
+      setIsSolo(solo);
       setSubmitted(true);
     } catch {
       setError('Something went wrong. Please try again.');
@@ -133,14 +147,23 @@ export default function QuizBowlRegister() {
             <h2 className="font-sans text-3xl text-foreground mb-3">You're registered!</h2>
             <p className="text-muted-foreground mb-4">
               A confirmation email is on its way to <strong>{form.email}</strong>.
-              {showTeam && teamName ? ` Your team "${teamName}" has been created.` : ''}
+              {' '}Your team <strong>"{assignedTeamName}"</strong> has been created.
             </p>
-            {!showTeam && (
-              <div className="bg-primary/5 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
-                <p className="text-sm font-semibold text-orange-900 mb-1">Next step: create or join a team</p>
-                <p className="text-sm text-orange-700">Sign in to your dashboard, go to Competition â†’ Quiz Bowl to create a team or browse open teams.</p>
+            {isSolo && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 mb-4 text-left">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900 mb-1">Note on solo participation</p>
+                    <p className="text-sm text-amber-800">You've been registered as a solo participant. Solo teams are eligible to compete, but be aware that round scheduling is based on team availability — coordinate early if you later add teammates to avoid scheduling conflicts.</p>
+                  </div>
+                </div>
               </div>
             )}
+            <div className="bg-primary/5 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
+              <p className="text-sm font-semibold text-orange-900 mb-1">Next step: manage your team</p>
+              <p className="text-sm text-orange-700">Sign in to your dashboard to invite teammates or update your team roster.</p>
+            </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
               <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary/90 transition-colors">
                 Sign In <ArrowRight className="w-3.5 h-3.5" />
@@ -168,7 +191,7 @@ export default function QuizBowlRegister() {
             <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Register</p>
             <h1 className="font-sans text-3xl text-foreground mb-2">USAEO Quiz Bowl 2026</h1>
-            <p className="text-sm text-muted-foreground">Free registration · Takes under 2 minutes</p>
+            <p className="text-sm text-muted-foreground">Free registration · Solo or team · Takes under 2 minutes</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -209,12 +232,19 @@ export default function QuizBowlRegister() {
               </div>
             </div>
 
+            {/* Solo notice */}
+            {!showTeam && (
+              <div className="bg-muted/40 border border-border rounded-xl px-4 py-3 text-xs text-muted-foreground">
+                You can compete solo or build a team (3–5 players). Solo participants are placed on their own team with a randomly assigned economics-themed name.
+              </div>
+            )}
+
             {/* Team section */}
             <div className="border border-border rounded-xl overflow-hidden">
               <button type="button" onClick={() => setShowTeam(v => !v)}
                 className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors">
                 <span className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Build your team now (optional)</span>
-                <span className="text-xs text-muted-foreground">{showTeam ? 'â–² Hide' : 'â–¼ Show'}</span>
+                <span className="text-xs text-muted-foreground">{showTeam ? '▲ Hide' : '▼ Show'}</span>
               </button>
 
               {showTeam && (
@@ -233,7 +263,6 @@ export default function QuizBowlRegister() {
                       <span className="text-xs text-muted-foreground">{totalMembers}/{MAX_TEAM_SIZE} members</span>
                     </div>
                     <div className="space-y-2">
-                      {/* Registrant row */}
                       <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-border">
                         <input type="radio" name="captain" checked={captainIndex === -1} onChange={() => setCaptainIndex(-1)} className="accent-primary" />
                         <div className="flex-1 min-w-0">
@@ -242,7 +271,6 @@ export default function QuizBowlRegister() {
                         </div>
                         <span className="text-xs text-primary font-semibold">You</span>
                       </div>
-                      {/* Teammate rows */}
                       {teammates.map((tm, i) => (
                         <div key={i} className="flex items-start gap-2">
                           <div className="pt-3">

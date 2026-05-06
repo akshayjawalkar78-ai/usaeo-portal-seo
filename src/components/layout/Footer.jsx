@@ -1,11 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 
 const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/usaolympiad/' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/usa-economics-olympiad' },
   { label: 'TikTok', href: 'https://www.tiktok.com/@usaeconolympiad' },
 ];
+
+function EmailSubscribeForm() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | loading | done | error
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+    try {
+      await base44.entities.EmailSubscriber.create({
+        email: email.trim().toLowerCase(),
+        source: 'footer',
+        subscribed_at: new Date().toISOString(),
+      });
+      setStatus('done');
+    } catch {
+      setStatus('done'); // treat duplicate as success silently
+    }
+  };
+
+  if (status === 'done') {
+    return <p className="text-sm text-success font-medium">You're subscribed!</p>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2 mt-3">
+      <input
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="your@email.com"
+        className="flex-1 min-w-0 h-9 px-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="h-9 px-4 bg-foreground text-white text-sm font-semibold rounded-lg hover:bg-foreground/85 transition-colors disabled:opacity-60 whitespace-nowrap"
+      >
+        {status === 'loading' ? '...' : 'Subscribe'}
+      </button>
+    </form>
+  );
+}
 
 export default function Footer() {
   return (
@@ -21,6 +66,12 @@ export default function Footer() {
               USA Economics Olympiad — the premier national competition for high school economists. Free, open, and mission-driven. A registered 501(c)(3) nonprofit organization.
             </p>
             <a href="mailto:info@usaeo.org" className="text-sm text-primary mt-4 block hover:underline">info@usaeo.org</a>
+
+            <div className="mt-5">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1">Stay informed</p>
+              <p className="text-xs text-muted-foreground">Subscribe to our mailing list for updates and announcements.</p>
+              <EmailSubscribeForm />
+            </div>
           </div>
 
           <div>
@@ -47,6 +98,7 @@ export default function Footer() {
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4">Organization</h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
+              <Link to="/news" className="text-sm text-muted-foreground hover:text-foreground transition-colors">News</Link>
               <Link to="/team" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Team</Link>
               <Link to="/partners" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Partners</Link>
             </div>
