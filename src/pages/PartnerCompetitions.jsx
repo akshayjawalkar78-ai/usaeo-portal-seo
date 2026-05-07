@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ExternalLink, Lock, CheckCircle } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNER_COMPETITIONS } from '@/lib/partnerEventsSeed';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -23,12 +25,12 @@ function CompetitionCard({ event, i }) {
           {/* Partner logos */}
           <div className="flex-shrink-0 flex flex-col gap-3 min-w-[100px]">
             {event.partnerLogo && (
-              <img src={event.partnerLogo} alt={event.partnerShort} className="h-9 w-auto max-w-[80px] object-contain opacity-85" />
+              <img src={event.partnerLogo} alt={event.partnerShort} className="h-9 w-auto max-w-[80px] object-contain opacity-85"  loading="lazy" decoding="async" />
             )}
             {event.coPartnerLogo && (
               <>
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">in partnership with</span>
-                <img src={event.coPartnerLogo} alt={event.coPartner} className="h-7 w-auto max-w-[80px] object-contain opacity-70" />
+                <img src={event.coPartnerLogo} alt={event.coPartner} className="h-7 w-auto max-w-[80px] object-contain opacity-70"  loading="lazy" decoding="async" />
               </>
             )}
           </div>
@@ -71,6 +73,7 @@ function CompetitionCard({ event, i }) {
 export default function PartnerCompetitions() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/competitions/partner-competitions']?.title} description={PAGE_SEO['/competitions/partner-competitions']?.description} canonical="/competitions/partner-competitions" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
@@ -120,7 +123,7 @@ export default function PartnerCompetitions() {
                   className="flex items-start gap-5 bg-white border border-border rounded-xl px-6 py-5 opacity-75">
                   <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
                     {event.partnerLogo && (
-                      <img src={event.partnerLogo} alt={event.partnerShort} className="h-8 w-auto max-w-[36px] object-contain grayscale" />
+                      <img src={event.partnerLogo} alt={event.partnerShort} className="h-8 w-auto max-w-[36px] object-contain grayscale"  loading="lazy" decoding="async" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

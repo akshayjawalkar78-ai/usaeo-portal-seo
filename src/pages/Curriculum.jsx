@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -99,6 +101,7 @@ function CurriculumUnit({ unit, index }) {
 export default function Curriculum() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/curriculum']?.title} description={PAGE_SEO['/curriculum']?.description} canonical="/curriculum" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>

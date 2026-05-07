@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -43,7 +45,7 @@ function MemberCard({ member, delay = 0 }) {
           src={member.photo}
           alt={member.name}
           className="w-full h-full object-contain"
-        />
+         loading="lazy" decoding="async" />
       </div>
       <div className="px-4 py-3">
         <p className="font-semibold text-foreground text-sm">{member.name}</p>
@@ -57,6 +59,7 @@ function MemberCard({ member, delay = 0 }) {
 export default function Team() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/team']?.title} description={PAGE_SEO['/team']?.description} canonical="/team" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>

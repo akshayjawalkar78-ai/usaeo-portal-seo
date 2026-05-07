@@ -276,7 +276,7 @@ export default function Admin() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-border flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="h-14 flex items-center px-5 border-b border-border flex-shrink-0">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-6 w-6" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-6 w-6"  loading="lazy" decoding="async" />
             <span className="font-semibold text-sm text-foreground">Admin Console</span>
           </Link>
         </div>
@@ -470,7 +470,7 @@ export default function Admin() {
                       <div key={e.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            {e.partnerLogo && <img src={e.partnerLogo} alt={e.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70" />}
+                            {e.partnerLogo && <img src={e.partnerLogo} alt={e.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70"  loading="lazy" decoding="async" />}
                             <p className="font-medium text-sm text-foreground">{e.title}</p>
                           </div>
                           <p className="text-xs text-muted-foreground">{e.partner} · {e.category} · {e.date}</p>
@@ -485,7 +485,7 @@ export default function Admin() {
                       <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3 opacity-70">
                         <div>
                           <div className="flex items-center gap-2">
-                            {w.partnerLogo && <img src={w.partnerLogo} alt={w.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70" />}
+                            {w.partnerLogo && <img src={w.partnerLogo} alt={w.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70"  loading="lazy" decoding="async" />}
                             <p className="font-medium text-sm text-foreground">{w.title}</p>
                           </div>
                           <p className="text-xs text-muted-foreground">{w.partner} · Partner Workshop · {w.date}</p>

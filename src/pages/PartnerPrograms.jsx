@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ExternalLink, Lock } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNER_PROGRAMS } from '@/lib/partnerEventsSeed';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -22,7 +24,7 @@ function ProgramCard({ event, i }) {
         <div className="flex flex-col md:flex-row md:items-start gap-6">
           <div className="flex-shrink-0 flex items-center gap-3 min-w-[120px]">
             {event.partnerLogo && (
-              <img src={event.partnerLogo} alt={event.partnerShort} className="h-10 w-auto max-w-[80px] object-contain opacity-80" />
+              <img src={event.partnerLogo} alt={event.partnerShort} className="h-10 w-auto max-w-[80px] object-contain opacity-80"  loading="lazy" decoding="async" />
             )}
           </div>
           <div className="flex-1">
@@ -54,6 +56,7 @@ function ProgramCard({ event, i }) {
 export default function PartnerPrograms() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/partner-programs']?.title} description={PAGE_SEO['/partner-programs']?.description} canonical="/partner-programs" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
@@ -103,7 +106,7 @@ export default function PartnerPrograms() {
                   className="flex items-start gap-5 bg-white border border-border rounded-xl px-6 py-5 opacity-75">
                   <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
                     {event.partnerLogo && (
-                      <img src={event.partnerLogo} alt={event.partnerShort} className="h-8 w-auto max-w-[36px] object-contain grayscale" />
+                      <img src={event.partnerLogo} alt={event.partnerShort} className="h-8 w-auto max-w-[36px] object-contain grayscale"  loading="lazy" decoding="async" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -8,34 +9,36 @@ import { NotificationProvider } from '@/lib/NotificationContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ScrollToTop from '@/components/ScrollToTop';
 import Home from './pages/Home';
-import About from './pages/About';
-import Competitions from './pages/Competitions';
-import QuizBowl from './pages/QuizBowl';
-import Essay from './pages/Essay';
-import Workshops from './pages/Workshops';
-import Curriculum from './pages/Curriculum';
-import Research from './pages/Research';
-import Chapters from './pages/Chapters';
-import Team from './pages/Team';
-import Partners from './pages/Partners';
-import Dashboard from './pages/Dashboard';
-import NationalQualifiers from './pages/NationalQualifiers';
-import NationalFinals from './pages/NationalFinals';
-import Admin from './pages/Admin';
 import Login from './pages/Login';
-import Register from './pages/Register';
-import AuthCallback from './pages/AuthCallback';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Unauthorized from './pages/Unauthorized';
-import QuizBowlRegister from './pages/QuizBowlRegister';
-import EssayRegister from './pages/EssayRegister';
-import ChapterRegister from './pages/ChapterRegister';
-import CareersApply from './pages/CareersApply';
-import Legal from './pages/Legal';
-import PartnerCompetitions from './pages/PartnerCompetitions';
-import PartnerPrograms from './pages/PartnerPrograms';
-import News from './pages/News';
+
+// Lazy-loaded routes (cuts initial JS for better LCP/TBT)
+const About = lazy(() => import('./pages/About'));
+const Competitions = lazy(() => import('./pages/Competitions'));
+const QuizBowl = lazy(() => import('./pages/QuizBowl'));
+const Essay = lazy(() => import('./pages/Essay'));
+const Workshops = lazy(() => import('./pages/Workshops'));
+const Curriculum = lazy(() => import('./pages/Curriculum'));
+const Research = lazy(() => import('./pages/Research'));
+const Chapters = lazy(() => import('./pages/Chapters'));
+const Team = lazy(() => import('./pages/Team'));
+const Partners = lazy(() => import('./pages/Partners'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const NationalQualifiers = lazy(() => import('./pages/NationalQualifiers'));
+const NationalFinals = lazy(() => import('./pages/NationalFinals'));
+const Admin = lazy(() => import('./pages/Admin'));
+const Register = lazy(() => import('./pages/Register'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
+const QuizBowlRegister = lazy(() => import('./pages/QuizBowlRegister'));
+const EssayRegister = lazy(() => import('./pages/EssayRegister'));
+const ChapterRegister = lazy(() => import('./pages/ChapterRegister'));
+const CareersApply = lazy(() => import('./pages/CareersApply'));
+const Legal = lazy(() => import('./pages/Legal'));
+const PartnerCompetitions = lazy(() => import('./pages/PartnerCompetitions'));
+const PartnerPrograms = lazy(() => import('./pages/PartnerPrograms'));
+const News = lazy(() => import('./pages/News'));
 
 // Redirect ?code= on non-callback pages to /auth/callback so PKCE exchange runs there
 function CodeRedirect({ element }) {
@@ -47,6 +50,10 @@ function CodeRedirect({ element }) {
   return element;
 }
 
+function RouteFallback() {
+  return <div className="min-h-screen" aria-busy="true" />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -54,6 +61,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<CodeRedirect element={<Home />} />} />
@@ -96,6 +104,7 @@ function App() {
 
             <Route path="*" element={<PageNotFound />} />
           </Routes>
+          </Suspense>
         </Router>
         <Toaster />
       </QueryClientProvider>

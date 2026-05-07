@@ -344,7 +344,7 @@ export default function AdminNews() {
           {filtered.map(a => (
             <div key={a.id} className="flex items-center gap-4 p-4">
               {a.thumbnail_url && (
-                <img src={a.thumbnail_url} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                <img src={a.thumbnail_url} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0"  loading="lazy" decoding="async" />
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">

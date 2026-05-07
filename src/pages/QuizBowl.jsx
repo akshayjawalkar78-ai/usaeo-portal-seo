@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Trophy, Users, Monitor, Zap, Shield, BookOpen } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -28,6 +30,7 @@ const software = [
 export default function QuizBowl() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/competitions/quiz-bowl']?.title} description={PAGE_SEO['/competitions/quiz-bowl']?.description} canonical="/competitions/quiz-bowl" />
       {/* Hero */}
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">

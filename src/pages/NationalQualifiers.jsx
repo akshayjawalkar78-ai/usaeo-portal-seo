@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -13,6 +15,7 @@ const fadeUp = (delay = 0) => ({
 export default function NationalQualifiers() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/competitions/qualifiers']?.title} description={PAGE_SEO['/competitions/qualifiers']?.description} canonical="/competitions/qualifiers" />
       {/* Hero */}
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
@@ -49,7 +52,7 @@ export default function NationalQualifiers() {
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
-            <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80" alt="Student taking virtual exam" className="w-full rounded-2xl object-cover h-80 border border-border" />
+            <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80" alt="Student taking virtual exam" className="w-full rounded-2xl object-cover h-80 border border-border"  loading="lazy" decoding="async" />
           </motion.div>
         </div>
       </section>

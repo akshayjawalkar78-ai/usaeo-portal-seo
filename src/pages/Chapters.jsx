@@ -8,6 +8,8 @@ import L from 'leaflet';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
 import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -56,6 +58,7 @@ export default function Chapters() {
 
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/chapters']?.title} description={PAGE_SEO['/chapters']?.description} canonical="/chapters" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>

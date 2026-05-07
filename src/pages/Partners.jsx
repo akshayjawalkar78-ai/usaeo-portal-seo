@@ -3,6 +3,8 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Mail } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNERS, PARTNER_BY_NAME } from '@/lib/partnersSeed';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -62,7 +64,7 @@ function SectionLogos({ section }) {
           title={p.name}
           className="h-9 w-9 rounded-lg border border-border bg-white flex items-center justify-center hover:border-primary/40 transition">
           {p.logo
-            ? <img src={p.logo} alt={p.name} className="h-5 w-auto max-w-[24px] object-contain opacity-70 hover:opacity-100 transition" />
+            ? <img src={p.logo} alt={p.name} className="h-5 w-auto max-w-[24px] object-contain opacity-70 hover:opacity-100 transition"  loading="lazy" decoding="async" />
             : <span className="text-[9px] font-semibold text-muted-foreground">{p.shortName || p.name.split(' ').map(w => w[0]).join('').slice(0, 3)}</span>
           }
         </a>
@@ -153,6 +155,7 @@ function ContributionSection({ section, index }) {
 export default function Partners() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/partners']?.title} description={PAGE_SEO['/partners']?.description} canonical="/partners" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
@@ -189,10 +192,10 @@ export default function Partners() {
                         <div style={{ height: 40, width: 100, overflow: 'hidden', position: 'relative' }} className="flex items-center justify-center">
                           <img src={p.logo} alt={p.name}
                             style={{ height: 40 * (p.logoScale || 1.5), width: 'auto', position: 'absolute', transform: 'translate(-50%, -50%)', top: '50%', left: '50%', ...(p.logoFilter ? { filter: p.logoFilter } : {}) }}
-                            className="grayscale group-hover:grayscale-0 transition-all duration-300" />
+                            className="grayscale group-hover:grayscale-0 transition-all duration-300"  loading="lazy" decoding="async" />
                         </div>
                       ) : (
-                        <img src={p.logo} alt={p.name} style={{ height: p.logoScale ? 40 * p.logoScale : 40, ...(p.logoFilter ? { filter: p.logoFilter } : {}) }} className="w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
+                        <img src={p.logo} alt={p.name} style={{ height: p.logoScale ? 40 * p.logoScale : 40, ...(p.logoFilter ? { filter: p.logoFilter } : {}) }} className="w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300"  loading="lazy" decoding="async" />
                       )
                     ) : (
                       <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">{p.shortName || p.name.split(' ').map(w => w[0]).join('').slice(0, 3)}</span>
