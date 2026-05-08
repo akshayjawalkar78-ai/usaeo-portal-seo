@@ -10,6 +10,8 @@ import L from 'leaflet';
 import { CHAPTERS_SEED, CHAPTER_STATE_COUNT } from '@/lib/chaptersSeed';
 import { PARTNERS } from '@/lib/partnersSeed';
 import { easeOut, viewportOnce } from '@/lib/motion';
+import Seo from '@/components/Seo';
+import { ORG_JSON_LD, PAGE_SEO, SITE_URL } from '@/lib/seo-config';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -68,6 +70,25 @@ export default function Home() {
 
   return (
     <PageLayout>
+      <Seo
+        title={PAGE_SEO['/'].title}
+        description={PAGE_SEO['/'].description}
+        canonical="/"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            ORG_JSON_LD,
+            {
+              '@type': 'WebSite',
+              '@id': `${SITE_URL}/#website`,
+              url: `${SITE_URL}/`,
+              name: 'USA Economics Olympiad',
+              publisher: { '@id': `${SITE_URL}/#organization` },
+              inLanguage: 'en-US',
+            },
+          ],
+        }}
+      />
 
       {/* â”€â”€ HERO â”€â”€ */}
       <section className="relative min-h-screen flex flex-col justify-center px-5 overflow-hidden bg-white pt-14">
@@ -103,10 +124,13 @@ export default function Home() {
         <motion.div {...fadeUp(0.2)} className="relative z-10 mt-16 w-full max-w-6xl mx-auto">
           <div className="rounded-2xl overflow-hidden border border-border shadow-2xl shadow-gray-100/80">
             <img
-              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&q=85"
-              alt="Students in an economics competition"
+              src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&q=80&fm=webp&auto=format"
+              srcSet="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=70&fm=webp&auto=format 800w, https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=75&fm=webp&auto=format 1200w, https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&q=80&fm=webp&auto=format 1600w"
+              sizes="(max-width: 768px) 100vw, 1200px"
+              alt="High school students competing at the USA Economics Olympiad national finals"
               className="w-full h-72 md:h-[480px] object-cover object-top"
-            />
+              fetchPriority="high"
+              decoding="async" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
           </div>
         </motion.div>
@@ -274,7 +298,7 @@ export default function Home() {
                   href={p.url} target="_blank" rel="noopener noreferrer"
                   className="group flex items-center justify-center gap-2 p-6 border border-border rounded-xl hover:border-primary/30 hover:shadow-sm transition-all duration-200 bg-white h-20">
                   {p.logo
-                    ? <img src={p.logo} alt={p.name} style={{ height: logoH, ...(p.logoFilter ? { filter: p.logoFilter } : {}) }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300" />
+                    ? <img src={p.logo} alt={p.name} style={{ height: logoH, ...(p.logoFilter ? { filter: p.logoFilter } : {}) }} className="w-auto max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300"  loading="lazy" decoding="async" />
                     : <span className="text-xs font-semibold text-muted-foreground text-center leading-tight group-hover:text-primary transition-colors">{p.shortName || p.name}</span>
                   }
                   {p.wordmark && (

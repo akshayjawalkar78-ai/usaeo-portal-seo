@@ -27,7 +27,7 @@ export default function EditableBlock({ page, block, as: Tag = 'div', className 
   };
 
   if (content.imageUrl) {
-    return <img src={content.imageUrl} alt="" className={className} style={style} />;
+    return <img src={content.imageUrl} alt="" className={className} style={style}  loading="lazy" decoding="async" />;
   }
 
   return (

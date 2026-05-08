@@ -1,9 +1,12 @@
 import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 export default function Legal() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/legal']?.title} description={PAGE_SEO['/legal']?.description} canonical="/legal" />
       <div className="max-w-2xl mx-auto px-5 py-20">
         <h1 className="text-3xl font-bold text-foreground mb-2">Legal & Tax Information</h1>
         <p className="text-muted-foreground mb-10">Official nonprofit status and tax information for USA Economics Olympiad.</p>

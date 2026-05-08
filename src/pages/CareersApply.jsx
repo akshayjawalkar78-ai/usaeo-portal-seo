@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const GRADUATION_YEARS = [
   'Highschool Freshman', 'Highschool Sophomore', 'Highschool Junior', 'Highschool Senior',
@@ -68,10 +70,11 @@ export default function CareersApply() {
   if (submitted) {
     return (
       <PageLayout>
+      <Seo title={PAGE_SEO['/careers/apply']?.title} description={PAGE_SEO['/careers/apply']?.description} canonical="/careers/apply" />
         <section className="min-h-[70vh] flex items-center justify-center px-5">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-lg">
             <div className="flex justify-center mb-5">
-              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" />
+              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16"  loading="lazy" decoding="async" />
             </div>
             <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
             <h2 className="font-sans text-3xl text-foreground mb-3">Application submitted!</h2>
@@ -92,7 +95,7 @@ export default function CareersApply() {
       <section className="pt-20 pb-24 px-5">
         <div className="max-w-lg mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4"  loading="lazy" decoding="async" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Careers</p>
             <h1 className="font-sans text-3xl text-foreground mb-2">Apply to USAEO</h1>
             <p className="text-sm text-muted-foreground">Contributors & committee leaders · Min. 1 hr/week volunteer commitment</p>

@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Lock } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -30,6 +32,7 @@ const topics = [
 export default function Research() {
   return (
     <PageLayout>
+      <Seo title={PAGE_SEO['/research']?.title} description={PAGE_SEO['/research']?.description} canonical="/research" />
       <section className="pt-20 pb-16 px-5 border-b border-border">
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp()}>
@@ -61,7 +64,7 @@ export default function Research() {
               <h2 className="font-sans text-4xl text-foreground leading-tight">From application<br /><em>to publication</em></h2>
             </div>
             <div className="flex items-start gap-3">
-              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-52 border border-border" />
+              <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80" alt="Research" className="w-full rounded-2xl object-cover h-52 border border-border"  loading="lazy" decoding="async" />
             </div>
           </motion.div>
           <div className="grid md:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden mb-10">

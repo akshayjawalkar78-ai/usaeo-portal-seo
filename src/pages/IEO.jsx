@@ -40,7 +40,7 @@ export default function IEO() {
             </div>
           </motion.div>
           <motion.div {...fadeUp(0.1)}>
-            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80" alt="International competition" className="w-full rounded-2xl object-cover h-80 border border-border" />
+            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80" alt="International competition" className="w-full rounded-2xl object-cover h-80 border border-border"  loading="lazy" decoding="async" />
           </motion.div>
         </div>
       </section>

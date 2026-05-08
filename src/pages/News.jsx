@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
+import Seo from '@/components/Seo';
+import { PAGE_SEO } from '@/lib/seo-config';
 
 const SECTIONS = [
   { id: 'all', label: 'All' },
@@ -26,7 +28,7 @@ function renderBlock(block, idx) {
     case 'image':
       return (
         <figure key={idx} className="my-6">
-          <img src={block.url} alt={block.alt || ''} className="w-full rounded-xl object-cover max-h-[480px]" />
+          <img src={block.url} alt={block.alt || ''} className="w-full rounded-xl object-cover max-h-[480px]"  loading="lazy" decoding="async" />
           {block.caption && <figcaption className="text-center text-xs text-muted-foreground mt-2">{block.caption}</figcaption>}
         </figure>
       );
@@ -68,7 +70,7 @@ function ArticleCard({ article }) {
     <Link to={`/news/${article.id}`} className="group block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/20 transition-all">
       {(firstImage || article.thumbnail_url) && (
         <div className="aspect-[16/9] overflow-hidden bg-muted">
-          <img src={article.thumbnail_url || firstImage} alt={article.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+          <img src={article.thumbnail_url || firstImage} alt={article.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"  loading="lazy" decoding="async" />
         </div>
       )}
       <div className="p-5">
@@ -126,7 +128,7 @@ function ArticleDetail({ article, onBack }) {
       {article.author && <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> {article.author}</p>}
       {article.excerpt && <p className="text-base text-muted-foreground mb-6 leading-relaxed border-l-2 border-border pl-4">{article.excerpt}</p>}
       {article.thumbnail_url && (
-        <img src={article.thumbnail_url} alt={article.title} className="w-full rounded-xl mb-8 object-cover max-h-[400px]" />
+        <img src={article.thumbnail_url} alt={article.title} className="w-full rounded-xl mb-8 object-cover max-h-[400px]"  loading="lazy" decoding="async" />
       )}
       <div className="article-body">
         {blocks.map((block, idx) => renderBlock(block, idx))}
@@ -157,6 +159,7 @@ export default function News() {
   if (selected) {
     return (
       <PageLayout>
+      <Seo title={PAGE_SEO['/news']?.title} description={PAGE_SEO['/news']?.description} canonical="/news" />
         <ArticleDetail article={selected} onBack={() => setSelected(null)} />
       </PageLayout>
     );

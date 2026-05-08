@@ -59,7 +59,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-7 w-7" />
+              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-7 w-7"  loading="lazy" decoding="async" />
               <span className="font-inter font-semibold text-foreground text-sm">USAEO</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
