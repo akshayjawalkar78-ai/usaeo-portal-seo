@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ExternalLink, Lock, CheckCircle } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { PARTNER_COMPETITIONS } from '@/lib/partnerEventsSeed';
+import { base44 } from '@/api/base44Client';
 import Seo from '@/components/Seo';
 import { PAGE_SEO } from '@/lib/seo-config';
 
@@ -13,8 +14,28 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
 
-const upcoming = PARTNER_COMPETITIONS.filter(e => e.status === 'upcoming');
-const past = PARTNER_COMPETITIONS.filter(e => e.status === 'past');
+function normalizeEvent(e) {
+  // Normalize DB snake_case fields to match seed camelCase shape
+  return {
+    id: e.id,
+    partner: e.partner,
+    partnerShort: e.partner_short || e.partnerShort,
+    partnerLogo: e.partner_logo || e.partnerLogo,
+    partnerUrl: e.partner_url || e.partnerUrl,
+    coPartner: e.co_partner || e.coPartner,
+    coPartnerLogo: e.co_partner_logo || e.coPartnerLogo,
+    coPartnerUrl: e.co_partner_url || e.coPartnerUrl,
+    title: e.title,
+    date: e.date,
+    isoDate: e.iso_date || e.isoDate,
+    status: e.status,
+    badge: e.badge,
+    category: e.category,
+    desc: e.description || e.desc,
+    highlights: Array.isArray(e.highlights) ? e.highlights : (e.highlights ? [e.highlights] : []),
+    externalUrl: e.external_url || e.externalUrl,
+  };
+}
 
 function CompetitionCard({ event, i }) {
   return (
@@ -71,6 +92,23 @@ function CompetitionCard({ event, i }) {
 }
 
 export default function PartnerCompetitions() {
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    base44.entities.PartnerEvent.filter({ event_type: 'competition' })
+      .then(rows => {
+        if (rows.length > 0) {
+          setEvents(rows.map(normalizeEvent).sort((a, b) => (a.isoDate || '').localeCompare(b.isoDate || '')));
+        } else {
+          setEvents(PARTNER_COMPETITIONS.map(normalizeEvent));
+        }
+      })
+      .catch(() => setEvents(PARTNER_COMPETITIONS.map(normalizeEvent)));
+  }, []);
+
+  const upcoming = events.filter(e => e.status === 'upcoming');
+  const past = events.filter(e => e.status === 'past');
+
   return (
     <PageLayout>
       <Seo title={PAGE_SEO['/competitions/partner-competitions']?.title} description={PAGE_SEO['/competitions/partner-competitions']?.description} canonical="/competitions/partner-competitions" />

@@ -25,6 +25,7 @@ const contributionSections = [
       { partner: 'Youth Economy Lab', headline: 'Curriculum advisory', body: 'YEL reviewed the open curriculum units end-to-end and contributed additional problem sets on international trade.' },
       { partner: 'Think Finance', headline: 'Financial markets deep-dives', body: 'Think Finance authored a weekend workshop series on bond pricing and monetary policy that fed directly into finals prep.' },
       { partner: 'CFE', headline: 'Academic oversight', body: 'The Council for Financial Education reviewed judge rubrics and helped calibrate our essay scoring guide.' },
+      { partner: 'YIMO', headline: 'IMO-level problems for economics', body: 'YIMO contributors — including IMO participants and USAMO honorable mentions — review and author high-difficulty math problems aligned to economics, raising the technical ceiling of the USAEO.' },
     ],
   },
   {
@@ -38,6 +39,7 @@ const contributionSections = [
       { partner: 'A-Warded', headline: 'Credential surface', body: 'A-Warded surfaced the USAEO on every relevant student profile, widening the applicant funnel by 30%.' },
       { partner: 'Southeast Asian Economics Project', headline: 'Regional reach', body: 'SEAE organized info-sessions across their international network to extend USAEO visibility.' },
       { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter, twice.' },
+      { partner: 'NXTHorizon', headline: 'Sponsorship that lowers the bar', body: 'NXTHorizon brings its sponsor network to the USAEO National Finals, reducing competition costs and making in-person participation accessible to more students.' },
     ],
   },
   {
