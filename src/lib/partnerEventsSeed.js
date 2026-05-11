@@ -5,7 +5,7 @@ export const PARTNER_COMPETITIONS = [
   // ── UPCOMING ───────────────────────────────────────────────────────────────
   {
     id: 'yel-student-scholars-research-2026',
-    partner: 'Youth Economics Lab',
+    partner: 'Youth Economy Lab',
     partnerShort: 'YEL',
     partnerLogo: '/logos/yel.png',
     partnerUrl: 'https://youtheconomylab.com/',
