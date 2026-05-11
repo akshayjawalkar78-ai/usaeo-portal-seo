@@ -104,6 +104,22 @@ export const PARTNERS = [
     wordmark: { text: 'Southeast Asian\nEconomics Project', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.8rem', wrap: true },
     tags: ['research', 'awareness'],
   },
+  {
+    name: 'NXTHorizon',
+    logo: '/logos/nxthorizon.png',
+    url: 'https://www.nxthorizon.org/',
+    desc: 'National Finals sponsor network',
+    wordmark: { text: 'NXTHorizon', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontWeight: 700, fontSize: '0.9rem' },
+    tags: ['awareness'],
+  },
+  {
+    name: 'YIMO',
+    logo: '/logos/yimo.png',
+    url: 'https://www.yimo-official.org/',
+    desc: 'IMO-level economics problem creation',
+    wordmark: { text: 'Youth International\nMath Olympiad', fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontWeight: 600, fontSize: '0.75rem', wrap: true },
+    tags: ['academic'],
+  },
 ];
 
 export const PARTNER_BY_NAME = Object.fromEntries(PARTNERS.map(p => [p.name, p]));

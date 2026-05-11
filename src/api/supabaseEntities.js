@@ -63,4 +63,5 @@ export const entities = {
   QuizBowlTeamMember: makeEntity('quiz_bowl_team_members'),
   NewsArticle: makeEntity('news_articles'),
   EmailSubscriber: makeEntity('email_subscribers'),
+  PartnerEvent: makeEntity('partner_events'),
 };

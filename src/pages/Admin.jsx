@@ -5,11 +5,10 @@ import {
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   ChevronRight, Plus, Pencil, Trash2, X, Check, AlertTriangle,
   Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download,
-  Lock, Unlock, Crown, TrendingUp, Newspaper, Copy, Mail,
+  Lock, Unlock, Crown, TrendingUp, Newspaper, Copy, Mail, Handshake,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
-import { UPCOMING_PARTNER_EVENTS, PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
 import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
 import AdminNews from './AdminNews';
@@ -27,6 +26,7 @@ const navItems = [
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
   { label: 'QB Teams', id: 'qb-teams', icon: Users },
   { label: 'Applications', id: 'applications', icon: ShieldCheck },
+  { label: 'Partner Events', id: 'partner-events', icon: Handshake },
   { label: 'News', id: 'news', icon: Newspaper },
   { label: 'Edit Website', id: 'edit-website', icon: Pencil },
 ];
@@ -122,6 +122,7 @@ export default function Admin() {
   const [registrations, setRegistrations] = useState([]);
   const [applications, setApplications] = useState([]);
   const [qbTeams, setQbTeams] = useState([]);
+  const [partnerEvents, setPartnerEvents] = useState([]);
   const [qbTeamMembers, setQbTeamMembers] = useState({}); // teamId â†' members[]
   const [expandedQBTeam, setExpandedQBTeam] = useState(null);
   const [chapterMembers, setChapterMembers] = useState({});
@@ -144,7 +145,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const loadAll = async () => {
-    const [a, w, r, rk, ch, ce, cu, reg, apps, qbt] = await Promise.all([
+    const [a, w, r, rk, ch, ce, cu, reg, apps, qbt, pe] = await Promise.all([
       base44.entities.Announcement.list('-created_date'),
       base44.entities.Workshop.list('-created_date'),
       base44.entities.Resource.list(),
@@ -155,10 +156,11 @@ export default function Admin() {
       base44.entities.EventRegistration.list('-registered_at'),
       base44.entities.Application?.list('-created_at').catch(() => []) ?? [],
       base44.entities.QuizBowlTeam.list('-created_at').catch(() => []),
+      base44.entities.PartnerEvent.list('-created_at').catch(() => []),
     ]);
     setAnnouncements(a); setWorkshops(w); setResources(r); setRankings(rk); setChapters(ch);
     setCompetitionEvents(ce); setCurriculumUnits(cu); setRegistrations(reg); setApplications(apps);
-    setQbTeams(qbt);
+    setQbTeams(qbt); setPartnerEvents(pe);
   };
 
   const loadQBTeamMembers = async (teamId) => {
@@ -193,11 +195,15 @@ export default function Admin() {
         chapterAnn: base44.entities.ChapterAnnouncement,
         competitionEvent: base44.entities.CompetitionEvent,
         curriculumUnit: base44.entities.CurriculumUnit,
+        partnerEvent: base44.entities.PartnerEvent,
       };
       const entity = entityMap[type];
       // rankings: team_name NOT NULL, derive from student_name if not provided
+      // partnerEvents: highlights stored as newline string in form, convert to array
       const payload = type === 'ranking'
         ? { ...form, team_name: form.team_name || form.student_name || form.school || 'Individual' }
+        : type === 'partnerEvent'
+        ? { ...form, highlights: form.highlights ? form.highlights.split('\n').map(s => s.trim()).filter(Boolean) : [] }
         : form;
       if (data?.id) await entity.update(data.id, payload);
       else await entity.create(payload);
@@ -310,7 +316,7 @@ export default function Admin() {
       {/* Modals */}
       <AnimatePresence>
         {modal && (
-          <Modal title={modal.data ? `Edit ${modal.type}` : `New ${modal.type}`} onClose={() => setModal(null)}>
+          <Modal title={modal.data ? `Edit ${modal.type === 'partnerEvent' ? 'partner event' : modal.type}` : `New ${modal.type === 'partnerEvent' ? 'partner event' : modal.type}`} onClose={() => setModal(null)}>
             <div className="space-y-4">
               {modal.type === 'announcement' && <>
                 <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
@@ -379,6 +385,38 @@ export default function Admin() {
                 <Field label="Hours (e.g. 4–6 hrs)" value={form.hours} onChange={v => setForm(p => ({ ...p, hours: v }))} />
                 <Field label="URL" value={form.url} onChange={v => setForm(p => ({ ...p, url: v }))} />
                 <Field label="Order (sort position)" type="number" value={form.order} onChange={v => setForm(p => ({ ...p, order: parseInt(v) }))} />
+              </>}
+              {modal.type === 'partnerEvent' && <>
+                <Field label="Event Type" type="select" value={form.event_type} onChange={v => setForm(p => ({ ...p, event_type: v }))}
+                  options={[{ value: 'competition', label: 'Competition' }, { value: 'program', label: 'Program' }, { value: 'workshop', label: 'Workshop' }]} />
+                <Field label="Status" type="select" value={form.status} onChange={v => setForm(p => ({ ...p, status: v }))}
+                  options={[{ value: 'upcoming', label: 'Upcoming' }, { value: 'past', label: 'Past' }]} />
+                <Field label="Partner Name" value={form.partner} onChange={v => setForm(p => ({ ...p, partner: v }))} />
+                <Field label="Partner Short Name (e.g. YEL)" value={form.partner_short} onChange={v => setForm(p => ({ ...p, partner_short: v }))} />
+                <Field label="Partner Logo Path (e.g. /logos/yel.png)" value={form.partner_logo} onChange={v => setForm(p => ({ ...p, partner_logo: v }))} />
+                <Field label="Partner Website URL" value={form.partner_url} onChange={v => setForm(p => ({ ...p, partner_url: v }))} />
+                <Field label="Title" value={form.title} onChange={v => setForm(p => ({ ...p, title: v }))} />
+                <Field label="Date (e.g. Dates TBA or May 9, 2026)" value={form.date} onChange={v => setForm(p => ({ ...p, date: v }))} />
+                <Field label="ISO Date (YYYY-MM-DD)" value={form.iso_date} onChange={v => setForm(p => ({ ...p, iso_date: v }))} />
+                <Field label="Category (e.g. Research Proposal Competition)" value={form.category} onChange={v => setForm(p => ({ ...p, category: v }))} />
+                <Field label="Badge (e.g. Ongoing · Virtual · Global)" value={form.badge} onChange={v => setForm(p => ({ ...p, badge: v }))} />
+                <Field label="Description" type="textarea" rows={4} value={form.description} onChange={v => setForm(p => ({ ...p, description: v }))} />
+                <Field label="External URL" value={form.external_url} onChange={v => setForm(p => ({ ...p, external_url: v }))} />
+                {form.event_type === 'competition' && <>
+                  <Field label="Highlights (one per line)" type="textarea" rows={4} value={form.highlights} onChange={v => setForm(p => ({ ...p, highlights: v }))} />
+                  <Field label="Co-Partner Name" value={form.co_partner} onChange={v => setForm(p => ({ ...p, co_partner: v }))} />
+                  <Field label="Co-Partner Logo Path" value={form.co_partner_logo} onChange={v => setForm(p => ({ ...p, co_partner_logo: v }))} />
+                  <Field label="Co-Partner URL" value={form.co_partner_url} onChange={v => setForm(p => ({ ...p, co_partner_url: v }))} />
+                </>}
+                {form.event_type === 'workshop' && <>
+                  <Field label="Time (e.g. 3:00 PM UTC)" value={form.time} onChange={v => setForm(p => ({ ...p, time: v }))} />
+                  <Field label="Instructor Name" value={form.instructor} onChange={v => setForm(p => ({ ...p, instructor: v }))} />
+                  <Field label="Instructor Role" value={form.role} onChange={v => setForm(p => ({ ...p, role: v }))} />
+                  <Field label="Topic" type="textarea" rows={2} value={form.topic} onChange={v => setForm(p => ({ ...p, topic: v }))} />
+                  <Field label="Zoom URL" value={form.zoom_url} onChange={v => setForm(p => ({ ...p, zoom_url: v }))} />
+                  <Field label="Open To" value={form.open_to} onChange={v => setForm(p => ({ ...p, open_to: v }))} />
+                  <Field label="Free" type="checkbox" value={form.free} onChange={v => setForm(p => ({ ...p, free: v }))} />
+                </>}
               </>}
               <div className="flex justify-end gap-3 pt-2">
                 <button onClick={() => setModal(null)} className="px-4 py-2 border border-border rounded-lg text-sm text-foreground hover:bg-muted transition-colors">Cancel</button>
@@ -461,41 +499,35 @@ export default function Admin() {
                 ))}
               </div>
               {/* Partner Events */}
-              {(UPCOMING_PARTNER_EVENTS.length > 0 || PARTNER_WORKSHOPS.length > 0) && (
-                <div className="bg-white rounded-2xl border border-border p-6">
-                  <h2 className="font-semibold text-foreground mb-1">Partner Events</h2>
-                  <p className="text-xs text-muted-foreground mb-4">Upcoming events from partner organizations. These are static and managed in <code className="bg-muted px-1 rounded">partnerEventsSeed.js</code>.</p>
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="font-semibold text-foreground">Partner Events</h2>
+                  <button onClick={() => { navigate('partner-events'); openCreate('partnerEvent', { status: 'upcoming', event_type: 'competition' }); }}
+                    className="text-xs font-semibold text-primary hover:underline">+ Add</button>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">Upcoming events from partner organizations. Manage in Partner Events tab.</p>
+                {partnerEvents.filter(e => e.status === 'upcoming').length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No upcoming partner events. <button onClick={() => navigate('partner-events')} className="text-primary hover:underline">Add one →</button></p>
+                ) : (
                   <div className="space-y-2">
-                    {UPCOMING_PARTNER_EVENTS.map(e => (
+                    {partnerEvents.filter(e => e.status === 'upcoming').map(e => (
                       <div key={e.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            {e.partnerLogo && <img src={e.partnerLogo} alt={e.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70"  loading="lazy" decoding="async" />}
+                            {e.partner_logo && <img src={e.partner_logo} alt={e.partner_short} className="h-5 w-auto max-w-[24px] object-contain opacity-70" loading="lazy" decoding="async" />}
                             <p className="font-medium text-sm text-foreground">{e.title}</p>
                           </div>
-                          <p className="text-xs text-muted-foreground">{e.partner} · {e.category} · {e.date}</p>
+                          <p className="text-xs text-muted-foreground">{e.partner} · {e.category || e.event_type} · {e.date}</p>
                         </div>
-                        <a href={e.externalUrl} target="_blank" rel="noopener noreferrer"
+                        <a href={e.external_url} target="_blank" rel="noopener noreferrer"
                           className="text-xs font-semibold text-primary hover:underline flex-shrink-0 ml-4">
-                          {e.partnerShort} ↗
+                          {e.partner_short || e.partner} ↗
                         </a>
                       </div>
                     ))}
-                    {PARTNER_WORKSHOPS.slice(0, 2).map(w => (
-                      <div key={w.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-3 opacity-70">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            {w.partnerLogo && <img src={w.partnerLogo} alt={w.partnerShort} className="h-5 w-auto max-w-[24px] object-contain opacity-70"  loading="lazy" decoding="async" />}
-                            <p className="font-medium text-sm text-foreground">{w.title}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{w.partner} · Partner Workshop · {w.date}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground flex-shrink-0 ml-4">Past</span>
-                      </div>
-                    ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
               <div className="bg-white rounded-2xl border border-border p-6">
                 <h2 className="font-semibold text-foreground mb-4">Quick actions</h2>
                 <div className="grid md:grid-cols-3 gap-3">
@@ -1168,6 +1200,59 @@ export default function Admin() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* â”€â”€ PARTNER EVENTS â”€â”€ */}
+          {active === 'partner-events' && (
+            <div className=”space-y-4”>
+              <div className=”flex items-center justify-between”>
+                <div>
+                  <h2 className=”font-semibold text-foreground”>Partner Events</h2>
+                  <p className=”text-xs text-muted-foreground mt-0.5”>Competitions, programs, and workshops from partner organizations.</p>
+                </div>
+                <button onClick={() => openCreate('partnerEvent', { status: 'upcoming', event_type: 'competition' })}
+                  className=”inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors”>
+                  <Plus className=”w-3.5 h-3.5” /> New partner event
+                </button>
+              </div>
+              {['competition', 'program', 'workshop'].map(type => {
+                const typeEvents = partnerEvents.filter(e => e.event_type === type);
+                return (
+                  <div key={type} className=”bg-white rounded-2xl border border-border overflow-hidden”>
+                    <div className=”px-5 py-3 border-b border-border bg-muted/20”>
+                      <p className=”text-xs font-semibold uppercase tracking-widest text-muted-foreground capitalize”>{type}s</p>
+                    </div>
+                    {typeEvents.length === 0 ? (
+                      <p className=”p-5 text-sm text-muted-foreground”>No {type}s yet.</p>
+                    ) : (
+                      <div className=”divide-y divide-border”>
+                        {typeEvents.map(e => (
+                          <div key={e.id} className=”flex items-start gap-4 p-5”>
+                            <div className=”flex-1 min-w-0”>
+                              <div className=”flex items-center gap-2 mb-1”>
+                                {e.partner_logo && <img src={e.partner_logo} alt={e.partner_short} className=”h-5 w-auto max-w-[20px] object-contain opacity-70” loading=”lazy” decoding=”async” />}
+                                <p className=”font-semibold text-sm text-foreground truncate”>{e.title}</p>
+                                <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${e.status === 'upcoming' ? 'bg-success/10 text-success border-green-200' : 'bg-muted text-muted-foreground border-border'}`}>
+                                  {e.status}
+                                </span>
+                              </div>
+                              <p className=”text-xs text-muted-foreground”>{e.partner}{e.category ? ` · ${e.category}` : ''} · {e.date || 'Date TBA'}</p>
+                              {e.description && <p className=”text-xs text-muted-foreground mt-1 line-clamp-2”>{e.description}</p>}
+                            </div>
+                            <div className=”flex items-center gap-2 flex-shrink-0”>
+                              <button onClick={() => openEdit('partnerEvent', { ...e, highlights: Array.isArray(e.highlights) ? e.highlights.join('\n') : '' })}
+                                className=”p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground”><Pencil className=”w-3.5 h-3.5” /></button>
+                              <button onClick={() => setDeleteTarget({ entity: base44.entities.PartnerEvent, id: e.id, label: e.title })}
+                                className=”p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive”><Trash2 className=”w-3.5 h-3.5” /></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
