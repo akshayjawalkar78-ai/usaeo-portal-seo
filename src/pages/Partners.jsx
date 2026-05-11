@@ -22,7 +22,7 @@ const contributionSections = [
     stories: [
       { partner: 'Stellar', headline: 'Practice sets that scale', body: 'Stellar contributed adaptive practice modules aligned to the USAEO qualifier syllabus, used by 500+ students this season.' },
       { partner: 'Crackd', headline: 'Mock exams, full stack', body: 'Crackd built our first timed mock-qualifier and published difficulty analytics for every section of the USAEO.' },
-      { partner: 'Youth Economics Lab', headline: 'Curriculum advisory', body: 'YEL reviewed the open curriculum units end-to-end and contributed additional problem sets on international trade.' },
+      { partner: 'Youth Economy Lab', headline: 'Curriculum advisory', body: 'YEL reviewed the open curriculum units end-to-end and contributed additional problem sets on international trade.' },
       { partner: 'Think Finance', headline: 'Financial markets deep-dives', body: 'Think Finance authored a weekend workshop series on bond pricing and monetary policy that fed directly into finals prep.' },
       { partner: 'CFE', headline: 'Academic oversight', body: 'The Council for Financial Education reviewed judge rubrics and helped calibrate our essay scoring guide.' },
     ],
@@ -49,7 +49,7 @@ const contributionSections = [
       { partner: 'YRI', headline: 'Mentored research', body: 'YRI paired six USAEO finalists with PhD mentors on original economics research projects.' },
       { partner: 'Launchpoint', headline: 'Career placement', body: 'Launchpoint surfaced finance and policy internships to every registered USAEO student.' },
       { partner: 'Synthica', headline: 'Research tooling', body: 'Synthica granted USAEO research fellows free access to their AI-assisted analysis workbench.' },
-      { partner: 'Youth Economics Lab', headline: 'Publication track', body: 'YEL offered top essay submissions a fast-track editorial review for publication.' },
+      { partner: 'Youth Economy Lab', headline: 'Publication track', body: 'YEL offered top essay submissions a fast-track editorial review for publication.' },
       { partner: 'Southeast Asian Economics Project', headline: 'International research', body: 'SEAE connected USAEO researchers to field-work opportunities across Southeast Asia.' },
     ],
   },
