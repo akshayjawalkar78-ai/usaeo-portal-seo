@@ -191,8 +191,8 @@ export default function Home() {
                   to: '/competitions/essay',
                 },
                 {
-                  n: '04', title: 'National Finals', date: 'June 14th 2026',
-                  body: 'An intensive in-person competition held at a US university campus. Top scorers from Quiz Bowl and Essay rounds compete in a written exam and case study analysis. Winners are named National Champions.',
+                  n: '04', title: 'National Finals', date: 'June 14th, 2026',
+                  body: 'An intensive in-person competition held at a US university campus. Top scorers from National Qualifiers, Quiz Bowl and Essay rounds compete in a MCQ, written exam and case study analysis. Winners are named National Champions.',
                   to: '/competitions/finals',
                 },
               ].map((step, i) => (
