@@ -73,7 +73,7 @@ export const PARTNERS = [
   },
   {
     name: 'Youth Economy Lab',
-    logo: '/logos/yel.png',
+    logo: '/logos/YEL.png',
     url: 'https://youtheconomylab.com/',
     desc: 'Student-led economics research',
     wordmark: { text: 'Youth\nEconomy Lab', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
@@ -106,7 +106,7 @@ export const PARTNERS = [
   },
   {
     name: 'NXTHorizon',
-    logo: '/logos/nxthorizon.png',
+    logo: '/logos/NXTHorizon.png',
     url: 'https://www.nxthorizon.org/',
     desc: 'National Finals sponsor network',
     wordmark: { text: 'NXTHorizon', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', fontWeight: 700, fontSize: '0.9rem' },
@@ -114,7 +114,7 @@ export const PARTNERS = [
   },
   {
     name: 'YIMO',
-    logo: '/logos/yimo.png',
+    logo: '/logos/YIMO.png',
     url: 'https://www.yimo-official.org/',
     desc: 'IMO-level economics problem creation',
     wordmark: { text: 'Youth International\nMath Olympiad', fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontWeight: 600, fontSize: '0.75rem', wrap: true },
