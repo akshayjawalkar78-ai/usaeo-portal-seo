@@ -486,7 +486,7 @@ export default function Admin() {
 
         <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto">
 
-          {/* â”€â”€ OVERVIEW â”€â”€ */}
+          {/* â"€â"€ OVERVIEW â"€â"€ */}
           {active === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -550,7 +550,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ ANNOUNCEMENTS â”€â”€ */}
+          {/* â"€â"€ ANNOUNCEMENTS â"€â"€ */}
           {active === 'announcements' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -583,7 +583,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ WORKSHOPS â”€â”€ */}
+          {/* â"€â"€ WORKSHOPS â"€â"€ */}
           {active === 'workshops' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -617,7 +617,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ RESOURCES â”€â”€ */}
+          {/* â"€â"€ RESOURCES â"€â"€ */}
           {active === 'resources' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -649,7 +649,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ RANKINGS â”€â”€ */}
+          {/* â"€â"€ RANKINGS â"€â"€ */}
           {active === 'rankings' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -682,7 +682,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ CHAPTERS â”€â”€ */}
+          {/* â"€â"€ CHAPTERS â"€â"€ */}
           {active === 'chapters' && (
             <div className="space-y-5">
               <div className="flex items-center justify-between">
@@ -804,7 +804,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ COMPETITION â”€â”€ */}
+          {/* â"€â"€ COMPETITION â"€â"€ */}
           {active === 'competition' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -833,7 +833,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ CURRICULUM â”€â”€ */}
+          {/* â"€â"€ CURRICULUM â"€â"€ */}
           {active === 'curriculum' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -861,7 +861,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ REGISTRATIONS â”€â”€ */}
+          {/* â"€â"€ REGISTRATIONS â"€â"€ */}
           {active === 'registrations' && (() => {
             const nonChapter = registrations.filter(r => r.event_type !== 'chapter');
 
@@ -1041,7 +1041,7 @@ export default function Admin() {
             );
           })()}
 
-          {/* â”€â”€ QB TEAMS â”€â”€ */}
+          {/* â"€â"€ QB TEAMS â"€â"€ */}
           {active === 'qb-teams' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -1150,7 +1150,7 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ APPLICATIONS â”€â”€ */}
+          {/* â"€â"€ APPLICATIONS â"€â"€ */}
           {active === 'applications' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -1203,48 +1203,48 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ PARTNER EVENTS â”€â”€ */}
+          {/* â"€â"€ PARTNER EVENTS â"€â"€ */}
           {active === 'partner-events' && (
-            <div className=”space-y-4”>
-              <div className=”flex items-center justify-between”>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className=”font-semibold text-foreground”>Partner Events</h2>
-                  <p className=”text-xs text-muted-foreground mt-0.5”>Competitions, programs, and workshops from partner organizations.</p>
+                  <h2 className="font-semibold text-foreground">Partner Events</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Competitions, programs, and workshops from partner organizations.</p>
                 </div>
                 <button onClick={() => openCreate('partnerEvent', { status: 'upcoming', event_type: 'competition' })}
-                  className=”inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors”>
-                  <Plus className=”w-3.5 h-3.5” /> New partner event
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                  <Plus className="w-3.5 h-3.5" /> New partner event
                 </button>
               </div>
               {['competition', 'program', 'workshop'].map(type => {
                 const typeEvents = partnerEvents.filter(e => e.event_type === type);
                 return (
-                  <div key={type} className=”bg-white rounded-2xl border border-border overflow-hidden”>
-                    <div className=”px-5 py-3 border-b border-border bg-muted/20”>
-                      <p className=”text-xs font-semibold uppercase tracking-widest text-muted-foreground capitalize”>{type}s</p>
+                  <div key={type} className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-5 py-3 border-b border-border bg-muted/20">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground capitalize">{type}s</p>
                     </div>
                     {typeEvents.length === 0 ? (
-                      <p className=”p-5 text-sm text-muted-foreground”>No {type}s yet.</p>
+                      <p className="p-5 text-sm text-muted-foreground">No {type}s yet.</p>
                     ) : (
-                      <div className=”divide-y divide-border”>
+                      <div className="divide-y divide-border">
                         {typeEvents.map(e => (
-                          <div key={e.id} className=”flex items-start gap-4 p-5”>
-                            <div className=”flex-1 min-w-0”>
-                              <div className=”flex items-center gap-2 mb-1”>
-                                {e.partner_logo && <img src={e.partner_logo} alt={e.partner_short} className=”h-5 w-auto max-w-[20px] object-contain opacity-70” loading=”lazy” decoding=”async” />}
-                                <p className=”font-semibold text-sm text-foreground truncate”>{e.title}</p>
+                          <div key={e.id} className="flex items-start gap-4 p-5">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {e.partner_logo && <img src={e.partner_logo} alt={e.partner_short} className="h-5 w-auto max-w-[20px] object-contain opacity-70" loading="lazy" decoding="async" />}
+                                <p className="font-semibold text-sm text-foreground truncate">{e.title}</p>
                                 <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${e.status === 'upcoming' ? 'bg-success/10 text-success border-green-200' : 'bg-muted text-muted-foreground border-border'}`}>
                                   {e.status}
                                 </span>
                               </div>
-                              <p className=”text-xs text-muted-foreground”>{e.partner}{e.category ? ` · ${e.category}` : ''} · {e.date || 'Date TBA'}</p>
-                              {e.description && <p className=”text-xs text-muted-foreground mt-1 line-clamp-2”>{e.description}</p>}
+                              <p className="text-xs text-muted-foreground">{e.partner}{e.category ? ` · ${e.category}` : ''} · {e.date || 'Date TBA'}</p>
+                              {e.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{e.description}</p>}
                             </div>
-                            <div className=”flex items-center gap-2 flex-shrink-0”>
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <button onClick={() => openEdit('partnerEvent', { ...e, highlights: Array.isArray(e.highlights) ? e.highlights.join('\n') : '' })}
-                                className=”p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground”><Pencil className=”w-3.5 h-3.5” /></button>
+                                className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"><Pencil className="w-3.5 h-3.5" /></button>
                               <button onClick={() => setDeleteTarget({ entity: base44.entities.PartnerEvent, id: e.id, label: e.title })}
-                                className=”p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive”><Trash2 className=”w-3.5 h-3.5” /></button>
+                                className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         ))}
@@ -1256,10 +1256,10 @@ export default function Admin() {
             </div>
           )}
 
-          {/* â”€â”€ NEWS â”€â”€ */}
+          {/* â"€â"€ NEWS â"€â"€ */}
           {active === 'news' && <AdminNews />}
 
-          {/* â”€â”€ EDIT WEBSITE â”€â”€ */}
+          {/* â"€â"€ EDIT WEBSITE â"€â"€ */}
           {active === 'edit-website' && <AdminEditWebsite />}
 
         </main>
