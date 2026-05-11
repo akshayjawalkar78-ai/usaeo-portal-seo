@@ -61,6 +61,7 @@ export const PARTNERS = [
     logo: '/logos/FYC-Logo.png',
     url: 'https://linktr.ee/financialyouthclub',
     desc: 'Financial Youth Club',
+    wordmark: { text: 'Financial\nYouth Club', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
     tags: ['awareness'],
   },
   {
@@ -71,11 +72,11 @@ export const PARTNERS = [
     tags: ['awareness', 'academic'],
   },
   {
-    name: 'Youth Economics Lab',
+    name: 'Youth Economy Lab',
     logo: '/logos/yel.png',
     url: 'https://youtheconomylab.com/',
     desc: 'Student-led economics research',
-    wordmark: { text: 'Youth\nEconomics Lab', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
+    wordmark: { text: 'Youth\nEconomy Lab', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '0.85rem', wrap: true },
     tags: ['research', 'academic'],
   },
   {
