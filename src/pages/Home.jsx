@@ -181,17 +181,17 @@ export default function Home() {
                   to: '/competitions',
                 },
                 {
-                  n: '02', title: 'Quiz Bowl', date: 'Coming Soon',
+                  n: '02', title: 'Quiz Bowl', date: 'May 17th, 2026',
                   body: 'Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students, register now to secure your spot.',
                   to: '/competitions/quiz-bowl',
                 },
                 {
-                  n: '03', title: 'Essay Competition', date: 'Coming Soon',
+                  n: '03', title: 'Essay Competition', date: 'May 17th, 2026',
                   body: 'Submit a research essay on an economics topic. Judged on economic reasoning, evidence quality, and clarity of argument. Open to all registered students.',
                   to: '/competitions/essay',
                 },
                 {
-                  n: '04', title: 'National Finals', date: 'May 2026',
+                  n: '04', title: 'National Finals', date: 'June 14th 2026',
                   body: 'An intensive in-person competition held at a US university campus. Top scorers from Quiz Bowl and Essay rounds compete in a written exam and case study analysis. Winners are named National Champions.',
                   to: '/competitions/finals',
                 },
