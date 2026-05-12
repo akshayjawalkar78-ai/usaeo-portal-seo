@@ -10,9 +10,7 @@ import {
   addDays, addHours, addWeeks, addMonths,
 } from 'date-fns';
 import { X, TrendingUp } from 'lucide-react';
-import USStateTileMap, { STATE_NAME_TO_ABBREV } from '../components/USStateTileMap';
-
-const ABBREV_TO_NAME = Object.fromEntries(Object.entries(STATE_NAME_TO_ABBREV).map(([k, v]) => [v, k]));
+import USMapChoropleth from '../components/USMapChoropleth';
 
 function timeButton(id, label, current, setFn) {
   return (
@@ -191,21 +189,15 @@ export default function AdminAnalytics({ registrations, onClose }) {
             <div>
               <h3 className="font-semibold text-foreground mb-4">Geographic Distribution</h3>
 
-              {/* Tile map */}
+              {/* US map choropleth */}
               {stateStats.bars.length > 0 && (
                 <div className="mb-6">
-                  <p className="text-xs text-muted-foreground mb-3">Click a state to see school breakdown</p>
-                  <div className="overflow-x-auto">
-                    <USStateTileMap
-                      stateCounts={Object.fromEntries(stateStats.bars.map(b => [b.state, b.count]))}
-                      selectedState={selectedState ? STATE_NAME_TO_ABBREV[selectedState] || null : null}
-                      onStateClick={abbrev => {
-                        const full = ABBREV_TO_NAME[abbrev] || abbrev;
-                        setSelectedState(prev => prev === full ? null : full);
-                      }}
-                      size={30}
-                    />
-                  </div>
+                  <USMapChoropleth
+                    stateCounts={Object.fromEntries(stateStats.bars.map(b => [b.state, b.count]))}
+                    selectedState={selectedState}
+                    onStateClick={name => setSelectedState(prev => prev === name ? null : name)}
+                    height={320}
+                  />
                 </div>
               )}
 
@@ -259,7 +251,7 @@ export default function AdminAnalytics({ registrations, onClose }) {
                     </>
                   ) : (
                     <div className="h-full min-h-24 flex items-center justify-center text-sm text-muted-foreground text-center px-4">
-                      Click a state on the map or bar to see school breakdown
+                      Click a state on the map or chart to see school breakdown
                     </div>
                   )}
                 </div>

@@ -12,27 +12,19 @@ import { supabase } from '@/supabaseClient';
 import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
 import AdminNews from './AdminNews';
-import USStateTileMap, { STATE_NAME_TO_ABBREV } from '../components/USStateTileMap';
+import USMapChoropleth from '../components/USMapChoropleth';
 
 function QBStateMap({ stateCountsMap, qbStateFilter, setQbStateFilter }) {
-  const selectedAbbrev = qbStateFilter !== 'all'
-    ? STATE_NAME_TO_ABBREV[qbStateFilter] || null
-    : null;
   return (
     <div className="bg-white rounded-2xl border border-border p-5">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Teams by State</p>
-      <div className="overflow-x-auto">
-        <USStateTileMap
-          stateCounts={stateCountsMap}
-          selectedState={selectedAbbrev}
-          onStateClick={abbrev => {
-            const fullName = Object.entries(STATE_NAME_TO_ABBREV).find(([, v]) => v === abbrev)?.[0];
-            setQbStateFilter(prev => prev === fullName ? 'all' : (fullName || 'all'));
-          }}
-          size={34}
-        />
-      </div>
-      <p className="text-xs text-muted-foreground mt-3">Click a state to filter. Color = team density.</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Teams by State</p>
+      <USMapChoropleth
+        stateCounts={stateCountsMap}
+        selectedState={qbStateFilter !== 'all' ? qbStateFilter : null}
+        onStateClick={name => setQbStateFilter(prev => prev === name ? 'all' : name)}
+        height={280}
+      />
+      <p className="text-xs text-muted-foreground mt-2">Click state to filter. Color = team density.</p>
     </div>
   );
 }
