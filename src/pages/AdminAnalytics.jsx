@@ -10,6 +10,7 @@ import {
   addDays, addHours, addWeeks, addMonths,
 } from 'date-fns';
 import { X, TrendingUp } from 'lucide-react';
+import USMapChoropleth from '../components/USMapChoropleth';
 
 function timeButton(id, label, current, setFn) {
   return (
@@ -187,6 +188,19 @@ export default function AdminAnalytics({ registrations, onClose }) {
             {/* State distribution */}
             <div>
               <h3 className="font-semibold text-foreground mb-4">Geographic Distribution</h3>
+
+              {/* US map choropleth */}
+              {stateStats.bars.length > 0 && (
+                <div className="mb-6">
+                  <USMapChoropleth
+                    stateCounts={Object.fromEntries(stateStats.bars.map(b => [b.state, b.count]))}
+                    selectedState={selectedState}
+                    onStateClick={name => setSelectedState(prev => prev === name ? null : name)}
+                    height={320}
+                  />
+                </div>
+              )}
+
               <div className="grid md:grid-cols-2 gap-6 items-start">
                 {/* State bar chart */}
                 <div>
@@ -237,7 +251,7 @@ export default function AdminAnalytics({ registrations, onClose }) {
                     </>
                   ) : (
                     <div className="h-full min-h-24 flex items-center justify-center text-sm text-muted-foreground text-center px-4">
-                      Click a state bar to see school breakdown
+                      Click a state on the map or chart to see school breakdown
                     </div>
                   )}
                 </div>
