@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowLeft, ArrowRight, Plus, X, Users, AlertCircle } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ArrowRight, Plus, X, Users } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
@@ -28,9 +28,8 @@ function randomEconTeamName() {
 
 export default function QuizBowlRegister() {
   const [form, setForm] = useState({ name: '', email: '', school: '', grade: '', state: '' });
-  const [showTeam, setShowTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
-  const [teammates, setTeammates] = useState([{ name: '', email: '' }]);
+  const [teammates, setTeammates] = useState([]);
   const [captainIndex, setCaptainIndex] = useState(-1);
   const [submitted, setSubmitted] = useState(false);
   const [assignedTeamName, setAssignedTeamName] = useState('');
@@ -62,10 +61,6 @@ export default function QuizBowlRegister() {
       setError('Please fill in all fields.');
       return;
     }
-    if (showTeam && !teamName.trim()) {
-      setError('Please enter a team name.');
-      return;
-    }
     setError('');
     setLoading(true);
     try {
@@ -81,9 +76,9 @@ export default function QuizBowlRegister() {
         status: 'registered',
       });
 
-      const usedTeamName = showTeam && teamName.trim() ? teamName.trim() : randomEconTeamName();
-      const solo = !showTeam || !teamName.trim();
-      const validTeammates = showTeam ? teammates.filter(t => t.email.trim()) : [];
+      const usedTeamName = teamName.trim() || randomEconTeamName();
+      const validTeammates = teammates.filter(t => t.email.trim());
+      const solo = validTeammates.length === 0;
       const captainEmail = captainIndex === -1 ? form.email : (validTeammates[captainIndex]?.email || form.email);
 
       const team = await base44.entities.QuizBowlTeam.create({
@@ -140,11 +135,11 @@ export default function QuizBowlRegister() {
   if (submitted) {
     return (
       <PageLayout>
-      <Seo title={PAGE_SEO['/register/quiz-bowl']?.title} description={PAGE_SEO['/register/quiz-bowl']?.description} canonical="/register/quiz-bowl" />
+        <Seo title={PAGE_SEO['/register/quiz-bowl']?.title} description={PAGE_SEO['/register/quiz-bowl']?.description} canonical="/register/quiz-bowl" />
         <section className="min-h-[70vh] flex items-center justify-center px-5">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-lg">
             <div className="flex justify-center mb-5">
-              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16"  loading="lazy" decoding="async" />
+              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" loading="lazy" decoding="async" />
             </div>
             <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
             <h2 className="font-sans text-3xl text-foreground mb-3">You're registered!</h2>
@@ -153,19 +148,15 @@ export default function QuizBowlRegister() {
               {' '}Your team <strong>"{assignedTeamName}"</strong> has been created.
             </p>
             {isSolo && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 mb-4 text-left">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-amber-900 mb-1">Note on solo participation</p>
-                    <p className="text-sm text-amber-800">You've been registered as a solo participant. Solo teams are eligible to compete, but be aware that round scheduling is based on team availability — coordinate early if you later add teammates to avoid scheduling conflicts.</p>
-                  </div>
-                </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 mb-4 text-left">
+                <p className="text-sm text-blue-900">
+                  You're competing solo for now. You can invite teammates from your dashboard after creating an account — teams can have up to 5 members.
+                </p>
               </div>
             )}
             <div className="bg-primary/5 border border-orange-200 rounded-xl px-5 py-4 mb-6 text-left">
               <p className="text-sm font-semibold text-orange-900 mb-1">Next step: manage your team</p>
-              <p className="text-sm text-orange-700">Sign in to your dashboard to invite teammates or update your team roster.</p>
+              <p className="text-sm text-orange-700">Sign in to your dashboard to invite teammates, accept invitations, or update your roster.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-5">
               <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold text-sm hover:bg-primary/90 transition-colors">
@@ -191,10 +182,10 @@ export default function QuizBowlRegister() {
       <section className="pt-20 pb-24 px-5">
         <div className="max-w-lg mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4"  loading="lazy" decoding="async" />
+            <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-12 w-12 mx-auto mb-4" loading="lazy" decoding="async" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Register</p>
             <h1 className="font-sans text-3xl text-foreground mb-2">USAEO Quiz Bowl 2026</h1>
-            <p className="text-sm text-muted-foreground">Free registration · Solo or team · Takes under 2 minutes</p>
+            <p className="text-sm text-muted-foreground">Free registration · Solo or team (1–5 players) · Under 2 minutes</p>
           </motion.div>
 
           <motion.form initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -235,71 +226,62 @@ export default function QuizBowlRegister() {
               </div>
             </div>
 
-            {/* Solo notice */}
-            {!showTeam && (
-              <div className="bg-muted/40 border border-border rounded-xl px-4 py-3 text-xs text-muted-foreground">
-                You can compete solo or build a team (3–5 players). Solo participants are placed on their own team with a randomly assigned economics-themed name.
-              </div>
-            )}
-
-            {/* Team section */}
+            {/* Team section — always shown */}
             <div className="border border-border rounded-xl overflow-hidden">
-              <button type="button" onClick={() => setShowTeam(v => !v)}
-                className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors">
-                <span className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Build your team now (optional)</span>
-                <span className="text-xs text-muted-foreground">{showTeam ? '▲ Hide' : '▼ Show'}</span>
-              </button>
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/20 border-b border-border">
+                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Users className="w-4 h-4 text-primary" /> Your Team
+                </span>
+                <span className="text-xs text-muted-foreground">{totalMembers}/{MAX_TEAM_SIZE} members</span>
+              </div>
 
-              {showTeam && (
-                <div className="px-4 pb-4 pt-1 space-y-4 border-t border-border bg-muted/10">
-                  <p className="text-xs text-muted-foreground">Teams need 3–5 players. You can also create or join a team from your dashboard after registering.</p>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-foreground mb-1.5">Team Name</label>
-                    <input type="text" value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="e.g. Economics Eagles"
-                      className="w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold text-foreground">Team Captain</label>
-                      <span className="text-xs text-muted-foreground">{totalMembers}/{MAX_TEAM_SIZE} members</span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-border">
-                        <input type="radio" name="captain" checked={captainIndex === -1} onChange={() => setCaptainIndex(-1)} className="accent-primary" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{form.name || 'You'}</p>
-                          <p className="text-xs text-muted-foreground truncate">{form.email || 'your email'}</p>
-                        </div>
-                        <span className="text-xs text-primary font-semibold">You</span>
-                      </div>
-                      {teammates.map((tm, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <div className="pt-3">
-                            <input type="radio" name="captain" checked={captainIndex === i} onChange={() => setCaptainIndex(i)} className="accent-primary" />
-                          </div>
-                          <div className="flex-1 grid grid-cols-2 gap-2">
-                            <input type="text" value={tm.name} onChange={e => setTeammate(i, 'name', e.target.value)} placeholder="Name (optional)"
-                              className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-                            <input type="email" value={tm.email} onChange={e => setTeammate(i, 'email', e.target.value)} placeholder="Email"
-                              className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-                          </div>
-                          <button type="button" onClick={() => removeTeammate(i)} className="mt-2 p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    {teammates.length < MAX_TEAM_SIZE - 1 && (
-                      <button type="button" onClick={addTeammate}
-                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-                        <Plus className="w-3 h-3" /> Add teammate
-                      </button>
-                    )}
-                  </div>
+              <div className="px-4 pb-4 pt-3 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">Team Name <span className="font-normal text-muted-foreground">(optional — auto-assigned if blank)</span></label>
+                  <input type="text" value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="e.g. Economics Eagles"
+                    className="w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
                 </div>
-              )}
+
+                {/* Captain selector */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-foreground">Team Captain</label>
+                    <span className="text-xs text-muted-foreground">You can add teammates now or from your dashboard</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-border">
+                      <input type="radio" name="captain" checked={captainIndex === -1} onChange={() => setCaptainIndex(-1)} className="accent-primary" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{form.name || 'You'}</p>
+                        <p className="text-xs text-muted-foreground truncate">{form.email || 'your email'}</p>
+                      </div>
+                      <span className="text-xs text-primary font-semibold">You</span>
+                    </div>
+                    {teammates.map((tm, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="pt-3">
+                          <input type="radio" name="captain" checked={captainIndex === i} onChange={() => setCaptainIndex(i)} className="accent-primary" />
+                        </div>
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <input type="text" value={tm.name} onChange={e => setTeammate(i, 'name', e.target.value)} placeholder="Name (optional)"
+                            className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                          <input type="email" value={tm.email} onChange={e => setTeammate(i, 'email', e.target.value)} placeholder="Email"
+                            className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                        </div>
+                        <button type="button" onClick={() => removeTeammate(i)} className="mt-2 p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {teammates.length < MAX_TEAM_SIZE - 1 && (
+                    <button type="button" onClick={addTeammate}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                      <Plus className="w-3 h-3" /> Add teammate
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <button type="submit" disabled={loading}
