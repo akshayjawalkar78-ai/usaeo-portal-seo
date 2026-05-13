@@ -8,6 +8,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [chapterAdminOf, setChapterAdminOf] = useState([]);
+  // null = full access (super admin); string[] = page IDs allowed for custom admin
+  const [adminAllowedPages, setAdminAllowedPages] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [profileAttempted, setProfileAttempted] = useState(false);
@@ -22,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, full_name, role')
+        .select('id, email, full_name, role, admin_role_id')
         .eq('id', userId)
         .single();
       if (error) {
@@ -31,6 +33,21 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.log('[auth] profile loaded:', data);
         setProfile(data);
+        // Resolve custom admin page permissions
+        if (data.role === 'admin' && data.admin_role_id) {
+          try {
+            const { data: roleData } = await supabase
+              .from('admin_roles')
+              .select('allowed_pages')
+              .eq('id', data.admin_role_id)
+              .single();
+            setAdminAllowedPages(roleData?.allowed_pages ?? []);
+          } catch (_) {
+            setAdminAllowedPages([]);
+          }
+        } else {
+          setAdminAllowedPages(null);
+        }
         // Load chapter admin roles
         try {
           const email = data.email;
@@ -124,11 +141,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setProfile(null);
     setChapterAdminOf([]);
+    setAdminAllowedPages(null);
     setProfileAttempted(false);
   };
 
   const isAuthenticated = !!session?.user;
   const isAdmin = profile?.role === 'admin';
+  const isSuperAdmin = isAdmin && profile?.admin_role_id == null;
   const isChapterAdmin = chapterAdminOf.length > 0;
 
   return (
@@ -138,6 +157,8 @@ export const AuthProvider = ({ children }) => {
       profile,
       isAuthenticated,
       isAdmin,
+      isSuperAdmin,
+      adminAllowedPages,
       isChapterAdmin,
       chapterAdminOf,
       isLoading,

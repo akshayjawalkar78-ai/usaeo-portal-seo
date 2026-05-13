@@ -1,0 +1,424 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Plus, Trash2, Pencil, X, Check, ShieldCheck, Users, Lock,
+  LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
+  Trophy, BookOpen, ClipboardList, Handshake, Newspaper, AlertTriangle,
+} from 'lucide-react';
+import { supabase } from '@/supabaseClient';
+
+// Mirrors ALL_NAV_ITEMS from Admin.jsx (excluding access-control itself)
+const PAGES = [
+  { id: 'overview',       label: 'Overview',       icon: LayoutDashboard },
+  { id: 'announcements',  label: 'Announcements',  icon: Bell },
+  { id: 'workshops',      label: 'Workshops',      icon: Calendar },
+  { id: 'resources',      label: 'Resources',      icon: FileText },
+  { id: 'rankings',       label: 'Rankings',       icon: BarChart2 },
+  { id: 'chapters',       label: 'Chapters',       icon: School },
+  { id: 'competition',    label: 'Competition',    icon: Trophy },
+  { id: 'curriculum',     label: 'Curriculum',     icon: BookOpen },
+  { id: 'registrations',  label: 'Registrations',  icon: ClipboardList },
+  { id: 'qb-teams',       label: 'QB Teams',       icon: Users },
+  { id: 'applications',   label: 'Applications',   icon: ShieldCheck },
+  { id: 'partner-events', label: 'Partner Events', icon: Handshake },
+  { id: 'news',           label: 'News',           icon: Newspaper },
+  { id: 'edit-website',   label: 'Edit Website',   icon: Pencil },
+];
+
+const inputCls = 'w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
+
+function Modal({ title, onClose, children }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">{title}</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="p-6">{children}</div>
+      </motion.div>
+    </div>
+  );
+}
+
+function PageCheckboxes({ selected, onChange }) {
+  const toggle = (id) => {
+    onChange(selected.includes(id) ? selected.filter(p => p !== id) : [...selected, id]);
+  };
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {PAGES.map(page => {
+        const Icon = page.icon;
+        const checked = selected.includes(page.id);
+        return (
+          <label key={page.id}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors text-sm ${checked ? 'border-foreground bg-foreground/5 text-foreground font-medium' : 'border-border text-muted-foreground hover:border-muted-foreground/50'}`}>
+            <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(page.id)} />
+            <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-foreground border-foreground' : 'border-border'}`}>
+              {checked && <Check className="w-2.5 h-2.5 text-white" />}
+            </div>
+            <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+            {page.label}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function AdminAccessControl() {
+  const [tab, setTab] = useState('roles');
+  const [roles, setRoles] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [roleModal, setRoleModal] = useState(null); // null | { role: obj|null }
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // null | roleId
+  const [roleForm, setRoleForm] = useState({ name: '', allowed_pages: [] });
+  const [assignModal, setAssignModal] = useState(null); // null | admin profile obj
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [{ data: rolesData, error: re }, { data: adminsData, error: ae }] = await Promise.all([
+        supabase.from('admin_roles').select('*').order('name'),
+        supabase.from('profiles').select('id, email, full_name, admin_role_id').eq('role', 'admin').order('full_name'),
+      ]);
+      if (re) throw re;
+      if (ae) throw ae;
+      setRoles(rolesData || []);
+      setAdmins(adminsData || []);
+    } catch (e) {
+      setError(e.message || 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const openCreateRole = () => {
+    setRoleForm({ name: '', allowed_pages: [] });
+    setRoleModal({ role: null });
+  };
+
+  const openEditRole = (role) => {
+    setRoleForm({ name: role.name, allowed_pages: role.allowed_pages || [] });
+    setRoleModal({ role });
+  };
+
+  const saveRole = async () => {
+    if (!roleForm.name.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      if (roleModal.role) {
+        const { error } = await supabase.from('admin_roles').update({
+          name: roleForm.name.trim(),
+          allowed_pages: roleForm.allowed_pages,
+        }).eq('id', roleModal.role.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('admin_roles').insert({
+          name: roleForm.name.trim(),
+          allowed_pages: roleForm.allowed_pages,
+        });
+        if (error) throw error;
+      }
+      setRoleModal(null);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteRole = async (id) => {
+    setSaving(true);
+    setError(null);
+    try {
+      // Unassign from profiles first
+      await supabase.from('profiles').update({ admin_role_id: null }).eq('admin_role_id', id);
+      const { error } = await supabase.from('admin_roles').delete().eq('id', id);
+      if (error) throw error;
+      setDeleteConfirm(null);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Delete failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const assignRole = async (adminId, roleId) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('profiles').update({ admin_role_id: roleId || null }).eq('id', adminId);
+      if (error) throw error;
+      setAssignModal(null);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Assign failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const roleById = (id) => roles.find(r => r.id === id);
+
+  return (
+    <div className="p-6 space-y-6 max-w-4xl">
+      <div>
+        <h2 className="text-xl font-semibold text-foreground">Access Control</h2>
+        <p className="text-sm text-muted-foreground mt-1">Create custom admin roles with page-level permissions, then assign them to admin users.</p>
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-border">
+        {[{ id: 'roles', label: 'Roles', icon: Lock }, { id: 'users', label: 'Admin Users', icon: Users }].map(t => {
+          const Icon = t.icon;
+          return (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === t.id ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+              <Icon className="w-4 h-4" />{t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* Roles tab */}
+          {tab === 'roles' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{roles.length} custom role{roles.length !== 1 ? 's' : ''}</p>
+                <button onClick={openCreateRole}
+                  className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors">
+                  <Plus className="w-4 h-4" /> New Role
+                </button>
+              </div>
+
+              {roles.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+                  No custom roles yet. Create one to restrict admin access to specific pages.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {roles.map(role => (
+                    <div key={role.id} className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
+                      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm">{role.name}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(role.allowed_pages || []).length === 0 ? (
+                            <span className="text-xs text-muted-foreground">No pages assigned</span>
+                          ) : (
+                            (role.allowed_pages || []).map(pid => {
+                              const pg = PAGES.find(p => p.id === pid);
+                              return pg ? (
+                                <span key={pid} className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">
+                                  <pg.icon className="w-3 h-3" />{pg.label}
+                                </span>
+                              ) : null;
+                            })
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          {admins.filter(a => a.admin_role_id === role.id).length} user(s) assigned
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => openEditRole(role)}
+                          className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDeleteConfirm(role.id)}
+                          className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Users tab */}
+          {tab === 'users' && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">{admins.length} admin user{admins.length !== 1 ? 's' : ''}</p>
+              {admins.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+                  No admin users found.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {admins.map(admin => {
+                    const role = admin.admin_role_id ? roleById(admin.admin_role_id) : null;
+                    return (
+                      <div key={admin.id} className="bg-white border border-border rounded-xl p-4 flex items-center gap-4">
+                        <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center flex-shrink-0 text-white text-sm font-semibold">
+                          {(admin.full_name || admin.email || '?')[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground text-sm truncate">{admin.full_name || '—'}</p>
+                          <p className="text-xs text-muted-foreground truncate">{admin.email}</p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${role ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                            {role ? <><Lock className="w-3 h-3" />{role.name}</> : <><ShieldCheck className="w-3 h-3" />Full Access</>}
+                          </span>
+                          <button onClick={() => setAssignModal(admin)}
+                            className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Role create/edit modal */}
+      <AnimatePresence>
+        {roleModal && (
+          <Modal title={roleModal.role ? `Edit Role: ${roleModal.role.name}` : 'New Role'} onClose={() => setRoleModal(null)}>
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Role Name</label>
+                <input className={inputCls} placeholder="e.g. Content Manager" value={roleForm.name}
+                  onChange={e => setRoleForm(p => ({ ...p, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Allowed Pages</label>
+                <p className="text-xs text-muted-foreground mb-3">Users with this role will only see the checked pages in the admin console.</p>
+                <PageCheckboxes selected={roleForm.allowed_pages}
+                  onChange={pages => setRoleForm(p => ({ ...p, allowed_pages: pages }))} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setRoleModal(null)}
+                  className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button onClick={saveRole} disabled={saving || !roleForm.name.trim()}
+                  className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
+                  {saving ? 'Saving…' : roleModal.role ? 'Save Changes' : 'Create Role'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* Delete confirm modal */}
+      <AnimatePresence>
+        {deleteConfirm && (
+          <Modal title="Delete Role" onClose={() => setDeleteConfirm(null)}>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This will delete the role and remove it from all assigned users (they'll revert to Full Access). This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button onClick={() => deleteRole(deleteConfirm)} disabled={saving}
+                  className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50">
+                  {saving ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* Assign role modal */}
+      <AnimatePresence>
+        {assignModal && (
+          <Modal title={`Assign Role — ${assignModal.full_name || assignModal.email}`} onClose={() => setAssignModal(null)}>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Choose a role to restrict this admin's access, or set Full Access to grant all permissions.</p>
+              <div className="space-y-2">
+                <label
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${!assignModal.admin_role_id ? 'border-foreground bg-foreground/5' : 'border-border hover:border-muted-foreground/50'}`}
+                  onClick={() => setAssignModal(a => ({ ...a, _selectedRole: null }))}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${(assignModal._selectedRole === null || (assignModal._selectedRole === undefined && !assignModal.admin_role_id)) ? 'border-foreground' : 'border-border'}`}>
+                    {(assignModal._selectedRole === null || (assignModal._selectedRole === undefined && !assignModal.admin_role_id)) && (
+                      <div className="w-2 h-2 rounded-full bg-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Full Access</p>
+                    <p className="text-xs text-muted-foreground">Can access all admin pages</p>
+                  </div>
+                </label>
+                {roles.map(role => {
+                  const selected = assignModal._selectedRole === role.id ||
+                    (assignModal._selectedRole === undefined && assignModal.admin_role_id === role.id);
+                  return (
+                    <label key={role.id}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${selected ? 'border-foreground bg-foreground/5' : 'border-border hover:border-muted-foreground/50'}`}
+                      onClick={() => setAssignModal(a => ({ ...a, _selectedRole: role.id }))}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selected ? 'border-foreground' : 'border-border'}`}>
+                        {selected && <div className="w-2 h-2 rounded-full bg-foreground" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{role.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(role.allowed_pages || []).length} page{(role.allowed_pages || []).length !== 1 ? 's' : ''}:&nbsp;
+                          {(role.allowed_pages || []).map(pid => PAGES.find(p => p.id === pid)?.label).filter(Boolean).join(', ') || 'none'}
+                        </p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setAssignModal(null)}
+                  className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const roleId = assignModal._selectedRole !== undefined
+                      ? assignModal._selectedRole
+                      : assignModal.admin_role_id;
+                    assignRole(assignModal.id, roleId);
+                  }}
+                  disabled={saving}
+                  className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
+                  {saving ? 'Saving…' : 'Apply'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

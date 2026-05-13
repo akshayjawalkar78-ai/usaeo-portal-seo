@@ -7,11 +7,13 @@ import {
   Users, Menu, Eye, EyeOff, Upload, Trophy, BookOpen, ClipboardList, ShieldCheck, Download,
   Lock, Unlock, Crown, TrendingUp, Newspaper, Copy, Mail, Handshake, List, MapPin, Filter, Search,
 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
 import AdminNews from './AdminNews';
+import AdminAccessControl from './AdminAccessControl';
 import USMapChoropleth from '../components/USMapChoropleth';
 
 function QBStateMap({ stateCountsMap, qbStateFilter, setQbStateFilter }) {
@@ -29,7 +31,7 @@ function QBStateMap({ stateCountsMap, qbStateFilter, setQbStateFilter }) {
   );
 }
 
-const navItems = [
+const ALL_NAV_ITEMS = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
   { label: 'Announcements', id: 'announcements', icon: Bell },
   { label: 'Workshops', id: 'workshops', icon: Calendar },
@@ -45,6 +47,8 @@ const navItems = [
   { label: 'News', id: 'news', icon: Newspaper },
   { label: 'Edit Website', id: 'edit-website', icon: Pencil },
 ];
+// Access Control only visible to super admins (admin_role_id IS NULL)
+const ACCESS_CONTROL_ITEM = { label: 'Access Control', id: 'access-control', icon: Lock };
 
 const ECON_TEAM_NAMES = [
   'Invisible Hand','Nash Equilibrium','Keynesian Crusaders','Supply Siders','The Marginalists',
@@ -118,6 +122,12 @@ function Field({ label, type = 'text', value, onChange, options, rows }) {
 }
 
 export default function Admin() {
+  const { isSuperAdmin, adminAllowedPages } = useAuth();
+  // Build visible nav: super admins see all + Access Control; custom admins see allowed pages only
+  const navItems = isSuperAdmin
+    ? [...ALL_NAV_ITEMS, ACCESS_CONTROL_ITEM]
+    : ALL_NAV_ITEMS.filter(item => adminAllowedPages?.includes(item.id));
+
   const [active, setActive] = useState(() => {
     try { return localStorage.getItem('admin.activeTab') || 'overview'; } catch { return 'overview'; }
   });
@@ -1406,6 +1416,7 @@ export default function Admin() {
 
           {/* â"€â"€ EDIT WEBSITE â"€â"€ */}
           {active === 'edit-website' && <AdminEditWebsite />}
+          {active === 'access-control' && isSuperAdmin && <AdminAccessControl />}
 
         </main>
       </div>
