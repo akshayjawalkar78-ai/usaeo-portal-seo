@@ -4,6 +4,7 @@ import {
   Plus, Trash2, Pencil, X, Check, ShieldCheck, Users, Lock,
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   Trophy, BookOpen, ClipboardList, Handshake, Newspaper, AlertTriangle,
+  Search, UserPlus, UserMinus,
 } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
 
@@ -78,6 +79,12 @@ export default function AdminAccessControl() {
   const [deleteConfirm, setDeleteConfirm] = useState(null); // null | roleId
   const [roleForm, setRoleForm] = useState({ name: '', allowed_pages: [] });
   const [assignModal, setAssignModal] = useState(null); // null | admin profile obj
+  const [addModal, setAddModal] = useState(false);
+  const [addEmail, setAddEmail] = useState('');
+  const [addRoleId, setAddRoleId] = useState('');
+  const [addSearchResult, setAddSearchResult] = useState(null); // null | 'not_found' | profile obj
+  const [addSearching, setAddSearching] = useState(false);
+  const [removeConfirm, setRemoveConfirm] = useState(null); // null | admin profile obj
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -164,6 +171,64 @@ export default function AdminAccessControl() {
       await loadData();
     } catch (e) {
       setError(e.message || 'Assign failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const searchUser = async () => {
+    if (!addEmail.trim()) return;
+    setAddSearching(true);
+    setAddSearchResult(null);
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, role')
+        .eq('email', addEmail.trim().toLowerCase())
+        .single();
+      setAddSearchResult(data || 'not_found');
+    } catch {
+      setAddSearchResult('not_found');
+    } finally {
+      setAddSearching(false);
+    }
+  };
+
+  const addAdmin = async () => {
+    if (!addSearchResult || addSearchResult === 'not_found') return;
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('profiles').update({
+        role: 'admin',
+        admin_role_id: addRoleId || null,
+      }).eq('id', addSearchResult.id);
+      if (error) throw error;
+      setAddModal(false);
+      setAddEmail('');
+      setAddRoleId('');
+      setAddSearchResult(null);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Failed to add admin');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeAdmin = async (admin) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('profiles').update({
+        role: 'student',
+        admin_role_id: null,
+      }).eq('id', admin.id);
+      if (error) throw error;
+      setRemoveConfirm(null);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Failed to remove admin');
     } finally {
       setSaving(false);
     }
@@ -266,7 +331,13 @@ export default function AdminAccessControl() {
           {/* Users tab */}
           {tab === 'users' && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">{admins.length} admin user{admins.length !== 1 ? 's' : ''}</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{admins.length} admin user{admins.length !== 1 ? 's' : ''}</p>
+                <button onClick={() => { setAddEmail(''); setAddRoleId(''); setAddSearchResult(null); setAddModal(true); }}
+                  className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors">
+                  <UserPlus className="w-4 h-4" /> Add Admin
+                </button>
+              </div>
               {admins.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
                   No admin users found.
@@ -291,6 +362,10 @@ export default function AdminAccessControl() {
                           <button onClick={() => setAssignModal(admin)}
                             className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
                             <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setRemoveConfirm(admin)}
+                            className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                            <UserMinus className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -413,6 +488,93 @@ export default function AdminAccessControl() {
                   disabled={saving}
                   className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
                   {saving ? 'Saving…' : 'Apply'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* Add Admin modal */}
+      <AnimatePresence>
+        {addModal && (
+          <Modal title="Add Admin User" onClose={() => setAddModal(false)}>
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">User Email</label>
+                <div className="flex gap-2">
+                  <input className={inputCls} placeholder="user@example.com" value={addEmail}
+                    onChange={e => { setAddEmail(e.target.value); setAddSearchResult(null); }}
+                    onKeyDown={e => e.key === 'Enter' && searchUser()} />
+                  <button onClick={searchUser} disabled={addSearching || !addEmail.trim()}
+                    className="flex items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex-shrink-0">
+                    <Search className="w-4 h-4" />
+                    {addSearching ? '…' : 'Find'}
+                  </button>
+                </div>
+              </div>
+
+              {addSearchResult === 'not_found' && (
+                <p className="text-sm text-destructive">No user found with that email.</p>
+              )}
+
+              {addSearchResult && addSearchResult !== 'not_found' && (
+                <>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-muted/50 rounded-xl border border-border">
+                    <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center flex-shrink-0 text-white text-sm font-semibold">
+                      {(addSearchResult.full_name || addSearchResult.email || '?')[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{addSearchResult.full_name || '—'}</p>
+                      <p className="text-xs text-muted-foreground">{addSearchResult.email}</p>
+                    </div>
+                    {addSearchResult.role === 'admin' && (
+                      <span className="ml-auto text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex-shrink-0">Already admin</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Assign Role (optional)</label>
+                    <select className={inputCls} value={addRoleId} onChange={e => setAddRoleId(e.target.value)}>
+                      <option value="">Full Access</option>
+                      {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Leave as Full Access to grant all admin permissions.</p>
+                  </div>
+                </>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setAddModal(false)}
+                  className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button onClick={addAdmin} disabled={saving || !addSearchResult || addSearchResult === 'not_found'}
+                  className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
+                  {saving ? 'Saving…' : 'Grant Admin Access'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* Remove Admin confirm modal */}
+      <AnimatePresence>
+        {removeConfirm && (
+          <Modal title="Remove Admin Access" onClose={() => setRemoveConfirm(null)}>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This will revoke admin access for <strong>{removeConfirm.full_name || removeConfirm.email}</strong> and set their role back to student.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setRemoveConfirm(null)}
+                  className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button onClick={() => removeAdmin(removeConfirm)} disabled={saving}
+                  className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50">
+                  {saving ? 'Removing…' : 'Remove Access'}
                 </button>
               </div>
             </div>
