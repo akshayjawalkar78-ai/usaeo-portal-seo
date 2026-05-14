@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [chapterAdminOf, setChapterAdminOf] = useState([]);
   // null = full access (super admin); string[] = page IDs allowed for custom admin
   const [adminAllowedPages, setAdminAllowedPages] = useState(null);
+  // null = full access; Record<pageId, 'view'|'edit'> for custom admin roles
+  const [adminPagePermissions, setAdminPagePermissions] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [profileAttempted, setProfileAttempted] = useState(false);
@@ -38,15 +40,26 @@ export const AuthProvider = ({ children }) => {
           try {
             const { data: roleData } = await supabase
               .from('admin_roles')
-              .select('allowed_pages')
+              .select('allowed_pages, page_permissions')
               .eq('id', data.admin_role_id)
               .single();
-            setAdminAllowedPages(roleData?.allowed_pages ?? []);
+            const pagePerms = roleData?.page_permissions ?? {};
+            // If role has page_permissions, derive allowed_pages from its keys;
+            // otherwise fall back to the stored allowed_pages array.
+            const hasPerms = Object.keys(pagePerms).length > 0;
+            setAdminPagePermissions(hasPerms ? pagePerms : null);
+            setAdminAllowedPages(
+              hasPerms
+                ? Object.keys(pagePerms)
+                : (roleData?.allowed_pages ?? [])
+            );
           } catch (_) {
             setAdminAllowedPages([]);
+            setAdminPagePermissions({});
           }
         } else {
           setAdminAllowedPages(null);
+          setAdminPagePermissions(null);
         }
         // Load chapter admin roles
         try {
@@ -142,6 +155,7 @@ export const AuthProvider = ({ children }) => {
     setProfile(null);
     setChapterAdminOf([]);
     setAdminAllowedPages(null);
+    setAdminPagePermissions(null);
     setProfileAttempted(false);
   };
 
@@ -159,6 +173,7 @@ export const AuthProvider = ({ children }) => {
       isAdmin,
       isSuperAdmin,
       adminAllowedPages,
+      adminPagePermissions,
       isChapterAdmin,
       chapterAdminOf,
       isLoading,
