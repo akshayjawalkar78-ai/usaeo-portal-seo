@@ -289,9 +289,9 @@ export default function QuizBowl() {
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {[
-              { place: '1st Place', prize: '$100', icon: 'ðŸ¥‡' },
-              { place: '2nd Place', prize: '$75', icon: 'ðŸ¥ˆ' },
-              { place: '3rd Place', prize: '$50', icon: 'ðŸ¥‰' },
+              { place: '1st Place', prize: '$100', icon: '🥇' },
+              { place: '2nd Place', prize: '$75', icon: '🥈' },
+              { place: '3rd Place', prize: '$50', icon: '🥉' },
             ].map((award, i) => (
               <motion.div key={award.place} {...fadeUp(i * 0.07)}
                 className="bg-white border border-border rounded-2xl p-8 text-center">
