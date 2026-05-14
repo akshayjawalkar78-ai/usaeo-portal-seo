@@ -4,7 +4,7 @@ import {
   Plus, Trash2, Pencil, X, Check, ShieldCheck, Users, Lock,
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   Trophy, BookOpen, ClipboardList, Handshake, Newspaper, AlertTriangle,
-  Search, UserPlus, UserMinus,
+  Search, UserPlus, UserMinus, Eye,
 } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
 
@@ -26,13 +26,21 @@ const PAGES = [
   { id: 'edit-website',   label: 'Edit Website',   icon: Pencil },
 ];
 
+// Derive page_permissions from a role, handling legacy allowed_pages-only roles.
+function resolvePermissions(role) {
+  const perms = role.page_permissions || {};
+  if (Object.keys(perms).length > 0) return perms;
+  // backward compat: migrate allowed_pages → view-only permissions
+  return Object.fromEntries((role.allowed_pages || []).map(id => [id, 'view']));
+}
+
 const inputCls = 'w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
 
-function Modal({ title, onClose, children }) {
+function Modal({ title, onClose, children, wide }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        className={`bg-white rounded-2xl shadow-2xl w-full ${wide ? 'max-w-xl' : 'max-w-lg'} max-h-[90vh] overflow-y-auto`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="font-semibold text-foreground">{title}</h3>
           <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg transition-colors"><X className="w-4 h-4" /></button>
@@ -43,25 +51,45 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-function PageCheckboxes({ selected, onChange }) {
+function PagePermissions({ permissions, onChange }) {
   const toggle = (id) => {
-    onChange(selected.includes(id) ? selected.filter(p => p !== id) : [...selected, id]);
+    const next = { ...permissions };
+    if (next[id]) delete next[id];
+    else next[id] = 'view';
+    onChange(next);
   };
+  const setLevel = (id, level) => onChange({ ...permissions, [id]: level });
+
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="space-y-1.5">
       {PAGES.map(page => {
         const Icon = page.icon;
-        const checked = selected.includes(page.id);
+        const perm = permissions[page.id];
+        const checked = !!perm;
         return (
-          <label key={page.id}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors text-sm ${checked ? 'border-foreground bg-foreground/5 text-foreground font-medium' : 'border-border text-muted-foreground hover:border-muted-foreground/50'}`}>
-            <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggle(page.id)} />
-            <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${checked ? 'bg-foreground border-foreground' : 'border-border'}`}>
+          <div key={page.id}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${checked ? 'border-foreground/25 bg-foreground/5' : 'border-border'}`}>
+            <button type="button" onClick={() => toggle(page.id)}
+              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${checked ? 'bg-foreground border-foreground' : 'border-border hover:border-muted-foreground/60'}`}>
               {checked && <Check className="w-2.5 h-2.5 text-white" />}
-            </div>
-            <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-            {page.label}
-          </label>
+            </button>
+            <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${checked ? 'text-foreground' : 'text-muted-foreground'}`} />
+            <span className={`text-sm flex-1 ${checked ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+              {page.label}
+            </span>
+            {checked && (
+              <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
+                {['view', 'edit'].map(level => (
+                  <button key={level} type="button"
+                    onClick={() => setLevel(page.id, level)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${perm === level ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                    {level === 'view' ? <Eye className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                    {level === 'view' ? 'View' : 'Edit'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         );
       })}
     </div>
@@ -77,14 +105,14 @@ export default function AdminAccessControl() {
   const [error, setError] = useState(null);
   const [roleModal, setRoleModal] = useState(null); // null | { role: obj|null }
   const [deleteConfirm, setDeleteConfirm] = useState(null); // null | roleId
-  const [roleForm, setRoleForm] = useState({ name: '', allowed_pages: [] });
+  const [roleForm, setRoleForm] = useState({ name: '', page_permissions: {} });
   const [assignModal, setAssignModal] = useState(null); // null | admin profile obj
   const [addModal, setAddModal] = useState(false);
   const [addEmail, setAddEmail] = useState('');
   const [addRoleId, setAddRoleId] = useState('');
-  const [addSearchResult, setAddSearchResult] = useState(null); // null | 'not_found' | profile obj
+  const [addSearchResult, setAddSearchResult] = useState(null);
   const [addSearching, setAddSearching] = useState(false);
-  const [removeConfirm, setRemoveConfirm] = useState(null); // null | admin profile obj
+  const [removeConfirm, setRemoveConfirm] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -108,12 +136,12 @@ export default function AdminAccessControl() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const openCreateRole = () => {
-    setRoleForm({ name: '', allowed_pages: [] });
+    setRoleForm({ name: '', page_permissions: {} });
     setRoleModal({ role: null });
   };
 
   const openEditRole = (role) => {
-    setRoleForm({ name: role.name, allowed_pages: role.allowed_pages || [] });
+    setRoleForm({ name: role.name, page_permissions: resolvePermissions(role) });
     setRoleModal({ role });
   };
 
@@ -122,16 +150,20 @@ export default function AdminAccessControl() {
     setSaving(true);
     setError(null);
     try {
+      const pagePermissions = roleForm.page_permissions;
+      const allowedPages = Object.keys(pagePermissions);
       if (roleModal.role) {
         const { error } = await supabase.from('admin_roles').update({
           name: roleForm.name.trim(),
-          allowed_pages: roleForm.allowed_pages,
+          page_permissions: pagePermissions,
+          allowed_pages: allowedPages,
         }).eq('id', roleModal.role.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from('admin_roles').insert({
           name: roleForm.name.trim(),
-          allowed_pages: roleForm.allowed_pages,
+          page_permissions: pagePermissions,
+          allowed_pages: allowedPages,
         });
         if (error) throw error;
       }
@@ -148,7 +180,6 @@ export default function AdminAccessControl() {
     setSaving(true);
     setError(null);
     try {
-      // Unassign from profiles first
       await supabase.from('profiles').update({ admin_role_id: null }).eq('admin_role_id', id);
       const { error } = await supabase.from('admin_roles').delete().eq('id', id);
       if (error) throw error;
@@ -240,7 +271,7 @@ export default function AdminAccessControl() {
     <div className="p-6 space-y-6 max-w-4xl">
       <div>
         <h2 className="text-xl font-semibold text-foreground">Access Control</h2>
-        <p className="text-sm text-muted-foreground mt-1">Create custom admin roles with page-level permissions, then assign them to admin users.</p>
+        <p className="text-sm text-muted-foreground mt-1">Create custom admin roles with page-level view/edit permissions, then assign them to admin users.</p>
       </div>
 
       {error && (
@@ -286,43 +317,54 @@ export default function AdminAccessControl() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {roles.map(role => (
-                    <div key={role.id} className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                        <Lock className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground text-sm">{role.name}</p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {(role.allowed_pages || []).length === 0 ? (
-                            <span className="text-xs text-muted-foreground">No pages assigned</span>
-                          ) : (
-                            (role.allowed_pages || []).map(pid => {
-                              const pg = PAGES.find(p => p.id === pid);
-                              return pg ? (
-                                <span key={pid} className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">
-                                  <pg.icon className="w-3 h-3" />{pg.label}
-                                </span>
-                              ) : null;
-                            })
-                          )}
+                  {roles.map(role => {
+                    const perms = resolvePermissions(role);
+                    const entries = Object.entries(perms);
+                    return (
+                      <div key={role.id} className="bg-white border border-border rounded-xl p-4 flex items-start gap-4">
+                        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                          <Lock className="w-4 h-4 text-muted-foreground" />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1.5">
-                          {admins.filter(a => a.admin_role_id === role.id).length} user(s) assigned
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground text-sm">{role.name}</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {entries.length === 0 ? (
+                              <span className="text-xs text-muted-foreground">No pages assigned</span>
+                            ) : (
+                              entries.map(([pid, perm]) => {
+                                const pg = PAGES.find(p => p.id === pid);
+                                if (!pg) return null;
+                                const Icon = pg.icon;
+                                return (
+                                  <span key={pid}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${perm === 'edit' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-muted text-muted-foreground border-border'}`}>
+                                    <Icon className="w-3 h-3" />
+                                    {pg.label}
+                                    <span className={`ml-0.5 ${perm === 'edit' ? 'text-blue-500' : 'text-muted-foreground/60'}`}>
+                                      · {perm}
+                                    </span>
+                                  </span>
+                                );
+                              })
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1.5">
+                            {admins.filter(a => a.admin_role_id === role.id).length} user(s) assigned
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={() => openEditRole(role)}
+                            className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setDeleteConfirm(role.id)}
+                            className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button onClick={() => openEditRole(role)}
-                          className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => setDeleteConfirm(role.id)}
-                          className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -381,7 +423,7 @@ export default function AdminAccessControl() {
       {/* Role create/edit modal */}
       <AnimatePresence>
         {roleModal && (
-          <Modal title={roleModal.role ? `Edit Role: ${roleModal.role.name}` : 'New Role'} onClose={() => setRoleModal(null)}>
+          <Modal title={roleModal.role ? `Edit Role: ${roleModal.role.name}` : 'New Role'} onClose={() => setRoleModal(null)} wide>
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">Role Name</label>
@@ -389,10 +431,14 @@ export default function AdminAccessControl() {
                   onChange={e => setRoleForm(p => ({ ...p, name: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Allowed Pages</label>
-                <p className="text-xs text-muted-foreground mb-3">Users with this role will only see the checked pages in the admin console.</p>
-                <PageCheckboxes selected={roleForm.allowed_pages}
-                  onChange={pages => setRoleForm(p => ({ ...p, allowed_pages: pages }))} />
+                <label className="block text-sm font-medium text-foreground mb-1.5">Page Permissions</label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Check pages to grant access. Choose <strong>View</strong> (read-only) or <strong>Edit</strong> (full access) per page.
+                </p>
+                <PagePermissions
+                  permissions={roleForm.page_permissions}
+                  onChange={perms => setRoleForm(p => ({ ...p, page_permissions: perms }))}
+                />
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setRoleModal(null)}
@@ -455,6 +501,8 @@ export default function AdminAccessControl() {
                 {roles.map(role => {
                   const selected = assignModal._selectedRole === role.id ||
                     (assignModal._selectedRole === undefined && assignModal.admin_role_id === role.id);
+                  const perms = resolvePermissions(role);
+                  const entries = Object.entries(perms);
                   return (
                     <label key={role.id}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${selected ? 'border-foreground bg-foreground/5' : 'border-border hover:border-muted-foreground/50'}`}
@@ -465,8 +513,11 @@ export default function AdminAccessControl() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">{role.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {(role.allowed_pages || []).length} page{(role.allowed_pages || []).length !== 1 ? 's' : ''}:&nbsp;
-                          {(role.allowed_pages || []).map(pid => PAGES.find(p => p.id === pid)?.label).filter(Boolean).join(', ') || 'none'}
+                          {entries.length} page{entries.length !== 1 ? 's' : ''}:&nbsp;
+                          {entries.map(([pid, perm]) => {
+                            const pg = PAGES.find(p => p.id === pid);
+                            return pg ? `${pg.label} (${perm})` : null;
+                          }).filter(Boolean).join(', ') || 'none'}
                         </p>
                       </div>
                     </label>
