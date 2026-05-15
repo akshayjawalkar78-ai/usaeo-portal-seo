@@ -64,6 +64,12 @@ export default function QuizBowlRegister() {
     setError('');
     setLoading(true);
     try {
+      const existing = await base44.entities.EventRegistration.filter({ user_email: form.email, event_type: 'quiz-bowl' });
+      if (existing.length > 0) {
+        setError('This email is already registered for Quiz Bowl.');
+        setLoading(false);
+        return;
+      }
       await base44.entities.EventRegistration.create({
         user_name: form.name,
         user_email: form.email,
