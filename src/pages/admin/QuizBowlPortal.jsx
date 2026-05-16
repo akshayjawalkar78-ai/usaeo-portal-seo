@@ -307,7 +307,8 @@ export default function QuizBowlPortal() {
       )}
       {sub === 'brackets' && isSuperAdmin && (
         <BracketsTab teams={teams} brackets={brackets} matches={matches}
-          busy={busy} onGenerate={generateBrackets} reload={loadAll} />
+          busy={busy} onGenerate={generateBrackets} reload={loadAll}
+          config={config} setError={setError} />
       )}
       {sub === 'schedule' && (
         <ScheduleTab teams={teams} matches={matches} shifts={shifts} holds={holds}
@@ -509,7 +510,7 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
 }
 
 /* ─────────────────────────  BRACKETS  ───────────────────────── */
-function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
+function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, config, setError }) {
   const n = teams.length;
   const bd = qualifierBreakdown(n);
   const [edit, setEdit] = useState(null); // null | {} (new) | bracket (edit)
@@ -561,6 +562,33 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
 
   const moveTeam = async (teamId, bracketId) => {
     await base44.entities.QuizBowlTeam.update(teamId, { bracket_id: bracketId || null });
+    reload();
+  };
+  // Round-robin for one bracket's current teams; skips pairs already present.
+  const genBracketMatches = async (b) => {
+    const ids = teams.filter((t) => t.bracket_id === b.id).map((t) => t.id);
+    if (ids.length < 2) { setError('Need at least 2 teams in this bracket.'); return; }
+    const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
+    const existing = new Set(
+      matches.filter((m) => m.bracket_id === b.id)
+        .map((m) => [m.team_a_id, m.team_b_id].sort().join('|'))
+    );
+    const rr = generateRoundRobin(ids);
+    let made = 0;
+    for (const pair of rr) {
+      const key = [pair.teamAId, pair.teamBId].sort().join('|');
+      if (existing.has(key)) continue;
+      await base44.entities.QuizBowlMatch.create({
+        bracket_id: b.id, stage: b.stage || 'group', round: pair.round,
+        team_a_id: pair.teamAId, team_b_id: pair.teamBId,
+        status: 'unscheduled', deadline: rounds[pair.round - 1]?.deadline || null,
+      });
+      made++;
+    }
+    await base44.entities.QuizBowlBracket.update(b.id, {
+      round_count: rr.reduce((mx, x) => Math.max(mx, x.round), 0),
+    });
+    if (made === 0) setError('No new matches — all pairings already exist.');
     reload();
   };
   const toggleFlag = async (team, field) => {
@@ -655,6 +683,7 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
               </p>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => setAddTo(b)} className="text-xs border border-border rounded px-2 py-1 hover:bg-muted">+ team</button>
+                <button onClick={() => genBracketMatches(b)} className="text-xs border border-border rounded px-2 py-1 hover:bg-muted font-semibold text-primary">Generate matches</button>
                 <button onClick={() => setEdit(b)} className="text-xs border border-border rounded px-2 py-1 hover:bg-muted">Edit</button>
                 <button onClick={() => setDelTarget(b)} className="text-xs border border-red-200 text-destructive rounded px-2 py-1 hover:bg-destructive/10">Delete</button>
               </div>
