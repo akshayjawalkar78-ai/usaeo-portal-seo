@@ -32,6 +32,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 const QuizBowlRegister = lazy(() => import('./pages/QuizBowlRegister'));
+const QuizBowlTournament = lazy(() => import('./pages/QuizBowlTournament'));
 const EssayRegister = lazy(() => import('./pages/EssayRegister'));
 const ChapterRegister = lazy(() => import('./pages/ChapterRegister'));
 const CareersApply = lazy(() => import('./pages/CareersApply'));
@@ -95,6 +96,7 @@ function App() {
             {/* Authed */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/quiz-bowl" element={<QuizBowlTournament />} />
             </Route>
 
             {/* Admin only */}

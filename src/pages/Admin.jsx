@@ -14,6 +14,7 @@ import AdminEditWebsite from './AdminEditWebsite';
 import AdminAnalytics from './AdminAnalytics';
 import AdminNews from './AdminNews';
 import AdminAccessControl from './AdminAccessControl';
+import QuizBowlPortal from './admin/QuizBowlPortal';
 import USMapChoropleth from '../components/USMapChoropleth';
 
 function QBStateMap({ stateCountsMap, qbStateFilter, setQbStateFilter }) {
@@ -41,7 +42,7 @@ const ALL_NAV_ITEMS = [
   { label: 'Competition', id: 'competition', icon: Trophy },
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
-  { label: 'QB Teams', id: 'qb-teams', icon: Users },
+  { label: 'Quiz Bowl', id: 'qb-teams', icon: Trophy },
   { label: 'Applications', id: 'applications', icon: ShieldCheck },
   { label: 'Partner Events', id: 'partner-events', icon: Handshake },
   { label: 'News', id: 'news', icon: Newspaper },
@@ -1127,183 +1128,7 @@ export default function Admin() {
             );
           })()}
 
-          {/* â"€â"€ QB TEAMS â"€â"€ */}
-          {active === 'qb-teams' && (() => {
-            const allStates = [...new Set(qbTeams.map(t => t.state).filter(Boolean))].sort();
-            const filtered = qbTeams.filter(team => {
-              const members = qbTeamMembers[team.id] || [];
-              const activeCount = members.filter(m => m.status === 'active').length;
-              if (qbTeamSearch && !team.team_name?.toLowerCase().includes(qbTeamSearch.toLowerCase())) return false;
-              if (qbStateFilter !== 'all' && team.state !== qbStateFilter) return false;
-              if (qbMemberFilter === 'solo' && activeCount !== 1) return false;
-              if (qbMemberFilter === 'small' && activeCount !== 2) return false;
-              if (qbMemberFilter === 'ready' && activeCount < 3) return false;
-              return true;
-            });
-
-            const stateCountsMap = {};
-            qbTeams.forEach(t => {
-              if (t.state) stateCountsMap[t.state] = (stateCountsMap[t.state] || 0) + 1;
-            });
-
-            return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-foreground">Quiz Bowl Teams</h2>
-                  <div className="flex items-center gap-3">
-                    {backfillStatus === 'running' && <span className="text-xs text-muted-foreground animate-pulse">Auto-assigning teams…</span>}
-                    {backfillStatus === 'done' && backfillLog.length > 0 && <span className="text-xs text-success">{backfillLog.length} team{backfillLog.length !== 1 ? 's' : ''} auto-created</span>}
-                    <span className="text-sm text-muted-foreground">{filtered.length}/{qbTeams.length}</span>
-                  </div>
-                </div>
-
-                {/* Filter bar */}
-                <div className="bg-white rounded-2xl border border-border p-4">
-                  <div className="flex flex-wrap gap-3 items-center">
-                    <div className="relative flex-1 min-w-40">
-                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                      <input
-                        value={qbTeamSearch} onChange={e => setQbTeamSearch(e.target.value)}
-                        placeholder="Search team name…"
-                        className="w-full pl-8 pr-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                      />
-                    </div>
-                    <select value={qbMemberFilter} onChange={e => setQbMemberFilter(e.target.value)}
-                      className="border border-border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <option value="all">All sizes</option>
-                      <option value="solo">Solo (1)</option>
-                      <option value="small">2 members</option>
-                      <option value="ready">Ready (3–5)</option>
-                    </select>
-                    <select value={qbStateFilter} onChange={e => setQbStateFilter(e.target.value)}
-                      className="border border-border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
-                      <option value="all">All states</option>
-                      {allStates.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                    <div className="flex border border-border rounded-lg overflow-hidden">
-                      <button onClick={() => setQbViewMode('list')}
-                        className={`px-3 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${qbViewMode === 'list' ? 'bg-foreground text-white' : 'text-muted-foreground hover:bg-muted'}`}>
-                        <List className="w-3.5 h-3.5" /> List
-                      </button>
-                      <button onClick={() => setQbViewMode('map')}
-                        className={`px-3 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors border-l border-border ${qbViewMode === 'map' ? 'bg-foreground text-white' : 'text-muted-foreground hover:bg-muted'}`}>
-                        <MapPin className="w-3.5 h-3.5" /> Map
-                      </button>
-                    </div>
-                    {(qbTeamSearch || qbMemberFilter !== 'all' || qbStateFilter !== 'all') && (
-                      <button onClick={() => { setQbTeamSearch(''); setQbMemberFilter('all'); setQbStateFilter('all'); }}
-                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                        <X className="w-3 h-3" /> Clear
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Map view */}
-                {qbViewMode === 'map' && (
-                  <QBStateMap
-                    stateCountsMap={stateCountsMap}
-                    qbStateFilter={qbStateFilter}
-                    setQbStateFilter={setQbStateFilter}
-                  />
-                )}
-
-                {/* List view */}
-                {qbViewMode === 'list' && (
-                  <>
-                    {filtered.length === 0 && (
-                      <div className="bg-white rounded-2xl border border-border p-6">
-                        <p className="text-sm text-muted-foreground">No teams match current filters.</p>
-                      </div>
-                    )}
-                    {filtered.map(team => {
-                      const members = qbTeamMembers[team.id] || [];
-                      const activeCount = members.filter(m => m.status === 'active').length;
-                      const isExpanded = expandedQBTeam === team.id;
-                      return (
-                        <div key={team.id} className="bg-white rounded-2xl border border-border overflow-hidden">
-                          <div className="flex items-center gap-4 p-5">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-semibold text-foreground">{team.team_name}</p>
-                                {team.locked
-                                  ? <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1"><Lock className="w-3 h-3" /> Locked</span>
-                                  : <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Open</span>
-                                }
-                                {activeCount >= 3 && <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">Ready</span>}
-                                {activeCount === 1 && <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Solo</span>}
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {team.captain_email} · {activeCount} member{activeCount !== 1 ? 's' : ''}
-                                {team.state ? ` · ${team.state}` : ''}
-                                {team.school ? ` · ${team.school}` : ''}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <button onClick={async () => {
-                                await base44.entities.QuizBowlTeam.update(team.id, { locked: !team.locked });
-                                loadAll();
-                              }} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${team.locked ? 'border-green-200 bg-success/10 text-success hover:bg-success/15' : 'border-border bg-muted text-foreground hover:bg-muted/70'}`}>
-                                {team.locked ? <><Unlock className="w-3 h-3" /> Unlock</> : <><Lock className="w-3 h-3" /> Lock</>}
-                              </button>
-                              <button onClick={() => {
-                                if (isExpanded) { setExpandedQBTeam(null); return; }
-                                setExpandedQBTeam(team.id);
-                                if (!qbTeamMembers[team.id]) loadQBTeamMembers(team.id);
-                              }} className="px-3 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-muted transition-colors flex items-center gap-1.5">
-                                <Users className="w-3.5 h-3.5" /> {isExpanded ? 'Hide' : 'Members'}
-                              </button>
-                              <button onClick={() => setDeleteTarget({ entity: base44.entities.QuizBowlTeam, id: team.id, label: team.team_name })}
-                                className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {isExpanded && (
-                            <div className="border-t border-border p-5 bg-muted/10">
-                              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Members ({members.length})</p>
-                              {members.length === 0 && <p className="text-sm text-muted-foreground">No members.</p>}
-                              <div className="space-y-2">
-                                {members.map(m => (
-                                  <div key={m.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
-                                        {(m.user_name || m.user_email)?.[0]?.toUpperCase() ?? '?'}
-                                      </div>
-                                      <div>
-                                        <p className="text-sm text-foreground">{m.user_name || m.user_email}</p>
-                                        <p className="text-xs text-muted-foreground">{m.user_email}</p>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
-                                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${m.status === 'active' ? 'bg-success/10 text-success border border-green-200' : m.status === 'pending' ? 'bg-primary/5 text-orange-700 border border-orange-200' : 'bg-muted text-muted-foreground border border-border'}`}>
-                                        {m.status}
-                                      </span>
-                                      {!team.locked && (
-                                        <button onClick={async () => {
-                                          await base44.entities.QuizBowlTeamMember.delete(m.id);
-                                          loadQBTeamMembers(team.id);
-                                          loadAll();
-                                        }} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors">
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-              </div>
-            );
-          })()}
+          {active === 'qb-teams' && <QuizBowlPortal />}
 
           {/* â"€â"€ APPLICATIONS â"€â"€ */}
           {active === 'applications' && (

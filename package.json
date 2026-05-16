@@ -13,6 +13,7 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
+    "test": "node --test \"src/lib/quizBowl/__tests__/quizBowl.test.mjs\"",
     "preview": "vite preview"
   },
   "dependencies": {

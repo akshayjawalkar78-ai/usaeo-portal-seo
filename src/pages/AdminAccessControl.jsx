@@ -19,7 +19,7 @@ const PAGES = [
   { id: 'competition',    label: 'Competition',    icon: Trophy },
   { id: 'curriculum',     label: 'Curriculum',     icon: BookOpen },
   { id: 'registrations',  label: 'Registrations',  icon: ClipboardList },
-  { id: 'qb-teams',       label: 'QB Teams',       icon: Users },
+  { id: 'qb-teams',       label: 'Quiz Bowl',      icon: Trophy },
   { id: 'applications',   label: 'Applications',   icon: ShieldCheck },
   { id: 'partner-events', label: 'Partner Events', icon: Handshake },
   { id: 'news',           label: 'News',           icon: Newspaper },
