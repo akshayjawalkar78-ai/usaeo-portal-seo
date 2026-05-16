@@ -319,7 +319,7 @@ export default function QuizBowlPortal() {
       )}
       {sub === 'ref' && (
         <RefToolsTab matches={matches} teams={teams} teamById={teamById}
-          protests={protests} config={config} myEmail={myEmail}
+          protests={protests} config={config} myEmail={myEmail} shifts={shifts}
           isSuperAdmin={isSuperAdmin} reload={loadAll} setError={setError} />
       )}
       {sub === 'settings' && isSuperAdmin && (
@@ -510,6 +510,10 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
 function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
   const n = teams.length;
   const bd = qualifierBreakdown(n);
+  const [edit, setEdit] = useState(null); // null | {} (new) | bracket (edit)
+  const [delTarget, setDelTarget] = useState(null);
+  const [addTo, setAddTo] = useState(null); // bracket to add a team into
+
   const moveTeam = async (teamId, bracketId) => {
     await base44.entities.QuizBowlTeam.update(teamId, { bracket_id: bracketId || null });
     reload();
@@ -518,8 +522,34 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
     await base44.entities.QuizBowlTeam.update(team.id, { [field]: !team[field] });
     reload();
   };
+  const saveBracket = async (form) => {
+    if (form.id) {
+      await base44.entities.QuizBowlBracket.update(form.id, {
+        name: form.name, region: form.region, stage: form.stage,
+        is_international: form.is_international,
+      });
+    } else {
+      await base44.entities.QuizBowlBracket.create({
+        name: form.name, region: form.region || 'Custom',
+        stage: form.stage || 'group', is_international: !!form.is_international,
+      });
+    }
+    setEdit(null); reload();
+  };
+  const deleteBracket = async (b) => {
+    for (const t of teams.filter((x) => x.bracket_id === b.id)) {
+      await base44.entities.QuizBowlTeam.update(t.id, { bracket_id: null });
+    }
+    for (const m of matches.filter((x) => x.bracket_id === b.id)) {
+      await base44.entities.QuizBowlMatch.delete(m.id);
+    }
+    await base44.entities.QuizBowlBracket.delete(b.id);
+    setDelTarget(null); reload();
+  };
+
   const groups = brackets.filter((b) => b.stage === 'group');
   const playoff = brackets.filter((b) => b.stage === 'playoff');
+  const unassigned = teams.filter((t) => !t.bracket_id);
 
   return (
     <div className="space-y-4">
@@ -530,15 +560,39 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
           playoff <strong className="text-foreground">{bd.playoffSize}</strong>{' '}
           ({bd.guaranteed} auto + {bd.wildcards} wildcard)
         </div>
-        <button disabled={busy} onClick={onGenerate}
-          className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 disabled:opacity-50">
-          <Shuffle className="w-4 h-4" /> {busy ? 'Generating…' : 'Generate Brackets'}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setEdit({ stage: 'group' })}
+            className="flex items-center gap-2 border border-border text-sm font-medium px-4 py-2 rounded-lg hover:bg-muted">
+            <Trophy className="w-4 h-4" /> New bracket
+          </button>
+          <button disabled={busy} onClick={onGenerate}
+            className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 disabled:opacity-50">
+            <Shuffle className="w-4 h-4" /> {busy ? 'Generating…' : 'Auto-generate'}
+          </button>
+        </div>
       </div>
 
-      {groups.length === 0 && (
+      {unassigned.length > 0 && (
+        <div className="bg-white rounded-2xl border border-amber-200 p-5">
+          <p className="font-semibold text-foreground mb-2 text-sm">Unassigned teams ({unassigned.length})</p>
+          <div className="flex flex-wrap gap-2">
+            {unassigned.map((t) => (
+              <span key={t.id} className="inline-flex items-center gap-2 text-xs border border-border rounded-full px-3 py-1">
+                {t.team_name}
+                <select value="" onChange={(e) => e.target.value && moveTeam(t.id, e.target.value)}
+                  className="bg-transparent text-muted-foreground">
+                  <option value="">→ bracket…</option>
+                  {brackets.map((bb) => <option key={bb.id} value={bb.id}>{bb.name}</option>)}
+                </select>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {brackets.length === 0 && (
         <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
-          No brackets yet. Click Generate Brackets to build the group stage.
+          No brackets yet. Create one manually or auto-generate the group stage.
         </div>
       )}
 
@@ -548,14 +602,20 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
         const bm = matches.filter((m) => m.bracket_id === b.id);
         return (
           <div key={b.id} className="bg-white rounded-2xl border border-border p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="font-semibold text-foreground flex items-center gap-2">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <p className="font-semibold text-foreground flex items-center gap-2 flex-wrap">
                 {b.name}
-                <span className="text-xs font-normal text-muted-foreground">{b.region} · {b.stage} · {bm.length} matches</span>
+                <span className="text-xs font-normal text-muted-foreground">{b.region} · {b.stage} · {bt.length} teams · {bm.length} matches</span>
                 {b.is_international && <span className="text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">Intl</span>}
               </p>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button onClick={() => setAddTo(b)} className="text-xs border border-border rounded px-2 py-1 hover:bg-muted">+ team</button>
+                <button onClick={() => setEdit(b)} className="text-xs border border-border rounded px-2 py-1 hover:bg-muted">Edit</button>
+                <button onClick={() => setDelTarget(b)} className="text-xs border border-red-200 text-destructive rounded px-2 py-1 hover:bg-destructive/10">Delete</button>
+              </div>
             </div>
             <div className="space-y-1.5">
+              {bt.length === 0 && <p className="text-xs text-muted-foreground">No teams in this bracket.</p>}
               {bt.map((t, i) => (
                 <div key={t.id} className="flex items-center gap-3 text-sm py-1.5 border-b border-border/50 last:border-0">
                   <span className="w-5 text-muted-foreground">{i + 1}</span>
@@ -568,6 +628,7 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
                   <select value={t.bracket_id || ''} onChange={(e) => moveTeam(t.id, e.target.value)}
                     className="text-xs border border-border rounded px-1.5 py-0.5 bg-white">
                     {brackets.map((bb) => <option key={bb.id} value={bb.id}>{bb.name}</option>)}
+                    <option value="">— Unassign —</option>
                   </select>
                 </div>
               ))}
@@ -575,6 +636,64 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
           </div>
         );
       })}
+
+      <AnimatePresence>
+        {edit && (
+          <Modal title={edit.id ? `Edit ${edit.name}` : 'New bracket'} onClose={() => setEdit(null)}>
+            <BracketForm bracket={edit} onSave={saveBracket} />
+          </Modal>
+        )}
+        {addTo && (
+          <Modal title={`Add team to ${addTo.name}`} onClose={() => setAddTo(null)}>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {teams.filter((t) => t.bracket_id !== addTo.id).map((t) => (
+                <button key={t.id} onClick={async () => { await moveTeam(t.id, addTo.id); setAddTo(null); }}
+                  className="w-full text-left text-sm border border-border rounded-lg px-3 py-2 hover:bg-muted">
+                  {t.team_name} <span className="text-xs text-muted-foreground">{t.bracket_id ? '· (moves from another bracket)' : '· unassigned'}</span>
+                </button>
+              ))}
+            </div>
+          </Modal>
+        )}
+        {delTarget && (
+          <Modal title="Delete bracket" onClose={() => setDelTarget(null)}>
+            <p className="text-sm text-muted-foreground mb-4">
+              Delete <strong>{delTarget.name}</strong>? Its {matches.filter((m) => m.bracket_id === delTarget.id).length} matches are removed and its teams become unassigned. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDelTarget(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button onClick={() => deleteBracket(delTarget)} className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90">Delete</button>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function BracketForm({ bracket, onSave }) {
+  const [f, setF] = useState({
+    id: bracket.id, name: bracket.name || '', region: bracket.region || '',
+    stage: bracket.stage || 'group', is_international: !!bracket.is_international,
+  });
+  return (
+    <div className="space-y-4">
+      <div><label className="block text-sm font-medium mb-1.5">Name</label>
+        <input className={inputCls} value={f.name} onChange={(e) => setF((p) => ({ ...p, name: e.target.value }))} placeholder="Group 1" /></div>
+      <div><label className="block text-sm font-medium mb-1.5">Region</label>
+        <input className={inputCls} value={f.region} onChange={(e) => setF((p) => ({ ...p, region: e.target.value }))} placeholder="Northeast / International / …" /></div>
+      <div><label className="block text-sm font-medium mb-1.5">Stage</label>
+        <select className={inputCls} value={f.stage} onChange={(e) => setF((p) => ({ ...p, stage: e.target.value }))}>
+          <option value="group">Group</option><option value="playoff">Playoff</option>
+        </select></div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={f.is_international} onChange={(e) => setF((p) => ({ ...p, is_international: e.target.checked }))} />
+        International (isolated timezone bucket)
+      </label>
+      <button disabled={!f.name.trim()} onClick={() => onSave(f)}
+        className="w-full bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50">
+        {f.id ? 'Save changes' : 'Create bracket'}
+      </button>
     </div>
   );
 }
@@ -865,15 +984,63 @@ function OverrideForm({ shifts, onSubmit }) {
 }
 
 /* ─────────────────────────  REF TOOLS  ───────────────────────── */
-function RefToolsTab({ matches, teamById, protests, config, myEmail, isSuperAdmin, reload, setError }) {
+function RefToolsTab({ matches, teamById, protests, config, myEmail, shifts = [], isSuperAdmin, reload, setError }) {
   const mine = isSuperAdmin ? matches : matches.filter((m) => m.ref_email === myEmail);
   const live = mine.filter((m) => ['locked', 'live'].includes(m.status));
   const done = mine.filter((m) => ['completed', 'draw', 'forfeit'].includes(m.status));
+  const myShifts = isSuperAdmin ? shifts : shifts.filter((s) => s.ref_email === myEmail);
+  const [sf, setSf] = useState({ start_at: '', end_at: '', ref_name: '' });
+
+  const createShift = async () => {
+    if (!sf.start_at || !sf.end_at) return;
+    try {
+      await base44.entities.QuizBowlRefShift.create({
+        ref_email: myEmail, ref_name: sf.ref_name || myEmail,
+        start_at: new Date(sf.start_at).toISOString(),
+        end_at: new Date(sf.end_at).toISOString(), status: 'open',
+      });
+      setSf({ start_at: '', end_at: '', ref_name: '' });
+      reload();
+    } catch (e) { setError(e.message); }
+  };
+  const delShift = async (id) => { await base44.entities.QuizBowlRefShift.delete(id); reload(); };
+
   return (
     <div className="space-y-4">
+      {/* Always-visible shift pool */}
+      <div className="bg-white rounded-2xl border border-border p-5">
+        <p className="font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> My referee shifts ({myShifts.length})</p>
+        <div className="flex flex-wrap gap-3 items-end mb-3">
+          <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
+            <input type="datetime-local" className={inputCls} value={sf.start_at}
+              onChange={(e) => setSf((p) => ({ ...p, start_at: e.target.value }))} /></div>
+          <div><label className="block text-xs text-muted-foreground mb-1">End</label>
+            <input type="datetime-local" className={inputCls} value={sf.end_at}
+              onChange={(e) => setSf((p) => ({ ...p, end_at: e.target.value }))} /></div>
+          <div><label className="block text-xs text-muted-foreground mb-1">Ref name</label>
+            <input className={inputCls} placeholder="optional" value={sf.ref_name}
+              onChange={(e) => setSf((p) => ({ ...p, ref_name: e.target.value }))} /></div>
+          <button onClick={createShift} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Add shift</button>
+        </div>
+        {myShifts.length === 0 && <p className="text-sm text-muted-foreground">No shifts yet. Add one above — it appears in the open pool immediately.</p>}
+        <div className="space-y-1.5">
+          {myShifts.map((s) => (
+            <div key={s.id} className="flex items-center justify-between text-sm border-b border-border/50 last:border-0 py-2">
+              <span className="text-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}{isSuperAdmin ? ` · ${s.ref_email}` : ''}</span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.status === 'open' ? 'bg-success/10 text-success border border-green-200' : s.status === 'held' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-muted text-muted-foreground border border-border'}`}>{s.status}</span>
+                {s.status === 'open' && (
+                  <button onClick={() => delShift(s.id)} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {mine.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
-          No matches assigned to you.
+        <div className="text-center py-10 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+          No matches assigned to you yet.
         </div>
       )}
       {live.map((m) => (

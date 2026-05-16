@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/supabaseClient';
+import { Calendar as DayCalendar } from '@/components/ui/calendar';
 
 const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
 
@@ -32,6 +34,9 @@ export default function QuizBowlTournament() {
   const [openRule, setOpenRule] = useState(null);
   const [protesting, setProtesting] = useState(null);
   const [protestText, setProtestText] = useState('');
+  const [claimSlot, setClaimSlot] = useState(null); // shift being claimed
+  const [calDay, setCalDay] = useState(null); // selected calendar day filter
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,6 +80,45 @@ export default function QuizBowlTournament() {
     });
     setProtesting(null); setProtestText(''); load();
   };
+
+  // Captain claims an open ref slot for one of their unscheduled matches.
+  const schedulableMatches = myTeam
+    ? myMatches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status))
+    : [];
+
+  const proposeHold = async (shift, match, proposedISO) => {
+    setBusy(true);
+    try {
+      const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+      await base44.entities.QuizBowlSlotHold.create({
+        shift_id: shift.id, match_id: match.id, proposing_team_id: myTeam.id,
+        proposed_time: proposedISO, status: 'holding', expires_at: expires,
+      });
+      await base44.entities.QuizBowlRefShift.update(shift.id, { status: 'held', match_id: match.id });
+      await base44.entities.QuizBowlMatch.update(match.id, {
+        status: 'negotiating', ref_shift_id: shift.id, ref_email: shift.ref_email,
+        scheduled_at: proposedISO, last_interaction_at: new Date().toISOString(),
+      });
+      const oppId = match.team_a_id === myTeam.id ? match.team_b_id : match.team_a_id;
+      const opp = teams.find((t) => t.id === oppId);
+      if (opp?.captain_email) {
+        supabase.functions.invoke('quiz-bowl-notify', {
+          body: {
+            template: 'hold_alert', to: opp.captain_email,
+            data: { proposing_team: myTeam.team_name, proposed_time: new Date(proposedISO).toUTCString() },
+          },
+        }).catch(() => {});
+      }
+      setClaimSlot(null);
+      await load();
+    } finally { setBusy(false); }
+  };
+
+  const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
+  const slotDays = new Set(shifts.map((s) => dayKey(s.start_at)));
+  const visibleShifts = calDay
+    ? shifts.filter((s) => dayKey(s.start_at) === dayKey(calDay))
+    : shifts;
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -162,18 +206,47 @@ export default function QuizBowlTournament() {
           </div>
         )}
 
-        {/* Booking calendar: open ref slots + opponent suggestions */}
+        {/* Open referee slots — split list / calendar */}
         {myTeam && (
-          <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
-            <h3 className="font-semibold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Open referee slots</h3>
-            {shifts.length === 0 && <p className="text-sm text-muted-foreground">No open slots right now. Check back soon.</p>}
-            <div className="grid sm:grid-cols-2 gap-2">
-              {shifts.map((s) => (
-                <div key={s.id} className="border border-border rounded-lg p-3 text-sm">
-                  <p className="text-foreground font-medium">{s.ref_name || 'Referee'}</p>
-                  <p className="text-xs text-muted-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}</p>
-                </div>
-              ))}
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h3 className="font-semibold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Open referee slots</h3>
+              {calDay && (
+                <button onClick={() => setCalDay(null)} className="text-xs text-primary font-semibold">Clear day filter</button>
+              )}
+            </div>
+            {!isCaptain && (
+              <p className="text-xs text-muted-foreground">Only the team captain can claim a slot and propose a time to the opponent.</p>
+            )}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Left: slot cards */}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {visibleShifts.length === 0 && <p className="text-sm text-muted-foreground">No open slots{calDay ? ' on this day' : ' right now'}.</p>}
+                {visibleShifts.map((s) => (
+                  <div key={s.id} className="border border-border rounded-lg p-3 text-sm flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-foreground font-medium">{s.ref_name || 'Referee'}</p>
+                      <p className="text-xs text-muted-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}</p>
+                    </div>
+                    {isCaptain && schedulableMatches.length > 0 && (
+                      <button onClick={() => setClaimSlot(s)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary/90 flex-shrink-0">
+                        Claim & propose
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {/* Right: calendar */}
+              <div className="border border-border rounded-xl flex justify-center">
+                <DayCalendar
+                  mode="single"
+                  selected={calDay || undefined}
+                  onSelect={(d) => setCalDay(d || null)}
+                  modifiers={{ hasSlot: (date) => slotDays.has(dayKey(date)) }}
+                  modifiersClassNames={{ hasSlot: 'relative font-bold text-primary after:content-[\'\'] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-primary' }}
+                />
+              </div>
             </div>
             {holds.filter((h) => h.status === 'change_requested' &&
               myMatches.some((m) => m.id === h.match_id)).map((h) => (
@@ -181,7 +254,7 @@ export default function QuizBowlTournament() {
                 Opponent suggested a change: {h.change_reason || '(no detail)'}
               </div>
             ))}
-            <p className="text-xs text-muted-foreground">To propose a slot, your captain coordinates via the referee — proposing places a 24h hold and pings the other team.</p>
+            <p className="text-xs text-muted-foreground">Claiming places a strict 24h hold on the slot and pings the opponent captain to Claim, Decline, or Request a Change.</p>
           </div>
         )}
 
@@ -253,6 +326,56 @@ export default function QuizBowlTournament() {
           </div>
         </div>
       )}
+
+      {claimSlot && (
+        <ClaimModal shift={claimSlot} matches={schedulableMatches} teams={teams}
+          myTeam={myTeam} busy={busy} onClose={() => setClaimSlot(null)}
+          onSubmit={proposeHold} />
+      )}
+    </div>
+  );
+}
+
+function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) {
+  const [matchId, setMatchId] = useState(matches[0]?.id || '');
+  const [time, setTime] = useState('');
+  const match = matches.find((m) => m.id === matchId);
+  const oppOf = (m) => {
+    const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
+    return teams.find((t) => t.id === id)?.team_name || 'TBD';
+  };
+  const min = new Date(shift.start_at).toISOString().slice(0, 16);
+  const max = new Date(shift.end_at).toISOString().slice(0, 16);
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+        <h3 className="font-semibold text-foreground">Claim slot & propose time</h3>
+        <p className="text-xs text-muted-foreground">
+          Referee {shift.ref_name || shift.ref_email} · window {fmt(shift.start_at)} → {fmt(shift.end_at)}
+        </p>
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Which match</label>
+          <select className="w-full border border-border rounded-lg px-3 py-2 text-sm" value={matchId}
+            onChange={(e) => setMatchId(e.target.value)}>
+            {matches.map((m) => (
+              <option key={m.id} value={m.id}>vs {oppOf(m)} · {m.stage} R{m.round}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Proposed time (within ref window)</label>
+          <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
+            min={min} max={max} value={time} onChange={(e) => setTime(e.target.value)} />
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+          <button disabled={busy || !match || !time}
+            onClick={() => onSubmit(shift, match, new Date(time).toISOString())}
+            className="flex-1 bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+            {busy ? 'Placing hold…' : 'Place 24h hold'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
