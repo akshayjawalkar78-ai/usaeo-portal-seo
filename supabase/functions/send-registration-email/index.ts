@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, event_type, event_name, team_name, invited_by } = await req.json();
+    const { name, email, event_type, event_name, team_name, invited_by, role_name } = await req.json();
 
     if (!email || !event_type) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -22,6 +22,8 @@ serve(async (req) => {
 
     const isQuizBowl = event_type === 'quiz-bowl';
     const isTeamInvite = event_type === 'team-invite';
+    const isAdminInvite = event_type === 'admin-invite';
+    const isAdminPromoted = event_type === 'admin-promoted';
     const siteUrl = Deno.env.get('SITE_URL') || 'https://usaeo.org';
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
@@ -32,13 +34,31 @@ serve(async (req) => {
       });
     }
 
-    const subject = isTeamInvite
+    const subject = isAdminInvite
+      ? `You've been invited to join the USAEO admin team`
+      : isAdminPromoted
+      ? `You now have admin access on USAEO`
+      : isTeamInvite
       ? `You've been invited to join a Quiz Bowl team on USAEO!`
       : isQuizBowl
       ? `You're registered for USAEO Quiz Bowl 2026!`
       : `You're registered for the USAEO Essay Competition 2026!`;
 
-    const eventSpecificHtml = isTeamInvite
+    const eventSpecificHtml = isAdminInvite
+      ? `
+        <p style="margin:0 0 16px;"><strong>${invited_by || 'An admin'}</strong> has invited you to join the USAEO admin team${role_name ? ` with the <strong>${role_name}</strong> role` : ''}.</p>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
+          <p style="margin:0;font-size:14px;color:#166534;font-weight:600;">How to get started</p>
+          <p style="margin:6px 0 0;font-size:14px;color:#15803d;">Create your free USAEO account using this email address. Once you sign up, your admin access will be granted automatically.</p>
+        </div>`
+      : isAdminPromoted
+      ? `
+        <p style="margin:0 0 16px;"><strong>${invited_by || 'A super admin'}</strong> has granted you admin access on USAEO${role_name ? ` with the <strong>${role_name}</strong> role` : ''}.</p>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
+          <p style="margin:0;font-size:14px;color:#166534;font-weight:600;">Access your admin dashboard</p>
+          <p style="margin:6px 0 0;font-size:14px;color:#15803d;">Sign in to your account and navigate to the Admin panel to get started.</p>
+        </div>`
+      : isTeamInvite
       ? `
         <p style="margin:0 0 16px;"><strong>${invited_by || 'A teammate'}</strong> has invited you to join their Quiz Bowl team <strong>"${team_name || 'their team'}"</strong> for the USAEO Quiz Bowl 2026.</p>
         <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:0 0 24px;">
@@ -77,21 +97,21 @@ serve(async (req) => {
           <!-- Card -->
           <tr>
             <td style="background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;padding:40px 36px;">
-              <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">Registration Confirmed</p>
-              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#111827;line-height:1.3;">You're in, ${name || 'Student'}!</h1>
-              <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">Your registration for <strong style="color:#111827;">${event_name}</strong> has been confirmed.</p>
+              <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;">${isAdminInvite || isAdminPromoted ? 'Admin Access' : 'Registration Confirmed'}</p>
+              <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#111827;line-height:1.3;">${isAdminInvite ? `You're invited, ${name || 'there'}!` : isAdminPromoted ? `Welcome to the team, ${name || 'there'}!` : `You're in, ${name || 'Student'}!`}</h1>
+              <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">${isAdminInvite || isAdminPromoted ? `You've been given admin access to the <strong style="color:#111827;">USAEO Admin Portal</strong>.` : `Your registration for <strong style="color:#111827;">${event_name}</strong> has been confirmed.`}</p>
 
               ${eventSpecificHtml}
 
-              <p style="margin:0 0 16px;font-size:14px;color:#374151;">Sign in to your USAEO account to access your dashboard:</p>
+              <p style="margin:0 0 16px;font-size:14px;color:#374151;">${isAdminInvite ? 'Create your USAEO account to get started:' : 'Sign in to your USAEO account to access your dashboard:'}</p>
               <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
                 <tr>
                   <td style="border-radius:50px;background:#f97316;">
-                    <a href="${siteUrl}/login" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:50px;">Sign In to Dashboard →</a>
+                    <a href="${isAdminInvite ? `${siteUrl}/register-account` : `${siteUrl}/login`}" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:50px;">${isAdminInvite ? 'Create Account →' : 'Sign In to Dashboard →'}</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin:0;font-size:13px;color:#9ca3af;">Don't have an account yet? <a href="${siteUrl}/register-account" style="color:#f97316;font-weight:600;text-decoration:none;">Create one here</a> — it's free.</p>
+              <p style="margin:0;font-size:13px;color:#9ca3af;">${isAdminInvite ? `Already have an account? <a href="${siteUrl}/login" style="color:#f97316;font-weight:600;text-decoration:none;">Sign in here</a>.` : `Don't have an account yet? <a href="${siteUrl}/register-account" style="color:#f97316;font-weight:600;text-decoration:none;">Create one here</a> — it's free.`}</p>
             </td>
           </tr>
           <!-- Footer -->

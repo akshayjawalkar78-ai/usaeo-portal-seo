@@ -7,6 +7,7 @@ import {
   Search, UserPlus, UserMinus, Eye,
 } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 
 // Mirrors ALL_NAV_ITEMS from Admin.jsx (excluding access-control itself)
 const PAGES = [
@@ -97,6 +98,7 @@ function PagePermissions({ permissions, onChange }) {
 }
 
 export default function AdminAccessControl() {
+  const { profile: currentProfile } = useAuth();
   const [tab, setTab] = useState('roles');
   const [roles, setRoles] = useState([]);
   const [admins, setAdmins] = useState([]);
@@ -235,6 +237,7 @@ export default function AdminAccessControl() {
         admin_role_id: addRoleId || null,
       }).eq('id', addSearchResult.id);
       if (error) throw error;
+      await sendAdminEmail(addSearchResult.email, addSearchResult.full_name, 'admin-promoted', addRoleId);
       setAddModal(false);
       setAddEmail('');
       setAddRoleId('');
@@ -242,6 +245,23 @@ export default function AdminAccessControl() {
       await loadData();
     } catch (e) {
       setError(e.message || 'Failed to add admin');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const sendInviteEmail = async () => {
+    if (!addEmail.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await sendAdminEmail(addEmail.trim(), '', 'admin-invite', addRoleId);
+      setAddModal(false);
+      setAddEmail('');
+      setAddRoleId('');
+      setAddSearchResult(null);
+    } catch (e) {
+      setError(e.message || 'Failed to send invite');
     } finally {
       setSaving(false);
     }
@@ -266,6 +286,23 @@ export default function AdminAccessControl() {
   };
 
   const roleById = (id) => roles.find(r => r.id === id);
+
+  const sendAdminEmail = async (email, name, eventType, roleId) => {
+    try {
+      const roleName = roleId ? roleById(roleId)?.name : null;
+      await supabase.functions.invoke('send-registration-email', {
+        body: {
+          email,
+          name: name || '',
+          event_type: eventType,
+          invited_by: currentProfile?.full_name || currentProfile?.email || 'An admin',
+          role_name: roleName || null,
+        },
+      });
+    } catch {
+      // email failure is non-fatal
+    }
+  };
 
   return (
     <div className="p-6 space-y-6 max-w-4xl">
@@ -566,7 +603,22 @@ export default function AdminAccessControl() {
               </div>
 
               {addSearchResult === 'not_found' && (
-                <p className="text-sm text-destructive">No user found with that email.</p>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 space-y-3">
+                  <p className="text-sm text-amber-800 font-medium">No existing account found for this email.</p>
+                  <p className="text-xs text-amber-700">Send them an invite email with a link to create their account. You can grant admin access once they sign up.</p>
+                  <div>
+                    <label className="block text-xs font-medium text-amber-800 mb-1">Assign Role (optional)</label>
+                    <select className={inputCls} value={addRoleId} onChange={e => setAddRoleId(e.target.value)}>
+                      <option value="">Full Access</option>
+                      {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    </select>
+                  </div>
+                  <button onClick={sendInviteEmail} disabled={saving}
+                    className="flex items-center gap-2 bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50">
+                    <UserPlus className="w-4 h-4" />
+                    {saving ? 'Sending…' : 'Send Invite Email'}
+                  </button>
+                </div>
               )}
 
               {addSearchResult && addSearchResult !== 'not_found' && (
@@ -600,10 +652,12 @@ export default function AdminAccessControl() {
                   className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
                   Cancel
                 </button>
-                <button onClick={addAdmin} disabled={saving || !addSearchResult || addSearchResult === 'not_found'}
-                  className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
-                  {saving ? 'Saving…' : 'Grant Admin Access'}
-                </button>
+                {addSearchResult !== 'not_found' && (
+                  <button onClick={addAdmin} disabled={saving || !addSearchResult}
+                    className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50">
+                    {saving ? 'Saving…' : 'Grant Admin Access'}
+                  </button>
+                )}
               </div>
             </div>
           </Modal>
