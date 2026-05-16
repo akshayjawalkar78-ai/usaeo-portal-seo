@@ -1,0 +1,258 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Trophy, ArrowLeft, Calendar, ChevronDown, Flag, Clock, MapPin,
+} from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
+import { base44 } from '@/api/base44Client';
+
+const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+
+const RULES = [
+  ['Format', 'Each match: 20 Kahoot regular questions + 5 Multibuzzer toss-ups. Highest score wins. Live on Google Meet under a referee.'],
+  ['Structure', 'Days 1–4: round-robin group stage. Days 5–7: single-elimination playoffs. Top team per bracket auto-qualifies; remaining playoff slots are score-based wildcards.'],
+  ['Scoring', '+1000 per correct toss-up/bonus. Incorrect toss-up = neg penalty (set by admins). Bonus questions carry no penalty. Negative cumulative scores possible.'],
+  ['Scheduling', 'Claim an open referee slot to propose a time. The other team has 24h to Claim, Decline, or Request a Change. Unscheduled matches at the round deadline are recorded as draws.'],
+  ['Lobby', 'Lobby opens 15 min before match time. Both captains (or one member each) + the referee must check in before the Google Meet link is revealed. A 5-min tech check follows before Kahoot/buzzer links are released.'],
+  ['Edge cases', '5-min grace period; a no-show team can be forfeited at 10 min. Short-handed play allowed with at least 1 player. Captains may file a question-accuracy protest within 30 min post-match before the score locks.'],
+  ['Integrity', 'No external resources, no outside assistance, no recording/sharing questions. Violations range from point deductions to disqualification per the official policy.'],
+];
+
+export default function QuizBowlTournament() {
+  const { profile } = useAuth();
+  const email = profile?.email || '';
+  const [teams, setTeams] = useState([]);
+  const [brackets, setBrackets] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [holds, setHolds] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [config, setConfig] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openRule, setOpenRule] = useState(null);
+  const [protesting, setProtesting] = useState(null);
+  const [protestText, setProtestText] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [t, b, m, sh, hd, mem, cfg] = await Promise.all([
+      base44.entities.QuizBowlTeam.list().catch(() => []),
+      base44.entities.QuizBowlBracket.list().catch(() => []),
+      base44.entities.QuizBowlMatch.list('-created_at').catch(() => []),
+      base44.entities.QuizBowlRefShift.filter({ status: 'open' }).catch(() => []),
+      base44.entities.QuizBowlSlotHold.list('-created_at').catch(() => []),
+      base44.entities.QuizBowlTeamMember.filter({ user_email: email }).catch(() => []),
+      base44.entities.QuizBowlConfig.list().catch(() => []),
+    ]);
+    setTeams(t); setBrackets(b); setMatches(m); setShifts(sh);
+    setHolds(hd); setMembers(mem); setConfig(cfg[0] || null);
+    setLoading(false);
+  }, [email]);
+  useEffect(() => { load(); }, [load]);
+
+  const myTeam = useMemo(() => {
+    const ids = new Set(members.map((x) => x.team_id));
+    return teams.find((t) => ids.has(t.id)) || null;
+  }, [members, teams]);
+  const isCaptain = members.some((x) => x.role === 'captain');
+  const teamById = (id) => teams.find((t) => t.id === id);
+  const bracketById = (id) => brackets.find((b) => b.id === id);
+
+  const myBracket = myTeam?.bracket_id ? bracketById(myTeam.bracket_id) : null;
+  const myMatches = myTeam
+    ? matches.filter((m) => m.team_a_id === myTeam.id || m.team_b_id === myTeam.id)
+    : [];
+
+  const standings = (bracketId) =>
+    teams.filter((t) => t.bracket_id === bracketId)
+      .sort((a, b) => (b.cumulative_score || 0) - (a.cumulative_score || 0));
+
+  const fileProtest = async (match) => {
+    await base44.entities.QuizBowlProtest.create({
+      match_id: match.id, team_id: myTeam.id, captain_email: email,
+      reason: protestText, status: 'open',
+      window_expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
+    });
+    setProtesting(null); setProtestText(''); load();
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" /></div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-muted/20">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <Link to="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4" /> Dashboard
+          </Link>
+          {config?.phase && (
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-orange-200 uppercase">{config.phase} phase</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Trophy className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Quiz Bowl 2026</h1>
+        </div>
+
+        {!myTeam && (
+          <div className="bg-white rounded-2xl border border-border p-6 text-sm text-muted-foreground">
+            You're not on a Quiz Bowl team yet. <Link to="/register/quiz-bowl" className="text-primary font-semibold">Register here</Link>.
+          </div>
+        )}
+
+        {/* Pinned: my bracket */}
+        {myTeam && (
+          <div className="bg-white rounded-2xl border-2 border-primary/30 p-6 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your bracket</p>
+                <h2 className="text-lg font-bold text-foreground">{myBracket?.name || 'Not assigned yet'}
+                  {myBracket && <span className="text-sm font-normal text-muted-foreground"> · {myBracket.region}</span>}</h2>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {myTeam.team_name}: <strong className="text-foreground">{myTeam.wins || 0}W {myTeam.losses || 0}L {myTeam.draws || 0}D</strong> · {myTeam.cumulative_score || 0} pts
+                {myTeam.qualified && <span className="ml-2 text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Qualified</span>}
+              </div>
+            </div>
+            {myBracket && (
+              <div className="space-y-1">
+                {standings(myBracket.id).map((t, i) => (
+                  <div key={t.id} className={`flex items-center gap-3 text-sm py-1.5 border-b border-border/40 last:border-0 ${t.id === myTeam.id ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                    <span className="w-5">{i + 1}</span>
+                    <span className="flex-1">{t.team_name}</span>
+                    <span className="text-xs">{t.wins || 0}W {t.losses || 0}L {t.draws || 0}D · {t.cumulative_score || 0} pts</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* My matches + deadlines */}
+        {myTeam && (
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Your matches</h3>
+            {myMatches.length === 0 && <p className="text-sm text-muted-foreground">No matches scheduled yet.</p>}
+            {myMatches.map((m) => {
+              const opp = teamById(m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id);
+              const canProtest = m.status === 'completed' && isCaptain && m.score_locked_at &&
+                (Date.now() - new Date(m.score_locked_at).getTime()) < 30 * 60000;
+              return (
+                <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 py-2">
+                  <div>
+                    <p className="text-foreground">vs {opp?.team_name || 'TBD'} <span className="text-xs text-muted-foreground">· {m.stage} R{m.round}</span></p>
+                    <p className="text-xs text-muted-foreground">
+                      {m.status}{m.scheduled_at ? ` · ${fmt(m.scheduled_at)}` : ''}
+                      {m.deadline ? ` · due ${fmt(m.deadline)}` : ''}
+                      {['completed', 'forfeit', 'draw'].includes(m.status) ? ` · ${m.team_a_score ?? '–'}:${m.team_b_score ?? '–'}` : ''}
+                    </p>
+                  </div>
+                  {canProtest && (
+                    <button onClick={() => setProtesting(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 flex items-center gap-1.5">
+                      <Flag className="w-3.5 h-3.5" /> Protest
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Booking calendar: open ref slots + opponent suggestions */}
+        {myTeam && (
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Open referee slots</h3>
+            {shifts.length === 0 && <p className="text-sm text-muted-foreground">No open slots right now. Check back soon.</p>}
+            <div className="grid sm:grid-cols-2 gap-2">
+              {shifts.map((s) => (
+                <div key={s.id} className="border border-border rounded-lg p-3 text-sm">
+                  <p className="text-foreground font-medium">{s.ref_name || 'Referee'}</p>
+                  <p className="text-xs text-muted-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}</p>
+                </div>
+              ))}
+            </div>
+            {holds.filter((h) => h.status === 'change_requested' &&
+              myMatches.some((m) => m.id === h.match_id)).map((h) => (
+              <div key={h.id} className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
+                Opponent suggested a change: {h.change_reason || '(no detail)'}
+              </div>
+            ))}
+            <p className="text-xs text-muted-foreground">To propose a slot, your captain coordinates via the referee — proposing places a 24h hold and pings the other team.</p>
+          </div>
+        )}
+
+        {/* Playoff tree */}
+        {brackets.some((b) => b.stage === 'playoff') && (
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Trophy className="w-4 h-4" /> Playoffs</h3>
+            {matches.filter((m) => m.stage === 'playoff').sort((a, b) => (a.round - b.round) || ((a.playoff_slot || 0) - (b.playoff_slot || 0))).map((m) => {
+              const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
+              return (
+                <div key={m.id} className="flex justify-between text-sm border-b border-border/40 last:border-0 py-1.5">
+                  <span className="text-foreground">R{m.round} · {a?.team_name || 'TBD'} vs {b?.team_name || 'TBD'}</span>
+                  <span className="text-muted-foreground">{['completed', 'forfeit'].includes(m.status) ? `${m.team_a_score ?? '–'}:${m.team_b_score ?? '–'}` : m.status}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* All brackets */}
+        <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+          <h3 className="font-semibold text-foreground flex items-center gap-2"><MapPin className="w-4 h-4" /> All brackets</h3>
+          {brackets.filter((b) => b.stage === 'group').length === 0 && <p className="text-sm text-muted-foreground">Brackets not generated yet.</p>}
+          <div className="grid sm:grid-cols-2 gap-4">
+            {brackets.filter((b) => b.stage === 'group').map((b) => (
+              <div key={b.id} className="border border-border rounded-xl p-4">
+                <p className="font-medium text-foreground text-sm mb-2">{b.name} <span className="text-xs text-muted-foreground">· {b.region}</span></p>
+                {standings(b.id).map((t, i) => (
+                  <div key={t.id} className="flex justify-between text-xs py-1 text-muted-foreground">
+                    <span>{i + 1}. {t.team_name}</span>
+                    <span>{t.cumulative_score || 0} pts</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Rules */}
+        <div className="bg-white rounded-2xl border border-border p-6">
+          <h3 className="font-semibold text-foreground mb-3">Rules</h3>
+          <div className="divide-y divide-border">
+            {RULES.map(([title, body], i) => (
+              <div key={title}>
+                <button onClick={() => setOpenRule(openRule === i ? null : i)}
+                  className="w-full flex items-center justify-between py-3 text-sm font-medium text-foreground">
+                  {title}
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openRule === i ? 'rotate-180' : ''}`} />
+                </button>
+                {openRule === i && <p className="text-sm text-muted-foreground pb-3">{body}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {protesting && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <h3 className="font-semibold text-foreground">File a question-accuracy protest</h3>
+            <p className="text-xs text-muted-foreground">Must be filed within 30 minutes of score lock. The referee reviews before the score finalizes.</p>
+            <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={4}
+              value={protestText} onChange={(e) => setProtestText(e.target.value)} placeholder="Describe the disputed question(s)…" />
+            <div className="flex gap-3">
+              <button onClick={() => setProtesting(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={!protestText.trim()} onClick={() => fileProtest(protesting)}
+                className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">Submit protest</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

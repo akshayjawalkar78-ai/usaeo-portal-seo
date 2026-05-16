@@ -570,6 +570,14 @@ export default function Dashboard() {
                       )}
                     </div>
 
+                    <Link to="/quiz-bowl" className="flex items-center justify-between gap-3 bg-primary/5 border border-orange-200 rounded-xl px-4 py-3 hover:bg-primary/10 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-semibold text-foreground">Open the Quiz Bowl tournament portal</span>
+                      </div>
+                      <span className="text-xs font-semibold text-primary">Brackets · schedule · matches →</span>
+                    </Link>
+
                     {qbError && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3">{qbError}</div>}
                     {qbSuccess && <div className="bg-success/10 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}
 
