@@ -4,6 +4,7 @@ import {
   Users, Lock, Unlock, Crown, Trash2, Search, List, MapPin, X, Trophy,
   Shuffle, CalendarClock, Map as MapIcon, Gavel, Settings as SettingsIcon,
   Check, AlertTriangle, Clock, Play, ShieldCheck, RefreshCw, Flag, Link2,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -154,7 +155,7 @@ export default function QuizBowlPortal() {
       const plan = computeBracketPlan(
         teams.map((t) => ({ id: t.id, state: t.state, is_international: t.is_international }))
       );
-      const deadline = config?.round_deadlines?.['1'] || null;
+      const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
       for (const b of plan.brackets) {
         const rr = generateRoundRobin(b.teamIds);
         const created = await base44.entities.QuizBowlBracket.create({
@@ -169,7 +170,8 @@ export default function QuizBowlPortal() {
           await base44.entities.QuizBowlMatch.create({
             bracket_id: created.id, stage: 'group', round: pair.round,
             team_a_id: pair.teamAId, team_b_id: pair.teamBId,
-            status: 'unscheduled', deadline,
+            status: 'unscheduled',
+            deadline: rounds[pair.round - 1]?.deadline || null,
           });
         }
       }
@@ -513,6 +515,49 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
   const [edit, setEdit] = useState(null); // null | {} (new) | bracket (edit)
   const [delTarget, setDelTarget] = useState(null);
   const [addTo, setAddTo] = useState(null); // bracket to add a team into
+  const [openTeam, setOpenTeam] = useState(null); // team id whose results expanded
+
+  // Recompute every team's W/L/D + cumulative score from finished matches.
+  const recompute = async () => {
+    const tally = {};
+    teams.forEach((t) => { tally[t.id] = { wins: 0, losses: 0, draws: 0, cumulative_score: 0 }; });
+    for (const m of matches) {
+      if (!['completed', 'forfeit', 'draw'].includes(m.status)) continue;
+      const a = tally[m.team_a_id], b = tally[m.team_b_id];
+      const sa = Number(m.team_a_score) || 0, sb = Number(m.team_b_score) || 0;
+      if (a) a.cumulative_score += sa;
+      if (b) b.cumulative_score += sb;
+      if (m.status === 'draw') { if (a) a.draws++; if (b) b.draws++; }
+      else {
+        const aw = m.winner_team_id === m.team_a_id;
+        if (a) { a.wins += aw ? 1 : 0; a.losses += aw ? 0 : 1; }
+        if (b) { b.wins += aw ? 0 : 1; b.losses += aw ? 1 : 0; }
+      }
+    }
+    for (const t of teams) {
+      const v = tally[t.id];
+      if (!v) continue;
+      if (v.wins !== (t.wins || 0) || v.losses !== (t.losses || 0) ||
+          v.draws !== (t.draws || 0) || v.cumulative_score !== (t.cumulative_score || 0)) {
+        await base44.entities.QuizBowlTeam.update(t.id, v);
+      }
+    }
+  };
+
+  const setResult = async (match, outcome, sa, sb) => {
+    let patch = {
+      team_a_score: sa === '' || sa == null ? null : Number(sa),
+      team_b_score: sb === '' || sb == null ? null : Number(sb),
+      score_locked_at: new Date().toISOString(),
+    };
+    if (outcome === 'draw') patch = { ...patch, status: 'draw', winner_team_id: null };
+    else if (outcome === 'a') patch = { ...patch, status: 'completed', winner_team_id: match.team_a_id };
+    else if (outcome === 'b') patch = { ...patch, status: 'completed', winner_team_id: match.team_b_id };
+    else patch = { ...patch, status: 'unscheduled', winner_team_id: null, score_locked_at: null };
+    await base44.entities.QuizBowlMatch.update(match.id, patch);
+    await recompute();
+    reload();
+  };
 
   const moveTeam = async (teamId, bracketId) => {
     await base44.entities.QuizBowlTeam.update(teamId, { bracket_id: bracketId || null });
@@ -616,22 +661,43 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload }) {
             </div>
             <div className="space-y-1.5">
               {bt.length === 0 && <p className="text-xs text-muted-foreground">No teams in this bracket.</p>}
-              {bt.map((t, i) => (
-                <div key={t.id} className="flex items-center gap-3 text-sm py-1.5 border-b border-border/50 last:border-0">
-                  <span className="w-5 text-muted-foreground">{i + 1}</span>
-                  <span className="flex-1 text-foreground">{t.team_name}</span>
-                  <span className="text-xs text-muted-foreground">{t.wins || 0}W {t.losses || 0}L {t.draws || 0}D · {t.cumulative_score || 0} pts</span>
-                  {t.qualified && <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Qualified</span>}
-                  {t.eliminated && <span className="text-xs font-semibold text-destructive bg-destructive/10 border border-red-200 px-2 py-0.5 rounded-full">Out</span>}
-                  <button onClick={() => toggleFlag(t, 'qualified')} className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5">Q</button>
-                  <button onClick={() => toggleFlag(t, 'eliminated')} className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5">E</button>
-                  <select value={t.bracket_id || ''} onChange={(e) => moveTeam(t.id, e.target.value)}
-                    className="text-xs border border-border rounded px-1.5 py-0.5 bg-white">
-                    {brackets.map((bb) => <option key={bb.id} value={bb.id}>{bb.name}</option>)}
-                    <option value="">— Unassign —</option>
-                  </select>
+              {bt.map((t, i) => {
+                const tMatches = matches.filter((m) => m.team_a_id === t.id || m.team_b_id === t.id);
+                const isOpen = openTeam === t.id;
+                return (
+                <div key={t.id} className="border-b border-border/50 last:border-0">
+                  <div className="flex items-center gap-3 text-sm py-1.5">
+                    <span className="w-5 text-muted-foreground">{i + 1}</span>
+                    <button onClick={() => setOpenTeam(isOpen ? null : t.id)}
+                      className="flex-1 text-left text-foreground hover:text-primary flex items-center gap-1">
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      {t.team_name}
+                    </button>
+                    <span className="text-xs text-muted-foreground">{t.wins || 0}W {t.losses || 0}L {t.draws || 0}D · {t.cumulative_score || 0} pts</span>
+                    {t.qualified && <span className="text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Qualified</span>}
+                    {t.eliminated && <span className="text-xs font-semibold text-destructive bg-destructive/10 border border-red-200 px-2 py-0.5 rounded-full">Out</span>}
+                    <button onClick={() => toggleFlag(t, 'qualified')} className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5">Q</button>
+                    <button onClick={() => toggleFlag(t, 'eliminated')} className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5">E</button>
+                    <select value={t.bracket_id || ''} onChange={(e) => moveTeam(t.id, e.target.value)}
+                      className="text-xs border border-border rounded px-1.5 py-0.5 bg-white">
+                      {brackets.map((bb) => <option key={bb.id} value={bb.id}>{bb.name}</option>)}
+                      <option value="">— Unassign —</option>
+                    </select>
+                  </div>
+                  {isOpen && (
+                    <div className="bg-muted/20 rounded-lg p-3 mb-2 space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Matches & results</p>
+                      {tMatches.length === 0 && <p className="text-xs text-muted-foreground">No matches. Needs ≥2 teams in the bracket — generate or add an opponent.</p>}
+                      {tMatches.map((m) => (
+                        <MatchResultRow key={m.id} match={m} team={t}
+                          opp={teams.find((x) => x.id === (m.team_a_id === t.id ? m.team_b_id : m.team_a_id))}
+                          onSet={setResult} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
@@ -698,6 +764,49 @@ function BracketForm({ bracket, onSave }) {
   );
 }
 
+function MatchResultRow({ match, team, opp, onSet }) {
+  const teamIsA = match.team_a_id === team.id;
+  const [sa, setSa] = useState(match.team_a_score ?? '');
+  const [sb, setSb] = useState(match.team_b_score ?? '');
+  const myScore = teamIsA ? sa : sb;
+  const setMyScore = (v) => (teamIsA ? setSa(v) : setSb(v));
+  const oppScore = teamIsA ? sb : sa;
+  const setOppScore = (v) => (teamIsA ? setSb(v) : setSa(v));
+
+  let badge = 'Not played';
+  if (match.status === 'draw') badge = 'Drew';
+  else if (['completed', 'forfeit'].includes(match.status)) {
+    badge = match.winner_team_id === team.id ? 'Won' : 'Lost';
+  }
+  const badgeCls = badge === 'Won' ? 'bg-success/10 text-success border-green-200'
+    : badge === 'Lost' ? 'bg-destructive/10 text-destructive border-red-200'
+    : badge === 'Drew' ? 'bg-amber-50 text-amber-700 border-amber-200'
+    : 'bg-muted text-muted-foreground border-border';
+
+  return (
+    <div className="flex items-center gap-2 text-xs flex-wrap bg-white border border-border rounded-lg p-2">
+      <span className={`font-semibold px-2 py-0.5 rounded-full border ${badgeCls}`}>{badge}</span>
+      <span className="text-foreground">vs {opp?.team_name || 'TBD'}</span>
+      <span className="text-muted-foreground">R{match.round} {match.stage}</span>
+      <span className="ml-auto flex items-center gap-1">
+        <input type="number" value={myScore} onChange={(e) => setMyScore(e.target.value)}
+          className="w-14 border border-border rounded px-1 py-0.5" placeholder="us" />
+        <span className="text-muted-foreground">:</span>
+        <input type="number" value={oppScore} onChange={(e) => setOppScore(e.target.value)}
+          className="w-14 border border-border rounded px-1 py-0.5" placeholder="them" />
+      </span>
+      <button onClick={() => onSet(match, teamIsA ? 'a' : 'b', sa, sb)}
+        className="px-2 py-0.5 rounded border border-green-200 bg-success/10 text-success font-semibold">Win</button>
+      <button onClick={() => onSet(match, 'draw', sa, sb)}
+        className="px-2 py-0.5 rounded border border-amber-200 bg-amber-50 text-amber-700 font-semibold">Draw</button>
+      <button onClick={() => onSet(match, teamIsA ? 'b' : 'a', sa, sb)}
+        className="px-2 py-0.5 rounded border border-red-200 bg-destructive/10 text-destructive font-semibold">Loss</button>
+      <button onClick={() => onSet(match, 'reset', '', '')}
+        className="px-2 py-0.5 rounded border border-border text-muted-foreground">Reset</button>
+    </div>
+  );
+}
+
 /* ─────────────────────────  SCHEDULE  ───────────────────────── */
 function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEmail, busy, reload, proposeHold, resolveHold, teamById, setError }) {
   const [shiftForm, setShiftForm] = useState({ start_at: '', end_at: '', ref_name: '' });
@@ -720,12 +829,15 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
   const openShifts = shifts.filter((s) => s.status === 'open');
   const activeHolds = holds.filter((h) => ['holding', 'change_requested'].includes(h.status));
 
-  const setRoundDeadline = async (round, iso) => {
-    const rd = { ...(config?.round_deadlines || {}), [round]: iso };
-    if (config) await base44.entities.QuizBowlConfig.update(config.id, { round_deadlines: rd });
-    else await base44.entities.QuizBowlConfig.create({ round_deadlines: rd, phase: 'pre' });
+  const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
+  const saveRounds = async (next) => {
+    if (config) await base44.entities.QuizBowlConfig.update(config.id, { round_deadlines: next });
+    else await base44.entities.QuizBowlConfig.create({ round_deadlines: next, phase: 'pre' });
     reload();
   };
+  const addRound = () => saveRounds([...rounds, { name: `Round ${rounds.length + 1}`, deadline: '' }]);
+  const updateRound = (i, patch) => saveRounds(rounds.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  const deleteRound = (i) => saveRounds(rounds.filter((_, idx) => idx !== i));
 
   return (
     <div className="space-y-4">
@@ -749,18 +861,24 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
 
       {isSuperAdmin && (
         <div className="bg-white rounded-2xl border border-border p-5">
-          <p className="font-semibold text-foreground mb-3">Round deadlines</p>
-          <div className="flex flex-wrap gap-3">
-            {[1, 2, 3, 4, 5].map((r) => (
-              <div key={r}>
-                <label className="block text-xs text-muted-foreground mb-1">Round {r}</label>
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-semibold text-foreground">Round deadlines</p>
+            <button onClick={addRound} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">+ Add round</button>
+          </div>
+          {rounds.length === 0 && <p className="text-sm text-muted-foreground">No rounds yet. Add rounds — names and deadlines show on student dashboards.</p>}
+          <div className="space-y-2">
+            {rounds.map((r, i) => (
+              <div key={i} className="flex flex-wrap gap-2 items-center">
+                <input className={inputCls + ' flex-1 min-w-32'} value={r.name || ''}
+                  placeholder="Round name" onChange={(e) => updateRound(i, { name: e.target.value })} />
                 <input type="datetime-local" className={inputCls}
-                  defaultValue={config?.round_deadlines?.[r] ? new Date(config.round_deadlines[r]).toISOString().slice(0, 16) : ''}
-                  onBlur={(e) => e.target.value && setRoundDeadline(r, new Date(e.target.value).toISOString())} />
+                  defaultValue={r.deadline ? new Date(r.deadline).toISOString().slice(0, 16) : ''}
+                  onBlur={(e) => updateRound(i, { deadline: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
+                <button onClick={() => deleteRound(i)} className="p-2 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-2">Unplayed matches at the deadline are auto-marked as draws by the scheduler.</p>
+          <p className="text-xs text-muted-foreground mt-2">Unplayed matches at the deadline are auto-marked as draws by the scheduler. Editing names/count here updates the student dashboard.</p>
         </div>
       )}
 
@@ -913,11 +1031,19 @@ function ConflictTab({ matches, holds, shifts, teamById, isSuperAdmin, reload })
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap">
-        {['green', 'yellow', 'orange', 'red'].map((c) => (
-          <span key={c} className={`text-xs font-semibold px-3 py-1 rounded-full border ${CONFLICT_STYLE[c]}`}>
-            {c}: {counts[c] || 0}
-          </span>
+      <div className="bg-white rounded-2xl border border-border p-4 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Legend</p>
+        {[
+          ['green', 'Scheduled & confirmed — match locked/played'],
+          ['yellow', 'In negotiation or an active hold (healthy)'],
+          ['orange', 'Warning — 0 overlapping ref slots, or no team activity in 24h'],
+          ['red', 'Action required — no activity in 48h; needs manual override'],
+        ].map(([c, desc]) => (
+          <div key={c} className="flex items-center gap-2 text-xs">
+            <span className={`w-2.5 h-2.5 rounded-full ${c === 'green' ? 'bg-success' : c === 'yellow' ? 'bg-amber-400' : c === 'orange' ? 'bg-orange-500' : 'bg-destructive'}`} />
+            <span className={`font-semibold px-2 py-0.5 rounded-full border ${CONFLICT_STYLE[c]}`}>{c}: {counts[c] || 0}</span>
+            <span className="text-muted-foreground">{desc}</span>
+          </div>
         ))}
       </div>
       <div className="bg-white rounded-2xl border border-border divide-y divide-border">

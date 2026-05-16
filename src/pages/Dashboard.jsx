@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [myPendingMemberships, setMyPendingMemberships] = useState([]);
   // Quiz Bowl teams
   const [myQBTeam, setMyQBTeam] = useState(null); // { team, members, myMembership }
+  const [qbConfig, setQbConfig] = useState(null);
   const [openQBTeams, setOpenQBTeams] = useState([]);
   const [qbCreateName, setQbCreateName] = useState('');
   const [qbInviteEmail, setQbInviteEmail] = useState('');
@@ -89,6 +90,7 @@ export default function Dashboard() {
 
   const loadQBData = async (email) => {
     try {
+      base44.entities.QuizBowlConfig.list().then((c) => setQbConfig(c?.[0] || null)).catch(() => {});
       const myMemberships = await base44.entities.QuizBowlTeamMember.filter({ user_email: email });
 
       // Always load pending invitations regardless of active membership
@@ -577,6 +579,20 @@ export default function Dashboard() {
                       </div>
                       <span className="text-xs font-semibold text-primary">Brackets · schedule · matches →</span>
                     </Link>
+
+                    {Array.isArray(qbConfig?.round_deadlines) && qbConfig.round_deadlines.length > 0 && (
+                      <div className="border border-border rounded-xl p-4">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Round deadlines — submit matches before</p>
+                        <div className="space-y-1">
+                          {qbConfig.round_deadlines.map((r, i) => (
+                            <div key={i} className="flex justify-between text-sm">
+                              <span className="text-foreground">{r.name || `Round ${i + 1}`}</span>
+                              <span className="text-muted-foreground">{r.deadline ? new Date(r.deadline).toLocaleString() : 'TBD'}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {qbError && <div className="bg-destructive/10 border border-red-200 text-destructive text-sm rounded-xl px-4 py-3">{qbError}</div>}
                     {qbSuccess && <div className="bg-success/10 border border-green-200 text-green-800 text-sm rounded-xl px-4 py-3">{qbSuccess}</div>}

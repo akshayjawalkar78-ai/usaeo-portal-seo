@@ -6,9 +6,17 @@ import {
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
-import { Calendar as DayCalendar } from '@/components/ui/calendar';
 
 const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+
+// Tournament window: May 17–24, 2026 (day-view agenda).
+const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
+  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  return {
+    key: dt.toISOString().slice(0, 10),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+  };
+});
 
 const RULES = [
   ['Format', 'Each match: 20 Kahoot regular questions + 5 Multibuzzer toss-ups. Highest score wins. Live on Google Meet under a referee.'],
@@ -116,9 +124,7 @@ export default function QuizBowlTournament() {
 
   const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
   const slotDays = new Set(shifts.map((s) => dayKey(s.start_at)));
-  const visibleShifts = calDay
-    ? shifts.filter((s) => dayKey(s.start_at) === dayKey(calDay))
-    : shifts;
+  const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -206,47 +212,66 @@ export default function QuizBowlTournament() {
           </div>
         )}
 
-        {/* Open referee slots — split list / calendar */}
+        {/* Round deadlines */}
+        {myTeam && rounds.length > 0 && (
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-2">
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Round deadlines</h3>
+            <p className="text-xs text-muted-foreground">Schedule & finish your match before its round deadline — unplayed matches become draws.</p>
+            {rounds.map((r, i) => (
+              <div key={i} className="flex justify-between text-sm border-b border-border/40 last:border-0 py-1.5">
+                <span className="text-foreground">{r.name || `Round ${i + 1}`}</span>
+                <span className="text-muted-foreground">{r.deadline ? fmt(r.deadline) : 'TBD'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Open referee slots — 7-day agenda (May 17–24) */}
         {myTeam && (
           <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="font-semibold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Open referee slots</h3>
-              {calDay && (
-                <button onClick={() => setCalDay(null)} className="text-xs text-primary font-semibold">Clear day filter</button>
-              )}
-            </div>
+            <h3 className="font-semibold text-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Open referee slots</h3>
             {!isCaptain && (
               <p className="text-xs text-muted-foreground">Only the team captain can claim a slot and propose a time to the opponent.</p>
             )}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Left: slot cards */}
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {visibleShifts.length === 0 && <p className="text-sm text-muted-foreground">No open slots{calDay ? ' on this day' : ' right now'}.</p>}
-                {visibleShifts.map((s) => (
+            <div className="flex flex-wrap gap-2">
+              {TOURNAMENT_DAYS.map((d) => {
+                const has = slotDays.has(d.key);
+                return (
+                  <button key={d.key} onClick={() => setCalDay(d.key)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${calDay === d.key ? 'bg-primary text-white border-primary' : has ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
+                    {d.label}
+                    {has && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${calDay === d.key ? 'bg-white' : 'bg-primary'}`} />}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Day view: slots with times */}
+            <div className="space-y-2">
+              {(() => {
+                const day = calDay || TOURNAMENT_DAYS[0].key;
+                const daySlots = shifts.filter((s) => dayKey(s.start_at) === day)
+                  .sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
+                if (daySlots.length === 0) {
+                  return <p className="text-sm text-muted-foreground">No open referee slots on {day}.</p>;
+                }
+                return daySlots.map((s) => (
                   <div key={s.id} className="border border-border rounded-lg p-3 text-sm flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-foreground font-medium">{s.ref_name || 'Referee'}</p>
-                      <p className="text-xs text-muted-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}</p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-bold text-foreground tabular-nums">
+                        {new Date(s.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        –{new Date(s.end_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{s.ref_name || 'Referee'}</span>
                     </div>
-                    {isCaptain && schedulableMatches.length > 0 && (
+                    {isCaptain && (
                       <button onClick={() => setClaimSlot(s)}
                         className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary/90 flex-shrink-0">
                         Claim & propose
                       </button>
                     )}
                   </div>
-                ))}
-              </div>
-              {/* Right: calendar */}
-              <div className="border border-border rounded-xl flex justify-center">
-                <DayCalendar
-                  mode="single"
-                  selected={calDay || undefined}
-                  onSelect={(d) => setCalDay(d || null)}
-                  modifiers={{ hasSlot: (date) => slotDays.has(dayKey(date)) }}
-                  modifiersClassNames={{ hasSlot: 'relative font-bold text-primary after:content-[\'\'] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-primary' }}
-                />
-              </div>
+                ));
+              })()}
             </div>
             {holds.filter((h) => h.status === 'change_requested' &&
               myMatches.some((m) => m.id === h.match_id)).map((h) => (
@@ -353,6 +378,11 @@ function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) 
         <p className="text-xs text-muted-foreground">
           Referee {shift.ref_name || shift.ref_email} · window {fmt(shift.start_at)} → {fmt(shift.end_at)}
         </p>
+        {matches.length === 0 ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+            No match available to schedule yet. You need an assigned opponent — your bracket must have at least 2 teams and matches generated. Ask an admin to add an opponent / generate brackets.
+          </div>
+        ) : (
         <div>
           <label className="block text-sm font-medium mb-1.5">Which match</label>
           <select className="w-full border border-border rounded-lg px-3 py-2 text-sm" value={matchId}
@@ -362,6 +392,7 @@ function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) 
             ))}
           </select>
         </div>
+        )}
         <div>
           <label className="block text-sm font-medium mb-1.5">Proposed time (within ref window)</label>
           <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
