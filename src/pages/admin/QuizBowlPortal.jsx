@@ -42,6 +42,14 @@ function Modal({ title, onClose, children, wide }) {
   );
 }
 
+const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
+  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  return {
+    key: dt.toISOString().slice(0, 10),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+  };
+});
+
 const CONFLICT_STYLE = {
   green: 'bg-success/10 text-success border-green-200',
   yellow: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -1073,14 +1081,16 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
       {/* Calendar + schedule cards */}
       {(() => {
         const dk = (d) => new Date(d).toISOString().slice(0, 10);
-        const dayLabel = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
-        // derive days from shifts AND scheduled matches so calendar populates immediately when refs post slots
-        const allDaySet = new Set([
+        // start with the fixed tournament window, union any out-of-range data days
+        const extraDaySet = new Set([
           ...shifts.map((s) => dk(s.start_at)),
           ...matches.filter((m) => m.scheduled_at).map((m) => dk(m.scheduled_at)),
         ]);
-        const allDays = [...allDaySet].sort();
-        const selectedDay = calDay || allDays[0] || null;
+        const tournamentKeys = new Set(TOURNAMENT_DAYS.map((d) => d.key));
+        const extraDays = [...extraDaySet].filter((d) => !tournamentKeys.has(d)).sort()
+          .map((key) => ({ key, label: new Date(key + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }) }));
+        const allDays = [...TOURNAMENT_DAYS, ...extraDays];
+        const selectedDay = calDay || allDays[0]?.key || null;
         const dayShifts = selectedDay ? shifts.filter((s) => dk(s.start_at) === selectedDay).sort((a, b) => new Date(a.start_at) - new Date(b.start_at)) : [];
         const dayMatches = selectedDay ? matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === selectedDay).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)) : [];
         const unscheduled = matches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status));
@@ -1092,23 +1102,21 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
               <p className="text-sm text-muted-foreground">No matches yet — generate brackets first.</p>
             )}
 
-            {/* Day chip strip — always visible once shifts or matches exist */}
-            {allDays.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {allDays.map((d) => {
-                  const mCount = matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === d).length;
-                  const sCount = shifts.filter((s) => dk(s.start_at) === d).length;
-                  const hasData = mCount > 0 || sCount > 0;
-                  return (
-                    <button key={d} onClick={() => setCalDay(d)}
-                      className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${selectedDay === d ? 'bg-foreground text-white border-foreground' : hasData ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
-                      {dayLabel(d)}
-                      {hasData && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${selectedDay === d ? 'bg-white' : 'bg-primary'}`} />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            {/* Day chip strip — always shows full tournament window */}
+            <div className="flex flex-wrap gap-2">
+              {allDays.map(({ key, label }) => {
+                const mCount = matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === key).length;
+                const sCount = shifts.filter((s) => dk(s.start_at) === key).length;
+                const hasData = mCount > 0 || sCount > 0;
+                return (
+                  <button key={key} onClick={() => setCalDay(key)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${selectedDay === key ? 'bg-foreground text-white border-foreground' : hasData ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
+                    {label}
+                    {hasData && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${selectedDay === key ? 'bg-white' : 'bg-primary'}`} />}
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Cards for selected day — left: shifts, right: matches */}
             {selectedDay && (
