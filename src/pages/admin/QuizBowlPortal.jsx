@@ -341,6 +341,25 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
   const [view, setView] = useState('list');
   const [expanded, setExpanded] = useState(null);
   const [delTarget, setDelTarget] = useState(null);
+  const [bulkConfirm, setBulkConfirm] = useState(null); // 'lockAll' | 'deleteAll'
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const lockAll = async () => {
+    setBulkBusy(true);
+    try {
+      const unlocked = teams.filter(t => !t.locked);
+      await Promise.all(unlocked.map(t => base44.entities.QuizBowlTeam.update(t.id, { locked: true })));
+      reload();
+    } finally { setBulkBusy(false); setBulkConfirm(null); }
+  };
+
+  const deleteAll = async () => {
+    setBulkBusy(true);
+    try {
+      await Promise.all(teams.map(t => base44.entities.QuizBowlTeam.delete(t.id)));
+      reload();
+    } finally { setBulkBusy(false); setBulkConfirm(null); }
+  };
 
   const allStates = [...new Set(teams.map((t) => t.state).filter(Boolean))].sort();
   const bracketName = (id) => brackets.find((b) => b.id === id)?.name;
@@ -390,6 +409,18 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
             </button>
           </div>
           <span className="text-sm text-muted-foreground">{filtered.length}/{teams.length}</span>
+          {canEdit && (
+            <>
+              <button disabled={bulkBusy} onClick={() => setBulkConfirm('lockAll')}
+                className="flex items-center gap-1.5 border border-border text-xs font-medium px-3 py-2 rounded-lg hover:bg-muted disabled:opacity-50">
+                <Lock className="w-3.5 h-3.5" /> Lock All
+              </button>
+              <button disabled={bulkBusy} onClick={() => setBulkConfirm('deleteAll')}
+                className="flex items-center gap-1.5 border border-red-200 text-destructive text-xs font-medium px-3 py-2 rounded-lg hover:bg-destructive/10 disabled:opacity-50">
+                <Trash2 className="w-3.5 h-3.5" /> Delete All
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -504,6 +535,35 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
             </div>
           </Modal>
         )}
+        {bulkConfirm === 'lockAll' && (
+          <Modal title="Lock All Teams" onClose={() => setBulkConfirm(null)}>
+            <p className="text-sm text-muted-foreground mb-4">
+              Lock all <strong>{teams.filter(t => !t.locked).length}</strong> unlocked team{teams.filter(t => !t.locked).length !== 1 ? 's' : ''}? Already-locked teams are unaffected.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkConfirm(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={bulkBusy} onClick={lockAll}
+                className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50">
+                {bulkBusy ? 'Locking…' : 'Lock All'}
+              </button>
+            </div>
+          </Modal>
+        )}
+        {bulkConfirm === 'deleteAll' && (
+          <Modal title="Delete All Teams" onClose={() => setBulkConfirm(null)}>
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>This will permanently delete all {teams.length} teams and their members.</strong>
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">This cannot be undone. Match and bracket data referencing these teams may be affected.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkConfirm(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={bulkBusy} onClick={deleteAll}
+                className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">
+                {bulkBusy ? 'Deleting…' : `Delete All ${teams.length} Teams`}
+              </button>
+            </div>
+          </Modal>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -516,13 +576,35 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
   const [edit, setEdit] = useState(null); // null | {} (new) | bracket (edit)
   const [delTarget, setDelTarget] = useState(null);
   const [addTo, setAddTo] = useState(null); // bracket to add a team into
+  const [deleteAllConfirm, setDeleteAllConfirm] = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+
+  const deleteAllBrackets = async () => {
+    setDeleteAllBusy(true);
+    try {
+      for (const b of brackets) {
+        for (const t of teams.filter((x) => x.bracket_id === b.id)) {
+          await base44.entities.QuizBowlTeam.update(t.id, { bracket_id: null });
+        }
+        for (const m of matches.filter((x) => x.bracket_id === b.id)) {
+          await base44.entities.QuizBowlMatch.delete(m.id);
+        }
+        await base44.entities.QuizBowlBracket.delete(b.id);
+      }
+      reload();
+    } finally { setDeleteAllBusy(false); setDeleteAllConfirm(false); }
+  };
   const [openTeam, setOpenTeam] = useState(null); // team id whose results expanded
 
   // Recompute every team's W/L/D + cumulative score from finished matches.
   const recompute = async () => {
+    const [freshTeams, freshMatches] = await Promise.all([
+      base44.entities.QuizBowlTeam.list().catch(() => teams),
+      base44.entities.QuizBowlMatch.list().catch(() => matches),
+    ]);
     const tally = {};
-    teams.forEach((t) => { tally[t.id] = { wins: 0, losses: 0, draws: 0, cumulative_score: 0 }; });
-    for (const m of matches) {
+    freshTeams.forEach((t) => { tally[t.id] = { wins: 0, losses: 0, draws: 0, cumulative_score: 0 }; });
+    for (const m of freshMatches) {
       if (!['completed', 'forfeit', 'draw'].includes(m.status)) continue;
       const a = tally[m.team_a_id], b = tally[m.team_b_id];
       const sa = Number(m.team_a_score) || 0, sb = Number(m.team_b_score) || 0;
@@ -535,7 +617,7 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
         if (b) { b.wins += aw ? 0 : 1; b.losses += aw ? 1 : 0; }
       }
     }
-    for (const t of teams) {
+    for (const t of freshTeams) {
       const v = tally[t.id];
       if (!v) continue;
       if (v.wins !== (t.wins || 0) || v.losses !== (t.losses || 0) ||
@@ -555,9 +637,14 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
     else if (outcome === 'a') patch = { ...patch, status: 'completed', winner_team_id: match.team_a_id };
     else if (outcome === 'b') patch = { ...patch, status: 'completed', winner_team_id: match.team_b_id };
     else patch = { ...patch, status: 'unscheduled', winner_team_id: null, score_locked_at: null };
-    await base44.entities.QuizBowlMatch.update(match.id, patch);
-    await recompute();
-    reload();
+    try {
+      await base44.entities.QuizBowlMatch.update(match.id, patch);
+      await recompute();
+    } catch (e) {
+      setError(e.message || 'Failed to save result');
+    } finally {
+      reload();
+    }
   };
 
   const moveTeam = async (teamId, bracketId) => {
@@ -642,6 +729,12 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
             className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 disabled:opacity-50">
             <Shuffle className="w-4 h-4" /> {busy ? 'Generating…' : 'Auto-generate'}
           </button>
+          {brackets.length > 0 && (
+            <button disabled={deleteAllBusy} onClick={() => setDeleteAllConfirm(true)}
+              className="flex items-center gap-2 border border-red-200 text-destructive text-sm font-medium px-4 py-2 rounded-lg hover:bg-destructive/10 disabled:opacity-50">
+              <Trash2 className="w-4 h-4" /> Delete All
+            </button>
+          )}
         </div>
       </div>
 
@@ -758,6 +851,21 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
             <div className="flex gap-3">
               <button onClick={() => setDelTarget(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
               <button onClick={() => deleteBracket(delTarget)} className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90">Delete</button>
+            </div>
+          </Modal>
+        )}
+        {deleteAllConfirm && (
+          <Modal title="Delete All Brackets" onClose={() => setDeleteAllConfirm(false)}>
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>This will permanently delete all {brackets.length} brackets</strong>, their matches, and unassign all teams.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteAllConfirm(false)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={deleteAllBusy} onClick={deleteAllBrackets}
+                className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">
+                {deleteAllBusy ? 'Deleting…' : `Delete All ${brackets.length} Brackets`}
+              </button>
             </div>
           </Modal>
         )}
