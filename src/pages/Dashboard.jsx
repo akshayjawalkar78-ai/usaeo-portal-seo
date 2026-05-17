@@ -455,7 +455,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* â”€â”€ QUIZ BOWL INVITATIONS (visible to all logged-in users) â”€â”€ */}
+              {/* ── QUIZ BOWL INVITATIONS (visible to all logged-in users) ── */}
               {authUser && myQBInvites.length > 0 && (
                 <div className="bg-white rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -473,7 +473,9 @@ export default function Dashboard() {
                           <p className="text-xs text-muted-foreground">{inv.team.school}{inv.team.state ? ` · ${inv.team.state}` : ''}</p>
                         </div>
                         <div className="flex gap-2">
-                          <button onClick={async () => {
+                          {qbConfig?.registration_closed ? (
+                            <span className="px-3 py-1.5 text-xs text-muted-foreground border border-border rounded-lg">Registration closed</span>
+                          ) : <button onClick={async () => {
                             setQbError(''); setQbSuccess('');
                             try {
                               if (myQBTeam) {
@@ -500,7 +502,7 @@ export default function Dashboard() {
                               setQbSuccess(`Joined ${inv.team.team_name}!`);
                               loadQBData(authUser.email);
                             } catch { setQbError('Something went wrong. Try again.'); }
-                          }} className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15 transition-colors">Accept</button>
+                          }} className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15 transition-colors">Accept</button>}
                           <button onClick={async () => {
                             setQbError(''); setQbSuccess('');
                             await base44.entities.QuizBowlTeamMember.delete(inv.id);

@@ -1391,6 +1391,30 @@ function MatchExecCard({ match, teamById, protests, negPenalty, reload, setError
 
 /* ─────────────────────────  SETTINGS  ───────────────────────── */
 function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
+  const [closingReg, setClosingReg] = useState(false);
+  const [closeSuccess, setCloseSuccess] = useState('');
+
+  const closeRegistration = async () => {
+    if (!window.confirm('Close registration? This will:\n• Set registration_closed = true\n• Lock ALL teams\n• Cancel ALL pending/invited memberships\n\nThis cannot be undone easily.')) return;
+    setClosingReg(true);
+    setCloseSuccess('');
+    try {
+      if (config) await base44.entities.QuizBowlConfig.update(config.id, { registration_closed: true, updated_at: new Date().toISOString() });
+      else await base44.entities.QuizBowlConfig.create({ registration_closed: true, phase: 'pre', updated_at: new Date().toISOString() });
+
+      const allTeams = await base44.entities.QuizBowlTeam.list();
+      await Promise.all(allTeams.map(t => base44.entities.QuizBowlTeam.update(t.id, { locked: true })));
+
+      const allMembers = await base44.entities.QuizBowlTeamMember.list();
+      const toCancel = allMembers.filter(m => m.status === 'invited' || m.status === 'pending');
+      await Promise.all(toCancel.map(m => base44.entities.QuizBowlTeamMember.delete(m.id)));
+
+      setCloseSuccess(`Done. ${allTeams.length} teams locked, ${toCancel.length} invitations cancelled.`);
+      reload();
+    } catch (e) { setError(e.message); }
+    finally { setClosingReg(false); }
+  };
+
   const [form, setForm] = useState({
     start_date: config?.start_date?.slice(0, 16) || '',
     group_stage_end: config?.group_stage_end?.slice(0, 16) || '',
@@ -1431,6 +1455,20 @@ function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
           Registration closed (Quiz Bowl started — invites cancelled, no new teams)
         </label>
         <button onClick={save} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Save settings</button>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-red-200 p-5 max-w-xl space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-foreground">Close Registration</p>
+            <p className="text-xs text-muted-foreground">Locks all teams, cancels all invitations, blocks new sign-ups.</p>
+          </div>
+          <button disabled={closingReg || config?.registration_closed} onClick={closeRegistration}
+            className="flex items-center gap-2 bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
+            {closingReg ? 'Closing…' : config?.registration_closed ? 'Already closed' : 'Close Registration'}
+          </button>
+        </div>
+        {closeSuccess && <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{closeSuccess}</p>}
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5 flex items-center justify-between max-w-xl">

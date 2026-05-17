@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, ArrowLeft, ArrowRight, Plus, X, Users } from 'lucide-react';
@@ -36,6 +36,13 @@ export default function QuizBowlRegister() {
   const [isSolo, setIsSolo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [registrationClosed, setRegistrationClosed] = useState(false);
+
+  useEffect(() => {
+    base44.entities.QuizBowlConfig.list().then((c) => {
+      if (c?.[0]?.registration_closed) setRegistrationClosed(true);
+    }).catch(() => {});
+  }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -137,6 +144,26 @@ export default function QuizBowlRegister() {
       setLoading(false);
     }
   };
+
+  if (registrationClosed) {
+    return (
+      <PageLayout>
+        <Seo title={PAGE_SEO['/register/quiz-bowl']?.title} description={PAGE_SEO['/register/quiz-bowl']?.description} canonical="/register/quiz-bowl" />
+        <section className="min-h-[70vh] flex items-center justify-center px-5">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-lg">
+            <div className="flex justify-center mb-5">
+              <img src="/logos/USAEOlogo.png" alt="USAEO" className="h-16 w-16" loading="lazy" decoding="async" />
+            </div>
+            <h2 className="font-sans text-3xl text-foreground mb-3">Registration Closed</h2>
+            <p className="text-muted-foreground mb-6">Quiz Bowl registration is no longer open. The tournament is underway.</p>
+            <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white rounded-full font-semibold text-sm hover:bg-foreground/90 transition-colors">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+            </Link>
+          </motion.div>
+        </section>
+      </PageLayout>
+    );
+  }
 
   if (submitted) {
     return (
