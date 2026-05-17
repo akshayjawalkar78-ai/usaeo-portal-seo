@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Trophy, Users, Monitor, Zap, Shield, BookOpen } from 'lucide-react';
+import { ArrowRight, CheckCircle, Trophy, Users, Monitor, Zap, Shield, BookOpen, XCircle } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import Seo from '@/components/Seo';
 import { PAGE_SEO } from '@/lib/seo-config';
+import { base44 } from '@/api/base44Client';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, transform: 'translate3d(0,24px,0)' },
@@ -28,6 +29,14 @@ const software = [
 ];
 
 export default function QuizBowl() {
+  const [regClosed, setRegClosed] = useState(false);
+
+  useEffect(() => {
+    base44.entities.QuizBowlConfig.list().then((c) => {
+      if (c?.[0]?.registration_closed) setRegClosed(true);
+    }).catch(() => {});
+  }, []);
+
   return (
     <PageLayout>
       <Seo title={PAGE_SEO['/competitions/quiz-bowl']?.title} description={PAGE_SEO['/competitions/quiz-bowl']?.description} canonical="/competitions/quiz-bowl" />
@@ -40,7 +49,10 @@ export default function QuizBowl() {
               <h1 className="font-sans text-5xl md:text-6xl text-foreground leading-tight">
                 Quiz Bowl
               </h1>
-              <span className="text-xs font-semibold bg-success/10 text-success border border-green-200 px-3 py-1 rounded-full">Open</span>
+              {regClosed
+                ? <span className="text-xs font-semibold bg-muted text-muted-foreground border border-border px-3 py-1 rounded-full">Registration Closed</span>
+                : <span className="text-xs font-semibold bg-success/10 text-success border border-green-200 px-3 py-1 rounded-full">Open</span>
+              }
             </div>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
               Fast-paced live team competition covering microeconomics, macroeconomics, and current events. Teams of 3–5 compete in round-robin matches leading to a single-elimination playoff.
@@ -62,7 +74,7 @@ export default function QuizBowl() {
                 { label: 'Duration', value: '60 minutes per match' },
                 { label: 'Eligibility', value: 'All registered USAEO students (grades 9–12)' },
                 { label: 'Cost', value: 'Free' },
-                { label: 'Registration', value: 'Open now' },
+                { label: 'Registration', value: regClosed ? 'Closed' : 'Open now' },
               ].map((row) => (
                 <div key={row.label} className="flex gap-8 py-4">
                   <span className="text-sm text-muted-foreground w-36 flex-shrink-0">{row.label}</span>
@@ -73,19 +85,31 @@ export default function QuizBowl() {
           </motion.div>
 
           <motion.div {...fadeUp(0.1)}>
-            <div className="bg-success/10 border border-green-200 rounded-2xl p-8 mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle className="w-5 h-5 text-success" />
-                <span className="font-semibold text-green-800">Registration is open</span>
+            {regClosed ? (
+              <div className="bg-muted border border-border rounded-2xl p-8 mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <XCircle className="w-5 h-5 text-muted-foreground" />
+                  <span className="font-semibold text-foreground">Registration is closed</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  The Quiz Bowl tournament is underway. Registration is no longer open for new teams.
+                </p>
               </div>
-              <p className="text-sm text-success leading-relaxed mb-5">
-                Register now to secure your spot in the USAEO Quiz Bowl. The event date will be announced by email.
-              </p>
-              <Link to="/register/quiz-bowl"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-                Register Now, Free <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+            ) : (
+              <div className="bg-success/10 border border-green-200 rounded-2xl p-8 mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle className="w-5 h-5 text-success" />
+                  <span className="font-semibold text-green-800">Registration is open</span>
+                </div>
+                <p className="text-sm text-success leading-relaxed mb-5">
+                  Register now to secure your spot in the USAEO Quiz Bowl. The event date will be announced by email.
+                </p>
+                <Link to="/register/quiz-bowl"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+                  Register Now, Free <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
             <div className="bg-white border border-border rounded-2xl p-8">
               <h3 className="font-semibold text-foreground mb-3">How to prepare</h3>
               <div className="space-y-3">
@@ -375,12 +399,25 @@ export default function QuizBowl() {
       {/* CTA */}
       <section className="py-20 px-5 text-center border-t border-border">
         <motion.div {...fadeUp()} className="max-w-2xl mx-auto">
-          <h2 className="font-sans text-4xl text-foreground mb-5">Ready to compete?</h2>
-          <p className="text-muted-foreground mb-8">Registration is free and takes under two minutes.</p>
-          <Link to="/register/quiz-bowl"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
-            Register for Quiz Bowl <ArrowRight className="w-4 h-4" />
-          </Link>
+          {regClosed ? (
+            <>
+              <h2 className="font-sans text-4xl text-foreground mb-5">Tournament underway</h2>
+              <p className="text-muted-foreground mb-8">Registration is closed. The Quiz Bowl is in progress — check your dashboard for match schedules.</p>
+              <Link to="/dashboard"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white rounded-full font-medium text-sm hover:bg-foreground/90 transition-colors">
+                Go to Dashboard <ArrowRight className="w-4 h-4" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="font-sans text-4xl text-foreground mb-5">Ready to compete?</h2>
+              <p className="text-muted-foreground mb-8">Registration is free and takes under two minutes.</p>
+              <Link to="/register/quiz-bowl"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary/90 transition-colors">
+                Register for Quiz Bowl <ArrowRight className="w-4 h-4" />
+              </Link>
+            </>
+          )}
         </motion.div>
       </section>
     </PageLayout>

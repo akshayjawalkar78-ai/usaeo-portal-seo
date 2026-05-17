@@ -4,7 +4,7 @@ import {
   Users, Lock, Unlock, Crown, Trash2, Search, List, MapPin, X, Trophy,
   Shuffle, CalendarClock, Map as MapIcon, Gavel, Settings as SettingsIcon,
   Check, AlertTriangle, Clock, Play, ShieldCheck, RefreshCw, Flag, Link2,
-  ChevronDown,
+  ChevronDown, Eye, Pencil, LogOut, UserPlus, AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -303,7 +303,8 @@ export default function QuizBowlPortal() {
 
       {sub === 'teams' && (
         <TeamsTab teams={teams} members={members} setMembers={setMembers}
-          brackets={brackets} reload={loadAll} canEdit={isSuperAdmin} />
+          brackets={brackets} matches={matches} shifts={shifts} holds={holds} config={config}
+          reload={loadAll} canEdit={isSuperAdmin} />
       )}
       {sub === 'brackets' && isSuperAdmin && (
         <BracketsTab teams={teams} brackets={brackets} matches={matches}
@@ -334,13 +335,33 @@ export default function QuizBowlPortal() {
 }
 
 /* ─────────────────────────  TEAMS  ───────────────────────── */
-function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
+function TeamsTab({ teams, members, setMembers, brackets, matches, shifts, holds, config, reload, canEdit }) {
   const [search, setSearch] = useState('');
   const [memberFilter, setMemberFilter] = useState('all');
   const [stateFilter, setStateFilter] = useState('all');
   const [view, setView] = useState('list');
   const [expanded, setExpanded] = useState(null);
   const [delTarget, setDelTarget] = useState(null);
+  const [bulkConfirm, setBulkConfirm] = useState(null); // 'lockAll' | 'deleteAll'
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [previewTeam, setPreviewTeam] = useState(null);
+
+  const lockAll = async () => {
+    setBulkBusy(true);
+    try {
+      const unlocked = teams.filter(t => !t.locked);
+      await Promise.all(unlocked.map(t => base44.entities.QuizBowlTeam.update(t.id, { locked: true })));
+      reload();
+    } finally { setBulkBusy(false); setBulkConfirm(null); }
+  };
+
+  const deleteAll = async () => {
+    setBulkBusy(true);
+    try {
+      await Promise.all(teams.map(t => base44.entities.QuizBowlTeam.delete(t.id)));
+      reload();
+    } finally { setBulkBusy(false); setBulkConfirm(null); }
+  };
 
   const allStates = [...new Set(teams.map((t) => t.state).filter(Boolean))].sort();
   const bracketName = (id) => brackets.find((b) => b.id === id)?.name;
@@ -390,6 +411,18 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
             </button>
           </div>
           <span className="text-sm text-muted-foreground">{filtered.length}/{teams.length}</span>
+          {canEdit && (
+            <>
+              <button disabled={bulkBusy} onClick={() => setBulkConfirm('lockAll')}
+                className="flex items-center gap-1.5 border border-border text-xs font-medium px-3 py-2 rounded-lg hover:bg-muted disabled:opacity-50">
+                <Lock className="w-3.5 h-3.5" /> Lock All
+              </button>
+              <button disabled={bulkBusy} onClick={() => setBulkConfirm('deleteAll')}
+                className="flex items-center gap-1.5 border border-red-200 text-destructive text-xs font-medium px-3 py-2 rounded-lg hover:bg-destructive/10 disabled:opacity-50">
+                <Trash2 className="w-3.5 h-3.5" /> Delete All
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -441,6 +474,10 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
                         {team.locked ? <><Unlock className="w-3 h-3" /> Unlock</> : <><Lock className="w-3 h-3" /> Lock</>}
                       </button>
                     )}
+                    <button onClick={() => setPreviewTeam(team)}
+                      className="px-3 py-1.5 border border-blue-200 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-blue-100">
+                      <Eye className="w-3.5 h-3.5" /> Preview
+                    </button>
                     <button onClick={() => setExpanded(isExp ? null : team.id)}
                       className="px-3 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-muted flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" /> {isExp ? 'Hide' : 'Members'}
@@ -493,6 +530,20 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
         </>
       )}
 
+      {previewTeam && (
+        <QBTeamPreviewModal
+          team={previewTeam}
+          members={members[previewTeam.id] || []}
+          allMatches={matches}
+          teams={teams}
+          brackets={brackets}
+          shifts={shifts}
+          holds={holds}
+          config={config}
+          onClose={() => setPreviewTeam(null)}
+        />
+      )}
+
       <AnimatePresence>
         {delTarget && (
           <Modal title="Delete Team" onClose={() => setDelTarget(null)}>
@@ -501,6 +552,35 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
               <button onClick={() => setDelTarget(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
               <button onClick={async () => { await base44.entities.QuizBowlTeam.delete(delTarget.id); setDelTarget(null); reload(); }}
                 className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90">Delete</button>
+            </div>
+          </Modal>
+        )}
+        {bulkConfirm === 'lockAll' && (
+          <Modal title="Lock All Teams" onClose={() => setBulkConfirm(null)}>
+            <p className="text-sm text-muted-foreground mb-4">
+              Lock all <strong>{teams.filter(t => !t.locked).length}</strong> unlocked team{teams.filter(t => !t.locked).length !== 1 ? 's' : ''}? Already-locked teams are unaffected.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkConfirm(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={bulkBusy} onClick={lockAll}
+                className="flex-1 bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50">
+                {bulkBusy ? 'Locking…' : 'Lock All'}
+              </button>
+            </div>
+          </Modal>
+        )}
+        {bulkConfirm === 'deleteAll' && (
+          <Modal title="Delete All Teams" onClose={() => setBulkConfirm(null)}>
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>This will permanently delete all {teams.length} teams and their members.</strong>
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">This cannot be undone. Match and bracket data referencing these teams may be affected.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkConfirm(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={bulkBusy} onClick={deleteAll}
+                className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">
+                {bulkBusy ? 'Deleting…' : `Delete All ${teams.length} Teams`}
+              </button>
             </div>
           </Modal>
         )}
@@ -516,13 +596,35 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
   const [edit, setEdit] = useState(null); // null | {} (new) | bracket (edit)
   const [delTarget, setDelTarget] = useState(null);
   const [addTo, setAddTo] = useState(null); // bracket to add a team into
+  const [deleteAllConfirm, setDeleteAllConfirm] = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+
+  const deleteAllBrackets = async () => {
+    setDeleteAllBusy(true);
+    try {
+      for (const b of brackets) {
+        for (const t of teams.filter((x) => x.bracket_id === b.id)) {
+          await base44.entities.QuizBowlTeam.update(t.id, { bracket_id: null });
+        }
+        for (const m of matches.filter((x) => x.bracket_id === b.id)) {
+          await base44.entities.QuizBowlMatch.delete(m.id);
+        }
+        await base44.entities.QuizBowlBracket.delete(b.id);
+      }
+      reload();
+    } finally { setDeleteAllBusy(false); setDeleteAllConfirm(false); }
+  };
   const [openTeam, setOpenTeam] = useState(null); // team id whose results expanded
 
   // Recompute every team's W/L/D + cumulative score from finished matches.
   const recompute = async () => {
+    const [freshTeams, freshMatches] = await Promise.all([
+      base44.entities.QuizBowlTeam.list().catch(() => teams),
+      base44.entities.QuizBowlMatch.list().catch(() => matches),
+    ]);
     const tally = {};
-    teams.forEach((t) => { tally[t.id] = { wins: 0, losses: 0, draws: 0, cumulative_score: 0 }; });
-    for (const m of matches) {
+    freshTeams.forEach((t) => { tally[t.id] = { wins: 0, losses: 0, draws: 0, cumulative_score: 0 }; });
+    for (const m of freshMatches) {
       if (!['completed', 'forfeit', 'draw'].includes(m.status)) continue;
       const a = tally[m.team_a_id], b = tally[m.team_b_id];
       const sa = Number(m.team_a_score) || 0, sb = Number(m.team_b_score) || 0;
@@ -535,7 +637,7 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
         if (b) { b.wins += aw ? 0 : 1; b.losses += aw ? 1 : 0; }
       }
     }
-    for (const t of teams) {
+    for (const t of freshTeams) {
       const v = tally[t.id];
       if (!v) continue;
       if (v.wins !== (t.wins || 0) || v.losses !== (t.losses || 0) ||
@@ -555,9 +657,14 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
     else if (outcome === 'a') patch = { ...patch, status: 'completed', winner_team_id: match.team_a_id };
     else if (outcome === 'b') patch = { ...patch, status: 'completed', winner_team_id: match.team_b_id };
     else patch = { ...patch, status: 'unscheduled', winner_team_id: null, score_locked_at: null };
-    await base44.entities.QuizBowlMatch.update(match.id, patch);
-    await recompute();
-    reload();
+    try {
+      await base44.entities.QuizBowlMatch.update(match.id, patch);
+      await recompute();
+    } catch (e) {
+      setError(e.message || 'Failed to save result');
+    } finally {
+      reload();
+    }
   };
 
   const moveTeam = async (teamId, bracketId) => {
@@ -642,6 +749,12 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
             className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 disabled:opacity-50">
             <Shuffle className="w-4 h-4" /> {busy ? 'Generating…' : 'Auto-generate'}
           </button>
+          {brackets.length > 0 && (
+            <button disabled={deleteAllBusy} onClick={() => setDeleteAllConfirm(true)}
+              className="flex items-center gap-2 border border-red-200 text-destructive text-sm font-medium px-4 py-2 rounded-lg hover:bg-destructive/10 disabled:opacity-50">
+              <Trash2 className="w-4 h-4" /> Delete All
+            </button>
+          )}
         </div>
       </div>
 
@@ -758,6 +871,21 @@ function BracketsTab({ teams, brackets, matches, busy, onGenerate, reload, confi
             <div className="flex gap-3">
               <button onClick={() => setDelTarget(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
               <button onClick={() => deleteBracket(delTarget)} className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90">Delete</button>
+            </div>
+          </Modal>
+        )}
+        {deleteAllConfirm && (
+          <Modal title="Delete All Brackets" onClose={() => setDeleteAllConfirm(false)}>
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>This will permanently delete all {brackets.length} brackets</strong>, their matches, and unassign all teams.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteAllConfirm(false)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={deleteAllBusy} onClick={deleteAllBrackets}
+                className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">
+                {deleteAllBusy ? 'Deleting…' : `Delete All ${brackets.length} Brackets`}
+              </button>
             </div>
           </Modal>
         )}
@@ -1391,6 +1519,30 @@ function MatchExecCard({ match, teamById, protests, negPenalty, reload, setError
 
 /* ─────────────────────────  SETTINGS  ───────────────────────── */
 function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
+  const [closingReg, setClosingReg] = useState(false);
+  const [closeSuccess, setCloseSuccess] = useState('');
+
+  const closeRegistration = async () => {
+    if (!window.confirm('Close registration? This will:\n• Set registration_closed = true\n• Lock ALL teams\n• Cancel ALL pending/invited memberships\n\nThis cannot be undone easily.')) return;
+    setClosingReg(true);
+    setCloseSuccess('');
+    try {
+      if (config) await base44.entities.QuizBowlConfig.update(config.id, { registration_closed: true, updated_at: new Date().toISOString() });
+      else await base44.entities.QuizBowlConfig.create({ registration_closed: true, phase: 'pre', updated_at: new Date().toISOString() });
+
+      const allTeams = await base44.entities.QuizBowlTeam.list();
+      await Promise.all(allTeams.map(t => base44.entities.QuizBowlTeam.update(t.id, { locked: true })));
+
+      const allMembers = await base44.entities.QuizBowlTeamMember.list();
+      const toCancel = allMembers.filter(m => m.status === 'invited' || m.status === 'pending');
+      await Promise.all(toCancel.map(m => base44.entities.QuizBowlTeamMember.delete(m.id)));
+
+      setCloseSuccess(`Done. ${allTeams.length} teams locked, ${toCancel.length} invitations cancelled.`);
+      reload();
+    } catch (e) { setError(e.message); }
+    finally { setClosingReg(false); }
+  };
+
   const [form, setForm] = useState({
     start_date: config?.start_date?.slice(0, 16) || '',
     group_stage_end: config?.group_stage_end?.slice(0, 16) || '',
@@ -1433,6 +1585,20 @@ function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
         <button onClick={save} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Save settings</button>
       </div>
 
+      <div className="bg-white rounded-2xl border border-red-200 p-5 max-w-xl space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-foreground">Close Registration</p>
+            <p className="text-xs text-muted-foreground">Locks all teams, cancels all invitations, blocks new sign-ups.</p>
+          </div>
+          <button disabled={closingReg || config?.registration_closed} onClick={closeRegistration}
+            className="flex items-center gap-2 bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50">
+            {closingReg ? 'Closing…' : config?.registration_closed ? 'Already closed' : 'Close Registration'}
+          </button>
+        </div>
+        {closeSuccess && <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{closeSuccess}</p>}
+      </div>
+
       <div className="bg-white rounded-2xl border border-border p-5 flex items-center justify-between max-w-xl">
         <div>
           <p className="font-semibold text-foreground">Scheduler</p>
@@ -1442,6 +1608,556 @@ function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
           className="flex items-center gap-2 border border-border text-sm font-medium px-4 py-2 rounded-lg hover:bg-muted disabled:opacity-50">
           <RefreshCw className={`w-4 h-4 ${busy ? 'animate-spin' : ''}`} /> Run scheduler now
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────  QB TEAM PREVIEW MODAL  ───────────────────────── */
+function QBTeamPreviewModal({ team, members, allMatches, teams, brackets, shifts, holds, config, onClose }) {
+  const [simLog, setSimLog] = useState(null);
+  const [tab, setTab] = useState('dashboard'); // 'dashboard' | 'tournament'
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+
+  const simulate = (label) => {
+    setSimLog(label);
+    setTimeout(() => setSimLog(null), 5000);
+  };
+
+  const [calDay, setCalDay] = useState(null);
+  const [claimSlot, setClaimSlot] = useState(null);
+  const [protesting, setProtesting] = useState(null);
+  const [protestText, setProtestText] = useState('');
+  const [openRule, setOpenRule] = useState(null);
+
+  const teamMatches = allMatches.filter(m => m.team_a_id === team.id || m.team_b_id === team.id);
+  const schedulableMatches = teamMatches.filter(m => ['unscheduled', 'negotiating'].includes(m.status));
+  const activeMembers = members.filter(m => m.status === 'active');
+  const pendingRequests = members.filter(m => m.status === 'pending');
+  const invitedMembers = members.filter(m => m.status === 'invited');
+  const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
+  const fmtDate = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+  const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
+  const slotDays = new Set(shifts.map(s => dayKey(s.start_at)));
+  const teamById = (id) => teams.find(t => t.id === id);
+  const myBracket = team.bracket_id ? brackets.find(b => b.id === team.bracket_id) : null;
+  const standings = (bracketId) =>
+    teams.filter(t => t.bracket_id === bracketId)
+      .sort((a, b) => (b.cumulative_score || 0) - (a.cumulative_score || 0));
+  const TOURNAMENT_DAYS_PREVIEW = Array.from({ length: 8 }, (_, i) => {
+    const dt = new Date(Date.UTC(2026, 4, 17 + i));
+    return { key: dt.toISOString().slice(0, 10), label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }) };
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-neutral-100">
+      {/* Top banner */}
+      <div className="bg-blue-600 text-white px-5 py-3 flex-shrink-0">
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-3">
+            <Eye className="w-5 h-5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-sm">Admin Preview — {team.team_name}</p>
+              <p className="text-xs text-blue-200">Read-only simulation. No changes are made to real data.</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium">
+            <X className="w-4 h-4" /> Close Preview
+          </button>
+        </div>
+        <div className="flex gap-1">
+          {[['dashboard', 'Team Dashboard'], ['tournament', 'Tournament Portal']].map(([t, label]) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-t-lg transition-colors ${tab === t ? 'bg-white text-blue-700' : 'text-blue-200 hover:text-white hover:bg-blue-700'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Simulation warning bar */}
+      {simLog && (
+        <div className="flex items-start gap-3 bg-amber-50 border-b-2 border-amber-300 px-5 py-3 flex-shrink-0">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Simulated — no data changed</p>
+            <p className="text-xs text-amber-700 mt-0.5">{simLog}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── TOURNAMENT PORTAL TAB ── */}
+      {tab === 'tournament' && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="min-h-screen bg-muted/20">
+            <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+              <div className="flex items-center justify-between">
+                <button onClick={() => setTab('dashboard')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                  <ChevronDown className="w-4 h-4 rotate-90" /> Team Dashboard
+                </button>
+                {config?.phase && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-orange-200 uppercase">{config.phase} phase</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-6 h-6 text-primary" />
+                <h1 className="text-2xl font-bold text-foreground">Quiz Bowl 2026</h1>
+              </div>
+
+              {/* Pinned: my bracket */}
+              <div className="bg-white rounded-2xl border-2 border-primary/30 p-6 space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your bracket</p>
+                    <h2 className="text-lg font-bold text-foreground">
+                      {myBracket?.name || 'Not assigned yet'}
+                      {myBracket && <span className="text-sm font-normal text-muted-foreground"> · {myBracket.region}</span>}
+                    </h2>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {team.team_name}: <strong className="text-foreground">{team.wins || 0}W {team.losses || 0}L {team.draws || 0}D</strong> · {team.cumulative_score || 0} pts
+                    {team.qualified && <span className="ml-2 text-xs font-semibold text-success bg-success/10 border border-green-200 px-2 py-0.5 rounded-full">Qualified</span>}
+                  </div>
+                </div>
+                {myBracket && (
+                  <div className="space-y-1">
+                    {standings(myBracket.id).map((t, i) => (
+                      <div key={t.id} className={`flex items-center gap-3 text-sm py-1.5 border-b border-border/40 last:border-0 ${t.id === team.id ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                        <span className="w-5">{i + 1}</span>
+                        <span className="flex-1">{t.team_name}</span>
+                        <span className="text-xs">{t.wins || 0}W {t.losses || 0}L {t.draws || 0}D · {t.cumulative_score || 0} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* My matches */}
+              <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+                <h3 className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Your matches</h3>
+                {teamMatches.length === 0 && <p className="text-sm text-muted-foreground">No matches scheduled yet.</p>}
+                {teamMatches.map(m => {
+                  const opp = teamById(m.team_a_id === team.id ? m.team_b_id : m.team_a_id);
+                  return (
+                    <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 py-2">
+                      <div>
+                        <p className="text-foreground">vs {opp?.team_name || 'TBD'} <span className="text-xs text-muted-foreground">· {m.stage} R{m.round}</span></p>
+                        <p className="text-xs text-muted-foreground">
+                          {m.status}{m.scheduled_at ? ` · ${fmtDate(m.scheduled_at)}` : ''}
+                          {m.deadline ? ` · due ${fmtDate(m.deadline)}` : ''}
+                          {['completed', 'forfeit', 'draw'].includes(m.status) ? ` · ${m.team_a_score ?? '–'}:${m.team_b_score ?? '–'}` : ''}
+                        </p>
+                      </div>
+                      {m.status === 'completed' && (
+                        <button onClick={() => simulate(`Would file protest for match vs ${opp?.team_name} — INSERT quiz_bowl_protests with 30-min window.`)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 flex items-center gap-1.5">
+                          <Flag className="w-3.5 h-3.5" /> Protest
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Round deadlines */}
+              {rounds.length > 0 && (
+                <div className="bg-white rounded-2xl border border-border p-6 space-y-2">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Round deadlines</h3>
+                  <p className="text-xs text-muted-foreground">Schedule & finish your match before its round deadline — unplayed matches become draws.</p>
+                  {rounds.map((r, i) => (
+                    <div key={i} className="flex justify-between text-sm border-b border-border/40 last:border-0 py-1.5">
+                      <span className="text-foreground">{r.name || `Round ${i + 1}`}</span>
+                      <span className="text-muted-foreground">{r.deadline ? fmtDate(r.deadline) : 'TBD'}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Open referee slots */}
+              <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+                <h3 className="font-semibold text-foreground flex items-center gap-2"><CalendarClock className="w-4 h-4" /> Open referee slots</h3>
+                <div className="flex flex-wrap gap-2">
+                  {TOURNAMENT_DAYS_PREVIEW.map(d => {
+                    const has = slotDays.has(d.key);
+                    return (
+                      <button key={d.key} onClick={() => setCalDay(d.key)}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${calDay === d.key ? 'bg-primary text-white border-primary' : has ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
+                        {d.label}
+                        {has && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${calDay === d.key ? 'bg-white' : 'bg-primary'}`} />}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="space-y-2">
+                  {(() => {
+                    const day = calDay || TOURNAMENT_DAYS_PREVIEW[0].key;
+                    const daySlots = shifts.filter(s => dayKey(s.start_at) === day)
+                      .sort((a, b) => new Date(a.start_at) - new Date(b.start_at));
+                    if (daySlots.length === 0) return <p className="text-sm text-muted-foreground">No open referee slots on {day}.</p>;
+                    return daySlots.map(s => (
+                      <div key={s.id} className="border border-border rounded-lg p-3 text-sm flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-base font-bold text-foreground tabular-nums">
+                            {new Date(s.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            –{new Date(s.end_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{s.ref_name || 'Referee'}</span>
+                        </div>
+                        <button onClick={() => setClaimSlot(s)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary/90 flex-shrink-0">
+                          Claim & propose
+                        </button>
+                      </div>
+                    ));
+                  })()}
+                </div>
+                {holds.filter(h => h.status === 'change_requested' && teamMatches.some(m => m.id === h.match_id)).map(h => (
+                  <div key={h.id} className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
+                    Opponent suggested a change: {h.change_reason || '(no detail)'}
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">Claiming places a strict 24h hold on the slot and pings the opponent captain to Claim, Decline, or Request a Change.</p>
+              </div>
+
+              {/* Playoff tree */}
+              {brackets.some(b => b.stage === 'playoff') && (
+                <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2"><Trophy className="w-4 h-4" /> Playoffs</h3>
+                  {allMatches.filter(m => m.stage === 'playoff').sort((a, b) => (a.round - b.round) || ((a.playoff_slot || 0) - (b.playoff_slot || 0))).map(m => {
+                    const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
+                    return (
+                      <div key={m.id} className="flex justify-between text-sm border-b border-border/40 last:border-0 py-1.5">
+                        <span className="text-foreground">R{m.round} · {a?.team_name || 'TBD'} vs {b?.team_name || 'TBD'}</span>
+                        <span className="text-muted-foreground">{['completed', 'forfeit'].includes(m.status) ? `${m.team_a_score ?? '–'}:${m.team_b_score ?? '–'}` : m.status}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* All brackets */}
+              <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+                <h3 className="font-semibold text-foreground flex items-center gap-2"><Flag className="w-4 h-4" /> All brackets</h3>
+                {brackets.filter(b => b.stage === 'group').length === 0 && <p className="text-sm text-muted-foreground">Brackets not generated yet.</p>}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {brackets.filter(b => b.stage === 'group').map(b => (
+                    <div key={b.id} className="border border-border rounded-xl p-4">
+                      <p className="font-medium text-foreground text-sm mb-2">{b.name} <span className="text-xs text-muted-foreground">· {b.region}</span></p>
+                      {standings(b.id).map((t, i) => (
+                        <div key={t.id} className={`flex justify-between text-xs py-1 ${t.id === team.id ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                          <span>{i + 1}. {t.team_name}</span>
+                          <span>{t.cumulative_score || 0} pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rules accordion */}
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <h3 className="font-semibold text-foreground mb-3">Rules</h3>
+                <div className="divide-y divide-border">
+                  {[
+                    ['Format', 'Each match: 20 Kahoot regular questions + 5 Multibuzzer toss-ups. Highest score wins. Live on Google Meet under a referee.'],
+                    ['Structure', 'Days 1–4: round-robin group stage. Days 5–7: single-elimination playoffs.'],
+                    ['Scoring', '+1000 per correct toss-up/bonus. Incorrect toss-up = neg penalty. Bonus questions carry no penalty.'],
+                    ['Scheduling', 'Claim an open referee slot to propose a time. The other team has 24h to Claim, Decline, or Request a Change.'],
+                    ['Lobby', 'Lobby opens 15 min before match time. Both captains + referee must check in before Google Meet link is revealed.'],
+                  ].map(([title, body], i) => (
+                    <div key={title}>
+                      <button onClick={() => setOpenRule(openRule === i ? null : i)}
+                        className="w-full flex items-center justify-between py-3 text-sm font-medium text-foreground">
+                        {title}<ChevronDown className={`w-4 h-4 transition-transform ${openRule === i ? 'rotate-180' : ''}`} />
+                      </button>
+                      {openRule === i && <p className="text-sm text-muted-foreground pb-3">{body}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Protest modal (simulated) */}
+          {protesting && (
+            <div className="fixed inset-0 bg-black/40 z-60 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+                <h3 className="font-semibold text-foreground">File a question-accuracy protest</h3>
+                <p className="text-xs text-muted-foreground">Must be filed within 30 minutes of score lock.</p>
+                <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={4}
+                  value={protestText} onChange={e => setProtestText(e.target.value)} placeholder="Describe the disputed question(s)…" />
+                <div className="flex gap-3">
+                  <button onClick={() => setProtesting(null)} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+                  <button disabled={!protestText.trim()} onClick={() => {
+                    simulate(`Would submit protest for match — INSERT quiz_bowl_protests with reason: "${protestText.slice(0, 80)}…"`);
+                    setProtesting(null); setProtestText('');
+                  }} className="flex-1 bg-destructive text-white rounded-lg py-2 text-sm font-medium hover:bg-destructive/90 disabled:opacity-50">Submit protest</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Claim slot modal (simulated) */}
+          {claimSlot && (
+            <PreviewClaimModal shift={claimSlot} matches={schedulableMatches} teams={teams}
+              myTeam={team} onClose={() => setClaimSlot(null)}
+              onSubmit={(shift, match, iso) => {
+                simulate(`Would claim slot ${fmtDate(shift.start_at)}–${fmtDate(shift.end_at)} for match vs ${teamById(match.team_a_id === team.id ? match.team_b_id : match.team_a_id)?.team_name || 'TBD'} at ${fmtDate(iso)} — creates QuizBowlSlotHold + sets match status to 'negotiating'.`);
+                setClaimSlot(null);
+              }} />
+          )}
+        </div>
+      )}
+
+      {/* ── DASHBOARD TAB ── */}
+      {tab === 'dashboard' && (
+      <div className="flex-1 overflow-y-auto p-5">
+        <div className="max-w-2xl mx-auto space-y-5">
+
+          {/* Team card */}
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-foreground">Quiz Bowl Team</h3>
+              {team.locked && (
+                <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Locked
+                </span>
+              )}
+            </div>
+
+            {/* Tournament portal link */}
+            <div className="flex items-center justify-between gap-3 bg-primary/5 border border-orange-200 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">Open the Quiz Bowl tournament portal</span>
+              </div>
+              <span className="text-xs font-semibold text-primary">Brackets · schedule · matches →</span>
+            </div>
+
+            {/* Round deadlines */}
+            {rounds.length > 0 && (
+              <div className="border border-border rounded-xl p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Round deadlines</p>
+                <div className="space-y-1">
+                  {rounds.map((r, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-foreground">{r.name || `Round ${i + 1}`}</span>
+                      <span className="text-muted-foreground">{r.deadline ? new Date(r.deadline).toLocaleString() : 'TBD'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Team header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-foreground">{team.team_name}</p>
+                  {!team.locked && (
+                    <button onClick={() => simulate(`Would rename team "${team.team_name}" — opens inline edit, saves updated team_name to quiz_bowl_teams.`)}
+                      className="p-1 hover:bg-muted rounded text-muted-foreground">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {team.school} · {activeMembers.length}/5 members
+                  {activeMembers.length < 3 && <span className="text-orange-600"> · Need {3 - activeMembers.length} more</span>}
+                </p>
+              </div>
+              {!team.locked && (
+                <button onClick={() => simulate(`Would delete team "${team.team_name}" and all members — prompts confirm first, then cascades via quiz_bowl_teams ON DELETE.`)}
+                  className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Members list */}
+            <div className="space-y-2">
+              {members.map(m => (
+                <div key={m.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
+                      {(m.user_name || m.user_email)?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                      <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
+                    {m.status === 'invited' && <span className="text-xs text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full">Invited</span>}
+                    {m.status === 'pending' && <span className="text-xs text-orange-700 bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Requested</span>}
+                    {!team.locked && m.role !== 'captain' && (
+                      <button onClick={() => simulate(`Would remove ${m.user_name || m.user_email} (status: ${m.status}) — deletes quiz_bowl_team_members row id=${m.id}.`)}
+                        className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pending join requests */}
+            {pendingRequests.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Join Requests ({pendingRequests.length})</p>
+                <div className="space-y-2">
+                  {pendingRequests.map(req => (
+                    <div key={req.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-2.5">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{req.user_name || req.user_email}</p>
+                        <p className="text-xs text-muted-foreground">{req.user_email}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => simulate(`Would approve ${req.user_name || req.user_email} — UPDATE quiz_bowl_team_members SET status='active' WHERE id='${req.id}'.`)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15">Approve</button>
+                        <button onClick={() => simulate(`Would deny ${req.user_name || req.user_email} — DELETE quiz_bowl_team_members WHERE id='${req.id}'.`)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-destructive/10 text-destructive border border-red-200 rounded-lg hover:bg-destructive/15">Deny</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Invite teammate */}
+            {!team.locked && activeMembers.length < 5 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Invite a Teammate</p>
+                <div className="flex gap-2">
+                  <input value={inviteName} onChange={e => setInviteName(e.target.value)} placeholder="Name (optional)"
+                    className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="Email"
+                    className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <button onClick={() => {
+                    if (!inviteEmail.trim()) return;
+                    simulate(`Would invite ${inviteName.trim() || inviteEmail.trim()} — INSERT quiz_bowl_team_members status='invited' + call send-registration-email edge fn.`);
+                    setInviteEmail(''); setInviteName('');
+                  }} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 whitespace-nowrap">
+                    <UserPlus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Leave team */}
+            {!team.locked && (
+              <button onClick={() => simulate(`Would leave team "${team.team_name}" — DELETE quiz_bowl_team_members WHERE user_email=captain. Prompts confirm first.`)}
+                className="inline-flex items-center gap-1.5 text-sm text-destructive hover:underline">
+                <LogOut className="w-3.5 h-3.5" /> Leave team
+              </button>
+            )}
+          </div>
+
+          {/* Matches */}
+          {teamMatches.length > 0 && (
+            <div className="bg-white rounded-2xl border border-border p-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Matches</p>
+              <div className="space-y-2">
+                {teamMatches.map(m => {
+                  const isA = m.team_a_id === team.id;
+                  const opp = teams.find(t => t.id === (isA ? m.team_b_id : m.team_a_id));
+                  const myScore = isA ? m.team_a_score : m.team_b_score;
+                  const oppScore = isA ? m.team_b_score : m.team_a_score;
+                  let result = 'Unscheduled'; let cls = 'bg-muted text-muted-foreground border-border';
+                  if (m.status === 'draw') { result = 'Drew'; cls = 'bg-amber-50 text-amber-700 border-amber-200'; }
+                  else if (['completed', 'forfeit'].includes(m.status)) {
+                    const won = m.winner_team_id === team.id;
+                    result = won ? 'Won' : 'Lost';
+                    cls = won ? 'bg-success/10 text-success border-green-200' : 'bg-destructive/10 text-destructive border-red-200';
+                  } else if (m.status === 'locked') { result = 'Scheduled'; cls = 'bg-blue-50 text-blue-700 border-blue-200'; }
+                  return (
+                    <div key={m.id} className="flex items-center gap-3 text-sm border border-border rounded-xl px-4 py-3 flex-wrap">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cls}`}>{result}</span>
+                      <span className="text-foreground flex-1">vs {opp?.team_name || 'TBD'}</span>
+                      <span className="text-xs text-muted-foreground">R{m.round} · {m.stage}</span>
+                      {myScore != null && <span className="text-xs font-semibold">{myScore} – {oppScore ?? '?'}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Outgoing invitations */}
+          {invitedMembers.length > 0 && (
+            <div className="bg-white rounded-2xl border border-border p-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Outgoing Invitations</p>
+              <div className="space-y-2">
+                {invitedMembers.map(m => (
+                  <div key={m.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-2.5">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                      <p className="text-xs text-muted-foreground">{m.user_email} · Awaiting response</p>
+                    </div>
+                    <button onClick={() => simulate(`Would cancel invitation to ${m.user_name || m.user_email} — DELETE quiz_bowl_team_members WHERE id='${m.id}'.`)}
+                      className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+      )}
+    </div>
+  );
+}
+
+function PreviewClaimModal({ shift, matches, teams, myTeam, onClose, onSubmit }) {
+  const [matchId, setMatchId] = useState(matches[0]?.id || '');
+  const [time, setTime] = useState('');
+  const match = matches.find(m => m.id === matchId);
+  const oppOf = (m) => {
+    const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
+    return teams.find(t => t.id === id)?.team_name || 'TBD';
+  };
+  const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+  const min = new Date(shift.start_at).toISOString().slice(0, 16);
+  const max = new Date(shift.end_at).toISOString().slice(0, 16);
+  return (
+    <div className="fixed inset-0 bg-black/40 z-60 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+        <h3 className="font-semibold text-foreground">Claim slot & propose time</h3>
+        <p className="text-xs text-muted-foreground">
+          Referee {shift.ref_name || shift.ref_email} · window {fmt(shift.start_at)} → {fmt(shift.end_at)}
+        </p>
+        {matches.length === 0 ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+            No match available to schedule yet.
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Which match</label>
+            <select className="w-full border border-border rounded-lg px-3 py-2 text-sm" value={matchId}
+              onChange={e => setMatchId(e.target.value)}>
+              {matches.map(m => <option key={m.id} value={m.id}>vs {oppOf(m)} · {m.stage} R{m.round}</option>)}
+            </select>
+          </div>
+        )}
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Proposed time (within ref window)</label>
+          <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
+            min={min} max={max} value={time} onChange={e => setTime(e.target.value)} />
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+          <button disabled={!match || !time}
+            onClick={() => onSubmit(shift, match, new Date(time).toISOString())}
+            className="flex-1 bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+            Place 24h hold
+          </button>
+        </div>
       </div>
     </div>
   );
