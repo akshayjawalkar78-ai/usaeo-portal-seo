@@ -4,7 +4,7 @@ import {
   Users, Lock, Unlock, Crown, Trash2, Search, List, MapPin, X, Trophy,
   Shuffle, CalendarClock, Map as MapIcon, Gavel, Settings as SettingsIcon,
   Check, AlertTriangle, Clock, Play, ShieldCheck, RefreshCw, Flag, Link2,
-  ChevronDown,
+  ChevronDown, Eye, Pencil, LogOut, UserPlus, AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -303,7 +303,8 @@ export default function QuizBowlPortal() {
 
       {sub === 'teams' && (
         <TeamsTab teams={teams} members={members} setMembers={setMembers}
-          brackets={brackets} reload={loadAll} canEdit={isSuperAdmin} />
+          brackets={brackets} matches={matches} config={config}
+          reload={loadAll} canEdit={isSuperAdmin} />
       )}
       {sub === 'brackets' && isSuperAdmin && (
         <BracketsTab teams={teams} brackets={brackets} matches={matches}
@@ -334,7 +335,7 @@ export default function QuizBowlPortal() {
 }
 
 /* ─────────────────────────  TEAMS  ───────────────────────── */
-function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
+function TeamsTab({ teams, members, setMembers, brackets, matches, config, reload, canEdit }) {
   const [search, setSearch] = useState('');
   const [memberFilter, setMemberFilter] = useState('all');
   const [stateFilter, setStateFilter] = useState('all');
@@ -343,6 +344,7 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
   const [delTarget, setDelTarget] = useState(null);
   const [bulkConfirm, setBulkConfirm] = useState(null); // 'lockAll' | 'deleteAll'
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [previewTeam, setPreviewTeam] = useState(null);
 
   const lockAll = async () => {
     setBulkBusy(true);
@@ -472,6 +474,10 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
                         {team.locked ? <><Unlock className="w-3 h-3" /> Unlock</> : <><Lock className="w-3 h-3" /> Lock</>}
                       </button>
                     )}
+                    <button onClick={() => setPreviewTeam(team)}
+                      className="px-3 py-1.5 border border-blue-200 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-blue-100">
+                      <Eye className="w-3.5 h-3.5" /> Preview
+                    </button>
                     <button onClick={() => setExpanded(isExp ? null : team.id)}
                       className="px-3 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-muted flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" /> {isExp ? 'Hide' : 'Members'}
@@ -522,6 +528,17 @@ function TeamsTab({ teams, members, setMembers, brackets, reload, canEdit }) {
             );
           })}
         </>
+      )}
+
+      {previewTeam && (
+        <QBTeamPreviewModal
+          team={previewTeam}
+          members={members[previewTeam.id] || []}
+          matches={matches.filter(m => m.team_a_id === previewTeam.id || m.team_b_id === previewTeam.id)}
+          teams={teams}
+          config={config}
+          onClose={() => setPreviewTeam(null)}
+        />
       )}
 
       <AnimatePresence>
@@ -1588,6 +1605,251 @@ function SettingsTab({ config, busy, onRunScheduler, reload, setError }) {
           className="flex items-center gap-2 border border-border text-sm font-medium px-4 py-2 rounded-lg hover:bg-muted disabled:opacity-50">
           <RefreshCw className={`w-4 h-4 ${busy ? 'animate-spin' : ''}`} /> Run scheduler now
         </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────  QB TEAM PREVIEW MODAL  ───────────────────────── */
+function QBTeamPreviewModal({ team, members, matches, teams, config, onClose }) {
+  const [simLog, setSimLog] = useState(null);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+
+  const simulate = (label) => {
+    setSimLog(label);
+    setTimeout(() => setSimLog(null), 5000);
+  };
+
+  const activeMembers = members.filter(m => m.status === 'active');
+  const pendingRequests = members.filter(m => m.status === 'pending');
+  const invitedMembers = members.filter(m => m.status === 'invited');
+  const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-neutral-100">
+      {/* Top banner */}
+      <div className="flex items-center justify-between gap-4 bg-blue-600 text-white px-5 py-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <Eye className="w-5 h-5 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-sm">Admin Preview — {team.team_name}</p>
+            <p className="text-xs text-blue-200">Read-only simulation. No changes are made to real data.</p>
+          </div>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium">
+          <X className="w-4 h-4" /> Close Preview
+        </button>
+      </div>
+
+      {/* Simulation warning bar */}
+      {simLog && (
+        <div className="flex items-start gap-3 bg-amber-50 border-b-2 border-amber-300 px-5 py-3 flex-shrink-0">
+          <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Simulated — no data changed</p>
+            <p className="text-xs text-amber-700 mt-0.5">{simLog}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto p-5">
+        <div className="max-w-2xl mx-auto space-y-5">
+
+          {/* Team card */}
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-foreground">Quiz Bowl Team</h3>
+              {team.locked && (
+                <span className="text-xs font-semibold text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Locked
+                </span>
+              )}
+            </div>
+
+            {/* Tournament portal link */}
+            <div className="flex items-center justify-between gap-3 bg-primary/5 border border-orange-200 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">Open the Quiz Bowl tournament portal</span>
+              </div>
+              <span className="text-xs font-semibold text-primary">Brackets · schedule · matches →</span>
+            </div>
+
+            {/* Round deadlines */}
+            {rounds.length > 0 && (
+              <div className="border border-border rounded-xl p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Round deadlines</p>
+                <div className="space-y-1">
+                  {rounds.map((r, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-foreground">{r.name || `Round ${i + 1}`}</span>
+                      <span className="text-muted-foreground">{r.deadline ? new Date(r.deadline).toLocaleString() : 'TBD'}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Team header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-foreground">{team.team_name}</p>
+                  {!team.locked && (
+                    <button onClick={() => simulate(`Would rename team "${team.team_name}" — opens inline edit, saves updated team_name to quiz_bowl_teams.`)}
+                      className="p-1 hover:bg-muted rounded text-muted-foreground">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {team.school} · {activeMembers.length}/5 members
+                  {activeMembers.length < 3 && <span className="text-orange-600"> · Need {3 - activeMembers.length} more</span>}
+                </p>
+              </div>
+              {!team.locked && (
+                <button onClick={() => simulate(`Would delete team "${team.team_name}" and all members — prompts confirm first, then cascades via quiz_bowl_teams ON DELETE.`)}
+                  className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Members list */}
+            <div className="space-y-2">
+              {members.map(m => (
+                <div key={m.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-primary">
+                      {(m.user_name || m.user_email)?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                      <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {m.role === 'captain' && <span className="text-xs font-semibold text-primary flex items-center gap-1"><Crown className="w-3 h-3" /> Captain</span>}
+                    {m.status === 'invited' && <span className="text-xs text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded-full">Invited</span>}
+                    {m.status === 'pending' && <span className="text-xs text-orange-700 bg-primary/5 border border-orange-200 px-2 py-0.5 rounded-full">Requested</span>}
+                    {!team.locked && m.role !== 'captain' && (
+                      <button onClick={() => simulate(`Would remove ${m.user_name || m.user_email} (status: ${m.status}) — deletes quiz_bowl_team_members row id=${m.id}.`)}
+                        className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pending join requests */}
+            {pendingRequests.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Join Requests ({pendingRequests.length})</p>
+                <div className="space-y-2">
+                  {pendingRequests.map(req => (
+                    <div key={req.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-2.5">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{req.user_name || req.user_email}</p>
+                        <p className="text-xs text-muted-foreground">{req.user_email}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => simulate(`Would approve ${req.user_name || req.user_email} — UPDATE quiz_bowl_team_members SET status='active' WHERE id='${req.id}'.`)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-success/10 text-success border border-green-200 rounded-lg hover:bg-success/15">Approve</button>
+                        <button onClick={() => simulate(`Would deny ${req.user_name || req.user_email} — DELETE quiz_bowl_team_members WHERE id='${req.id}'.`)}
+                          className="px-3 py-1.5 text-xs font-semibold bg-destructive/10 text-destructive border border-red-200 rounded-lg hover:bg-destructive/15">Deny</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Invite teammate */}
+            {!team.locked && activeMembers.length < 5 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Invite a Teammate</p>
+                <div className="flex gap-2">
+                  <input value={inviteName} onChange={e => setInviteName(e.target.value)} placeholder="Name (optional)"
+                    className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="Email"
+                    className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <button onClick={() => {
+                    if (!inviteEmail.trim()) return;
+                    simulate(`Would invite ${inviteName.trim() || inviteEmail.trim()} — INSERT quiz_bowl_team_members status='invited' + call send-registration-email edge fn.`);
+                    setInviteEmail(''); setInviteName('');
+                  }} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 whitespace-nowrap">
+                    <UserPlus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Leave team */}
+            {!team.locked && (
+              <button onClick={() => simulate(`Would leave team "${team.team_name}" — DELETE quiz_bowl_team_members WHERE user_email=captain. Prompts confirm first.`)}
+                className="inline-flex items-center gap-1.5 text-sm text-destructive hover:underline">
+                <LogOut className="w-3.5 h-3.5" /> Leave team
+              </button>
+            )}
+          </div>
+
+          {/* Matches */}
+          {matches.length > 0 && (
+            <div className="bg-white rounded-2xl border border-border p-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Matches</p>
+              <div className="space-y-2">
+                {matches.map(m => {
+                  const isA = m.team_a_id === team.id;
+                  const opp = teams.find(t => t.id === (isA ? m.team_b_id : m.team_a_id));
+                  const myScore = isA ? m.team_a_score : m.team_b_score;
+                  const oppScore = isA ? m.team_b_score : m.team_a_score;
+                  let result = 'Unscheduled'; let cls = 'bg-muted text-muted-foreground border-border';
+                  if (m.status === 'draw') { result = 'Drew'; cls = 'bg-amber-50 text-amber-700 border-amber-200'; }
+                  else if (['completed', 'forfeit'].includes(m.status)) {
+                    const won = m.winner_team_id === team.id;
+                    result = won ? 'Won' : 'Lost';
+                    cls = won ? 'bg-success/10 text-success border-green-200' : 'bg-destructive/10 text-destructive border-red-200';
+                  } else if (m.status === 'locked') { result = 'Scheduled'; cls = 'bg-blue-50 text-blue-700 border-blue-200'; }
+                  return (
+                    <div key={m.id} className="flex items-center gap-3 text-sm border border-border rounded-xl px-4 py-3 flex-wrap">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cls}`}>{result}</span>
+                      <span className="text-foreground flex-1">vs {opp?.team_name || 'TBD'}</span>
+                      <span className="text-xs text-muted-foreground">R{m.round} · {m.stage}</span>
+                      {myScore != null && <span className="text-xs font-semibold">{myScore} – {oppScore ?? '?'}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Outgoing invitations */}
+          {invitedMembers.length > 0 && (
+            <div className="bg-white rounded-2xl border border-border p-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Outgoing Invitations</p>
+              <div className="space-y-2">
+                {invitedMembers.map(m => (
+                  <div key={m.id} className="flex items-center justify-between border border-border rounded-xl px-4 py-2.5">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.user_name || m.user_email}</p>
+                      <p className="text-xs text-muted-foreground">{m.user_email} · Awaiting response</p>
+                    </div>
+                    <button onClick={() => simulate(`Would cancel invitation to ${m.user_name || m.user_email} — DELETE quiz_bowl_team_members WHERE id='${m.id}'.`)}
+                      className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );
