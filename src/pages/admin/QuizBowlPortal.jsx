@@ -1072,39 +1072,68 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
 
       {/* Calendar + schedule cards */}
       {(() => {
-        const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
-        const scheduledDays = [...new Set(matches.filter((m) => m.scheduled_at).map((m) => dayKey(m.scheduled_at)))].sort();
-        const allDays = scheduledDays.length > 0 ? scheduledDays : [];
+        const dk = (d) => new Date(d).toISOString().slice(0, 10);
+        const dayLabel = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
+        // derive days from shifts AND scheduled matches so calendar populates immediately when refs post slots
+        const allDaySet = new Set([
+          ...shifts.map((s) => dk(s.start_at)),
+          ...matches.filter((m) => m.scheduled_at).map((m) => dk(m.scheduled_at)),
+        ]);
+        const allDays = [...allDaySet].sort();
         const selectedDay = calDay || allDays[0] || null;
-        const dayMatches = selectedDay
-          ? matches.filter((m) => m.scheduled_at && dayKey(m.scheduled_at) === selectedDay)
-              .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
-          : [];
+        const dayShifts = selectedDay ? shifts.filter((s) => dk(s.start_at) === selectedDay).sort((a, b) => new Date(a.start_at) - new Date(b.start_at)) : [];
+        const dayMatches = selectedDay ? matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === selectedDay).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)) : [];
         const unscheduled = matches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status));
         return (
-          <div className="bg-white rounded-2xl border border-border p-5">
-            <p className="font-semibold text-foreground mb-4">Matches</p>
-            {matches.length === 0 && <p className="text-sm text-muted-foreground">No matches yet — generate brackets first.</p>}
-            {matches.length > 0 && (
-              <div className="flex gap-4">
-                {/* Left: day column */}
-                <div className="flex flex-col gap-1.5 min-w-[110px]">
-                  {allDays.length === 0 && <p className="text-xs text-muted-foreground">No scheduled matches yet.</p>}
-                  {allDays.map((d) => {
-                    const label = new Date(d + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
-                    const count = matches.filter((m) => m.scheduled_at && dayKey(m.scheduled_at) === d).length;
-                    return (
-                      <button key={d} onClick={() => setCalDay(d)}
-                        className={`text-left px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${selectedDay === d ? 'bg-foreground text-white border-foreground' : 'border-border text-foreground hover:bg-muted'}`}>
-                        {label}
-                        <span className={`ml-1.5 text-[10px] ${selectedDay === d ? 'text-white/70' : 'text-muted-foreground'}`}>{count}</span>
-                      </button>
-                    );
-                  })}
+          <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
+            <p className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Schedule</p>
+
+            {matches.length === 0 && shifts.length === 0 && (
+              <p className="text-sm text-muted-foreground">No matches yet — generate brackets first.</p>
+            )}
+
+            {/* Day chip strip — always visible once shifts or matches exist */}
+            {allDays.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {allDays.map((d) => {
+                  const mCount = matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === d).length;
+                  const sCount = shifts.filter((s) => dk(s.start_at) === d).length;
+                  const hasData = mCount > 0 || sCount > 0;
+                  return (
+                    <button key={d} onClick={() => setCalDay(d)}
+                      className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${selectedDay === d ? 'bg-foreground text-white border-foreground' : hasData ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
+                      {dayLabel(d)}
+                      {hasData && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${selectedDay === d ? 'bg-white' : 'bg-primary'}`} />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Cards for selected day — left: shifts, right: matches */}
+            {selectedDay && (
+              <div className="flex gap-4 items-start">
+                {/* Left: ref shifts */}
+                <div className="w-56 shrink-0 space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ref slots</p>
+                  {dayShifts.length === 0 && <p className="text-xs text-muted-foreground">No shifts on this day.</p>}
+                  {dayShifts.map((s) => (
+                    <div key={s.id} className="border border-border rounded-xl p-3 text-xs space-y-0.5">
+                      <p className="font-semibold text-foreground tabular-nums">
+                        {new Date(s.start_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                        {' – '}
+                        {new Date(s.end_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                      </p>
+                      <p className="text-muted-foreground">{s.ref_name || s.ref_email}</p>
+                      <span className={`inline-block font-semibold px-1.5 py-0.5 rounded border ${s.status === 'open' ? 'bg-success/10 text-success border-green-200' : s.status === 'held' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-muted text-muted-foreground border-border'}`}>{s.status}</span>
+                    </div>
+                  ))}
                 </div>
-                {/* Right: match cards for selected day */}
+
+                {/* Right: scheduled matches */}
                 <div className="flex-1 space-y-2">
-                  {selectedDay && dayMatches.length === 0 && <p className="text-sm text-muted-foreground">No matches on this day.</p>}
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Matches</p>
+                  {dayMatches.length === 0 && <p className="text-xs text-muted-foreground">No matches scheduled on this day.</p>}
                   {dayMatches.map((m) => {
                     const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
                     const time = new Date(m.scheduled_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -1114,13 +1143,14 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
                           <div>
                             <p className="font-medium text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {time} · {m.stage} R{m.round} · <span className={`font-medium ${m.status === 'locked' || m.status === 'completed' ? 'text-success' : m.status === 'live' ? 'text-primary' : 'text-amber-600'}`}>{m.status}</span>
-                              {m.ref_email ? ` · ref: ${m.ref_email}` : ''}
+                              {time} · {m.stage} R{m.round} ·{' '}
+                              <span className={`font-medium ${['locked', 'completed'].includes(m.status) ? 'text-success' : m.status === 'live' ? 'text-primary' : 'text-amber-600'}`}>{m.status}</span>
+                              {m.ref_email ? ` · ${m.ref_email}` : ''}
                               {m.deadline ? ` · due ${fmt(m.deadline)}` : ''}
                             </p>
                           </div>
                           {['unscheduled', 'negotiating'].includes(m.status) && openShifts.length > 0 && (
-                            <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted flex-shrink-0">
+                            <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted shrink-0">
                               Propose slot
                             </button>
                           )}
@@ -1128,13 +1158,13 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
                       </div>
                     );
                   })}
-                  {!selectedDay && <p className="text-sm text-muted-foreground">Select a day to see matches.</p>}
                 </div>
               </div>
             )}
-            {/* Unscheduled matches below calendar */}
+
+            {/* Unscheduled / negotiating — always visible below calendar */}
             {unscheduled.length > 0 && (
-              <div className="mt-4 border-t border-border pt-4">
+              <div className="border-t border-border pt-4">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Unscheduled / Negotiating ({unscheduled.length})</p>
                 <div className="space-y-1.5">
                   {unscheduled.map((m) => {
