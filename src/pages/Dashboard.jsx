@@ -753,8 +753,11 @@ export default function Dashboard() {
                     {/* No team: create or browse */}
                     {!myQBTeam && (
                       <div className="space-y-6">
+                        {qbConfig?.registration_closed && (
+                          <p className="text-sm text-muted-foreground bg-muted border border-border rounded-xl px-4 py-3">Registration is closed — new teams can no longer be created.</p>
+                        )}
                         {/* Create team */}
-                        <div>
+                        {!qbConfig?.registration_closed && <div>
                           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Create a Team</p>
                           <div className="flex gap-2">
                             <input value={qbCreateName} onChange={e => setQbCreateName(e.target.value)} placeholder="Team name"
@@ -784,10 +787,10 @@ export default function Dashboard() {
                               Create
                             </button>
                           </div>
-                        </div>
+                        </div>}
 
                         {/* Browse open teams */}
-                        {openQBTeams.length > 0 && (
+                        {!qbConfig?.registration_closed && openQBTeams.length > 0 && (
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Open Teams, Request to Join</p>
                             <div className="space-y-2">
