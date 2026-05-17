@@ -42,6 +42,14 @@ function Modal({ title, onClose, children, wide }) {
   );
 }
 
+const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
+  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  return {
+    key: dt.toISOString().slice(0, 10),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+  };
+});
+
 const CONFLICT_STYLE = {
   green: 'bg-success/10 text-success border-green-200',
   yellow: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -49,7 +57,7 @@ const CONFLICT_STYLE = {
   red: 'bg-destructive/10 text-destructive border-red-300',
 };
 
-const fmt = (d) => (d ? new Date(d).toLocaleString() : '—');
+const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—');
 
 export default function QuizBowlPortal() {
   const { isSuperAdmin, profile } = useAuth();
@@ -323,7 +331,7 @@ export default function QuizBowlPortal() {
       )}
       {sub === 'ref' && (
         <RefToolsTab matches={matches} teams={teams} teamById={teamById}
-          protests={protests} config={config} myEmail={myEmail} shifts={shifts}
+          holds={holds} protests={protests} config={config} myEmail={myEmail} shifts={shifts}
           isSuperAdmin={isSuperAdmin} reload={loadAll} setError={setError} />
       )}
       {sub === 'settings' && isSuperAdmin && (
@@ -969,6 +977,7 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
   const [shiftForm, setShiftForm] = useState({ start_at: '', end_at: '', ref_name: '' });
   const [proposeFor, setProposeFor] = useState(null); // match
   const [chgFor, setChgFor] = useState(null); // hold
+  const [calDay, setCalDay] = useState(null);
 
   const createShift = async () => {
     if (!shiftForm.start_at || !shiftForm.end_at) return;
@@ -1069,32 +1078,126 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
         </div>
       )}
 
-      {/* Matches needing scheduling */}
-      <div className="bg-white rounded-2xl border border-border p-5">
-        <p className="font-semibold text-foreground mb-3">Matches</p>
-        <div className="space-y-2">
-          {matches.length === 0 && <p className="text-sm text-muted-foreground">No matches yet — generate brackets first.</p>}
-          {matches.map((m) => {
-            const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
-            return (
-              <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/50 last:border-0 py-2">
-                <div>
-                  <p className="text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}
-                    <span className="text-xs text-muted-foreground"> · {m.stage} R{m.round}</span></p>
-                  <p className="text-xs text-muted-foreground">
-                    {m.status}{m.scheduled_at ? ` · ${fmt(m.scheduled_at)}` : ''}{m.deadline ? ` · due ${fmt(m.deadline)}` : ''}
-                  </p>
-                </div>
-                {['unscheduled', 'negotiating'].includes(m.status) && openShifts.length > 0 && (
-                  <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">
-                    Propose slot
+      {/* Calendar + schedule cards */}
+      {(() => {
+        const dk = (d) => new Date(d).toISOString().slice(0, 10);
+        // start with the fixed tournament window, union any out-of-range data days
+        const extraDaySet = new Set([
+          ...shifts.map((s) => dk(s.start_at)),
+          ...matches.filter((m) => m.scheduled_at).map((m) => dk(m.scheduled_at)),
+        ]);
+        const tournamentKeys = new Set(TOURNAMENT_DAYS.map((d) => d.key));
+        const extraDays = [...extraDaySet].filter((d) => !tournamentKeys.has(d)).sort()
+          .map((key) => ({ key, label: new Date(key + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }) }));
+        const allDays = [...TOURNAMENT_DAYS, ...extraDays];
+        const selectedDay = calDay || allDays[0]?.key || null;
+        const dayShifts = selectedDay ? shifts.filter((s) => dk(s.start_at) === selectedDay).sort((a, b) => new Date(a.start_at) - new Date(b.start_at)) : [];
+        const dayMatches = selectedDay ? matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === selectedDay).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at)) : [];
+        const unscheduled = matches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status));
+        return (
+          <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
+            <p className="font-semibold text-foreground flex items-center gap-2"><Clock className="w-4 h-4" /> Schedule</p>
+
+            {matches.length === 0 && shifts.length === 0 && (
+              <p className="text-sm text-muted-foreground">No matches yet — generate brackets first.</p>
+            )}
+
+            {/* Day chip strip — always shows full tournament window */}
+            <div className="flex flex-wrap gap-2">
+              {allDays.map(({ key, label }) => {
+                const mCount = matches.filter((m) => m.scheduled_at && dk(m.scheduled_at) === key).length;
+                const sCount = shifts.filter((s) => dk(s.start_at) === key).length;
+                const hasData = mCount > 0 || sCount > 0;
+                return (
+                  <button key={key} onClick={() => setCalDay(key)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${selectedDay === key ? 'bg-foreground text-white border-foreground' : hasData ? 'border-primary/40 text-primary hover:bg-primary/5' : 'border-border text-muted-foreground'}`}>
+                    {label}
+                    {hasData && <span className={`ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle ${selectedDay === key ? 'bg-white' : 'bg-primary'}`} />}
                   </button>
-                )}
+                );
+              })}
+            </div>
+
+            {/* Cards for selected day — left: shifts, right: matches */}
+            {selectedDay && (
+              <div className="flex gap-4 items-start">
+                {/* Left: ref shifts */}
+                <div className="w-56 shrink-0 space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ref slots</p>
+                  {dayShifts.length === 0 && <p className="text-xs text-muted-foreground">No shifts on this day.</p>}
+                  {dayShifts.map((s) => (
+                    <div key={s.id} className="border border-border rounded-xl p-3 text-xs space-y-0.5">
+                      <p className="font-semibold text-foreground tabular-nums">
+                        {new Date(s.start_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                        {' – '}
+                        {new Date(s.end_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                      </p>
+                      <p className="text-muted-foreground">{s.ref_name || s.ref_email}</p>
+                      <span className={`inline-block font-semibold px-1.5 py-0.5 rounded border ${s.status === 'open' ? 'bg-success/10 text-success border-green-200' : s.status === 'held' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-muted text-muted-foreground border-border'}`}>{s.status}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Right: scheduled matches */}
+                <div className="flex-1 space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Matches</p>
+                  {dayMatches.length === 0 && <p className="text-xs text-muted-foreground">No matches scheduled on this day.</p>}
+                  {dayMatches.map((m) => {
+                    const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
+                    const time = new Date(m.scheduled_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+                    return (
+                      <div key={m.id} className="border border-border rounded-xl p-3 text-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-medium text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {time} · {m.stage} R{m.round} ·{' '}
+                              <span className={`font-medium ${['locked', 'completed'].includes(m.status) ? 'text-success' : m.status === 'live' ? 'text-primary' : 'text-amber-600'}`}>{m.status}</span>
+                              {m.ref_email ? ` · ${m.ref_email}` : ''}
+                              {m.deadline ? ` · due ${fmt(m.deadline)}` : ''}
+                            </p>
+                          </div>
+                          {['unscheduled', 'negotiating'].includes(m.status) && openShifts.length > 0 && (
+                            <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted shrink-0">
+                              Propose slot
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+            )}
+
+            {/* Unscheduled / negotiating — always visible below calendar */}
+            {unscheduled.length > 0 && (
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Unscheduled / Negotiating ({unscheduled.length})</p>
+                <div className="space-y-1.5">
+                  {unscheduled.map((m) => {
+                    const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
+                    return (
+                      <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 py-2">
+                        <div>
+                          <p className="text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}
+                            <span className="text-xs text-muted-foreground"> · {m.stage} R{m.round}</span></p>
+                          <p className="text-xs text-muted-foreground">{m.status}{m.deadline ? ` · due ${fmt(m.deadline)}` : ''}</p>
+                        </div>
+                        {openShifts.length > 0 && (
+                          <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">
+                            Propose slot
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <AnimatePresence>
         {proposeFor && (
@@ -1267,12 +1370,160 @@ function OverrideForm({ shifts, onSubmit }) {
 }
 
 /* ─────────────────────────  REF TOOLS  ───────────────────────── */
-function RefToolsTab({ matches, teamById, protests, config, myEmail, shifts = [], isSuperAdmin, reload, setError }) {
+const SHIFT_STAGE_STYLE = {
+  not_taken:   { label: 'Not taken',   cls: 'bg-muted text-muted-foreground border-border' },
+  negotiating: { label: 'Negotiating', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  scheduled:   { label: 'Scheduled',   cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  playing:     { label: 'Playing',     cls: 'bg-success/10 text-success border-green-200' },
+  no_show:     { label: 'No show',     cls: 'bg-destructive/10 text-destructive border-red-200' },
+  finished:    { label: 'Finished',    cls: 'bg-muted text-muted-foreground border-border' },
+};
+
+function deriveShiftStage(shift, match, lobby) {
+  if (!match) return 'not_taken';
+  if (['completed', 'draw'].includes(match.status)) return 'finished';
+  if (match.status === 'forfeit') return 'no_show';
+  if (match.status === 'live' || (lobby?.team_a_ready_at && lobby?.team_b_ready_at && lobby?.ref_joined_at)) return 'playing';
+  if (shift.status === 'claimed' || match.status === 'locked') return 'scheduled';
+  if (shift.status === 'held' || match.status === 'negotiating') return 'negotiating';
+  return 'not_taken';
+}
+
+function ShiftDetailPanel({ shift, match, shiftHolds, teamById, reload, setError }) {
+  const [lobby, setLobby] = useState(null);
+  const [approveBusy, setApproveBusy] = useState(false);
+
+  useEffect(() => {
+    if (!match?.id) return;
+    supabase.from('quiz_bowl_lobby').select('*').eq('match_id', match.id).maybeSingle()
+      .then(({ data }) => setLobby(data || null));
+  }, [match?.id]);
+
+  const stage = deriveShiftStage(shift, match, lobby);
+  const { label, cls } = SHIFT_STAGE_STYLE[stage];
+  const a = teamById(match?.team_a_id), b = teamById(match?.team_b_id);
+
+  const approveTechCheck = async () => {
+    if (!match || !lobby) return;
+    setApproveBusy(true);
+    try {
+      const now = new Date().toISOString();
+      if (!lobby.tech_check_started_at) {
+        const ends = new Date(Date.now() + 5 * 60000).toISOString();
+        await supabase.from('quiz_bowl_lobby').update({ tech_check_started_at: now, tech_check_ends_at: ends }).eq('id', lobby.id);
+      } else if (!lobby.links_released) {
+        await supabase.from('quiz_bowl_lobby').update({ links_released: true }).eq('id', lobby.id);
+        await base44.entities.QuizBowlMatch.update(match.id, { status: 'live' });
+      }
+      const { data } = await supabase.from('quiz_bowl_lobby').select('*').eq('match_id', match.id).maybeSingle();
+      setLobby(data || null);
+      reload();
+    } catch (e) { setError(e.message); }
+    finally { setApproveBusy(false); }
+  };
+
+  const approveLabel = lobby?.tech_check_started_at && !lobby?.links_released ? 'Release links' : 'Start tech check';
+
+  return (
+    <div className="mt-2 pt-3 border-t border-border/50 space-y-3 text-sm">
+      {/* Assigned match */}
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Assigned match</p>
+        {match
+          ? <p className="text-foreground">{a?.team_name || '?'} vs {b?.team_name || '?'} <span className="text-xs text-muted-foreground">· {match.stage} R{match.round}</span></p>
+          : <p className="text-muted-foreground">No match assigned</p>}
+      </div>
+
+      {/* Stage */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Stage</p>
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cls}`}>{label}</span>
+        {stage === 'playing' && (
+          <button disabled={approveBusy} onClick={approveTechCheck}
+            className="text-xs font-semibold px-3 py-1 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+            {approveLabel}
+          </button>
+        )}
+      </div>
+
+      {/* Lobby readiness (when playing) */}
+      {stage === 'playing' && lobby && (
+        <div className="text-xs text-muted-foreground space-y-0.5">
+          <p>Team A ready: {lobby.team_a_ready_at ? fmt(lobby.team_a_ready_at) : '—'}</p>
+          <p>Team B ready: {lobby.team_b_ready_at ? fmt(lobby.team_b_ready_at) : '—'}</p>
+          <p>Ref joined: {lobby.ref_joined_at ? fmt(lobby.ref_joined_at) : '—'}</p>
+          {lobby.tech_check_started_at && <p>Tech check started: {fmt(lobby.tech_check_started_at)} · ends {fmt(lobby.tech_check_ends_at)}</p>}
+          {lobby.links_released && <p className="text-success font-medium">Links released ✓</p>}
+        </div>
+      )}
+
+      {/* Proposal history */}
+      {shiftHolds.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Proposal history</p>
+          <div className="space-y-1">
+            {shiftHolds.map((h) => (
+              <div key={h.id} className="flex items-start gap-2 text-xs">
+                <span className={`mt-0.5 shrink-0 font-semibold px-1.5 py-0.5 rounded border ${
+                  h.status === 'claimed' ? 'bg-success/10 text-success border-green-200' :
+                  h.status === 'declined' ? 'bg-destructive/10 text-destructive border-red-200' :
+                  h.status === 'change_requested' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  h.status === 'expired' ? 'bg-muted text-muted-foreground border-border' :
+                  'bg-blue-50 text-blue-700 border-blue-200'
+                }`}>{h.status}</span>
+                <span className="text-muted-foreground">
+                  Proposed {fmt(h.proposed_time)}
+                  {h.change_reason ? ` · "${h.change_reason}"` : ''}
+                  {h.expires_at ? ` · expires ${fmt(h.expires_at)}` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {shiftHolds.length === 0 && match && (
+        <p className="text-xs text-muted-foreground">No proposals yet.</p>
+      )}
+    </div>
+  );
+}
+
+function EditShiftModal({ shift, isSuperAdmin, onSave, onClose }) {
+  const [start, setStart] = useState(shift.start_at ? new Date(shift.start_at).toISOString().slice(0, 16) : '');
+  const [end, setEnd] = useState(shift.end_at ? new Date(shift.end_at).toISOString().slice(0, 16) : '');
+  const [name, setName] = useState(shift.ref_name || '');
+  const [email, setEmail] = useState(shift.ref_email || '');
+  return (
+    <Modal title="Edit shift" onClose={onClose}>
+      <div className="space-y-4">
+        <div><label className="block text-sm font-medium mb-1.5">Start</label>
+          <input type="datetime-local" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} /></div>
+        <div><label className="block text-sm font-medium mb-1.5">End</label>
+          <input type="datetime-local" className={inputCls} value={end} onChange={(e) => setEnd(e.target.value)} /></div>
+        <div><label className="block text-sm font-medium mb-1.5">Ref name</label>
+          <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} /></div>
+        {isSuperAdmin && (
+          <div><label className="block text-sm font-medium mb-1.5">Ref email (reassign)</label>
+            <input className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+        )}
+        <button disabled={!start || !end} onClick={() => onSave({ start_at: new Date(start).toISOString(), end_at: new Date(end).toISOString(), ref_name: name, ref_email: email })}
+          className="w-full bg-foreground text-white rounded-lg py-2 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50">
+          Save changes
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail, shifts = [], isSuperAdmin, reload, setError }) {
   const mine = isSuperAdmin ? matches : matches.filter((m) => m.ref_email === myEmail);
   const live = mine.filter((m) => ['locked', 'live'].includes(m.status));
   const done = mine.filter((m) => ['completed', 'draw', 'forfeit'].includes(m.status));
   const myShifts = isSuperAdmin ? shifts : shifts.filter((s) => s.ref_email === myEmail);
   const [sf, setSf] = useState({ start_at: '', end_at: '', ref_name: '' });
+  const [editShift, setEditShift] = useState(null);
+  const [expanded, setExpanded] = useState(new Set());
+  const toggleExpand = (id) => setExpanded((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
 
   const createShift = async () => {
     if (!sf.start_at || !sf.end_at) return;
@@ -1287,6 +1538,17 @@ function RefToolsTab({ matches, teamById, protests, config, myEmail, shifts = []
     } catch (e) { setError(e.message); }
   };
   const delShift = async (id) => { await base44.entities.QuizBowlRefShift.delete(id); reload(); };
+  const saveShift = async (id, data) => {
+    try {
+      await base44.entities.QuizBowlRefShift.update(id, data);
+      const s = myShifts.find((x) => x.id === id);
+      if (data.ref_email && s?.match_id) {
+        await base44.entities.QuizBowlMatch.update(s.match_id, { ref_email: data.ref_email });
+      }
+      setEditShift(null);
+      reload();
+    } catch (e) { setError(e.message); }
+  };
 
   return (
     <div className="space-y-4">
@@ -1306,20 +1568,53 @@ function RefToolsTab({ matches, teamById, protests, config, myEmail, shifts = []
           <button onClick={createShift} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Add shift</button>
         </div>
         {myShifts.length === 0 && <p className="text-sm text-muted-foreground">No shifts yet. Add one above — it appears in the open pool immediately.</p>}
-        <div className="space-y-1.5">
-          {myShifts.map((s) => (
-            <div key={s.id} className="flex items-center justify-between text-sm border-b border-border/50 last:border-0 py-2">
-              <span className="text-foreground">{fmt(s.start_at)} → {fmt(s.end_at)}{isSuperAdmin ? ` · ${s.ref_email}` : ''}</span>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.status === 'open' ? 'bg-success/10 text-success border border-green-200' : s.status === 'held' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-muted text-muted-foreground border border-border'}`}>{s.status}</span>
-                {s.status === 'open' && (
-                  <button onClick={() => delShift(s.id)} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+        <div className="space-y-1">
+          {myShifts.map((s) => {
+            const canEdit = isSuperAdmin || s.status === 'open';
+            const canDelete = isSuperAdmin || s.status === 'open';
+            const isOpen = expanded.has(s.id);
+            const match = s.match_id ? matches.find((m) => m.id === s.match_id) : null;
+            const shiftHolds = holds.filter((h) => h.shift_id === s.id).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            const stage = deriveShiftStage(s, match, null);
+            const { label: stageLabel, cls: stageCls } = SHIFT_STAGE_STYLE[stage];
+            return (
+              <div key={s.id} className="border border-border/60 rounded-xl overflow-hidden">
+                <button onClick={() => toggleExpand(s.id)}
+                  className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-sm hover:bg-muted/40 transition-colors text-left">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className="text-foreground font-medium truncate">{fmt(s.start_at)} → {fmt(s.end_at)}</span>
+                    {isSuperAdmin && <span className="text-xs text-muted-foreground shrink-0">· {s.ref_name || s.ref_email}</span>}
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${stageCls}`}>{stageLabel}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {canEdit && (
+                      <span onClick={(e) => { e.stopPropagation(); setEditShift(s); }} className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground cursor-pointer"><Pencil className="w-3.5 h-3.5" /></span>
+                    )}
+                    {canDelete && (
+                      <span onClick={(e) => { e.stopPropagation(); delShift(s.id); }} className="p-1 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></span>
+                    )}
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+                {isOpen && (
+                  <div className="px-3 pb-3">
+                    <ShiftDetailPanel shift={s} match={match} shiftHolds={shiftHolds}
+                      teamById={teamById} reload={reload} setError={setError} />
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      <AnimatePresence>
+        {editShift && (
+          <EditShiftModal shift={editShift} isSuperAdmin={isSuperAdmin}
+            onSave={(data) => saveShift(editShift.id, data)}
+            onClose={() => setEditShift(null)} />
+        )}
+      </AnimatePresence>
 
       {mine.length === 0 && (
         <div className="text-center py-10 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
@@ -1637,7 +1932,7 @@ function QBTeamPreviewModal({ team, members, allMatches, teams, brackets, shifts
   const pendingRequests = members.filter(m => m.status === 'pending');
   const invitedMembers = members.filter(m => m.status === 'invited');
   const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
-  const fmtDate = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+  const fmtDate = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
   const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
   const slotDays = new Set(shifts.map(s => dayKey(s.start_at)));
   const teamById = (id) => teams.find(t => t.id === id);
@@ -2122,7 +2417,7 @@ function PreviewClaimModal({ shift, matches, teams, myTeam, onClose, onSubmit })
     const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
     return teams.find(t => t.id === id)?.team_name || 'TBD';
   };
-  const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+  const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
   const min = new Date(shift.start_at).toISOString().slice(0, 16);
   const max = new Date(shift.end_at).toISOString().slice(0, 16);
   return (
