@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 
-const fmt = (d) => (d ? new Date(d).toLocaleString() : 'TBD');
+const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
 
 // Tournament window: May 17–24, 2026 (day-view agenda).
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
