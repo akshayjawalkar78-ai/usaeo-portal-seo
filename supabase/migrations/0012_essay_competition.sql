@@ -54,21 +54,21 @@ create policy "allow all" on essay_submissions for all using (true);
 alter table essay_reviews enable row level security;
 create policy "allow all" on essay_reviews for all using (true);
 
--- Seed the 5 prompts (update body text as needed)
+-- Seed the 5 prompts
 insert into essay_prompts (prompt_number, title, body, visible) values
-  (1, 'Inflation & Monetary Policy',
-   'Analyze the causes and consequences of the 2021–2023 inflation surge in the United States. Evaluate the Federal Reserve''s policy response and propose what, if anything, should have been done differently. Support your argument with economic theory and empirical evidence.',
+  (1, 'Microeconomics',
+   'Should governments intervene in markets where competition appears strong but consumer choice is still limited by data, network effects, or switching costs?',
    true),
-  (2, 'Income Inequality',
-   'To what extent does income inequality harm or help long-run economic growth? Draw on at least two competing economic perspectives and evaluate the empirical evidence. Conclude with a policy recommendation and its trade-offs.',
+  (2, 'Macroeconomics',
+   'Should central banks tolerate higher inflation temporarily to reduce unemployment and protect growth, or does doing so create greater long-term economic harm?',
    true),
-  (3, 'Climate Economics',
-   'Compare carbon taxes and cap-and-trade systems as mechanisms for reducing greenhouse gas emissions. Analyze efficiency, equity, and political feasibility. Which approach do you recommend for the United States, and why?',
+  (3, 'International Economics',
+   'Has globalization become more of a strategic vulnerability than an economic advantage for countries in the 21st century?',
    true),
-  (4, 'Globalization & Trade',
-   'Has globalization been a net positive for American workers? Examine the distributional effects of trade liberalization since the 1990s, and evaluate whether recent protectionist policies are an appropriate response.',
+  (4, 'Economic Development',
+   'Are cash transfers or investments in education and infrastructure more effective at reducing poverty and promoting long term development?',
    true),
-  (5, 'Technology & Labor Markets',
-   'How is automation and artificial intelligence reshaping the U.S. labor market? Assess the empirical evidence on job displacement and creation, and propose policies to ensure broadly shared prosperity in an AI-driven economy.',
+  (5, 'Current Economic Issues',
+   'Should governments prioritize protecting consumers from the cost of living crisis even if it means slower business growth and weaker investment?',
    true)
 on conflict do nothing;
