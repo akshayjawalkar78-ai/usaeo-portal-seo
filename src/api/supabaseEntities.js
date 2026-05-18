@@ -71,4 +71,7 @@ export const entities = {
   NewsArticle: makeEntity('news_articles'),
   EmailSubscriber: makeEntity('email_subscribers'),
   PartnerEvent: makeEntity('partner_events'),
+  EssayPrompt: makeEntity('essay_prompts'),
+  EssaySubmission: makeEntity('essay_submissions'),
+  EssayReview: makeEntity('essay_reviews'),
 };

@@ -15,6 +15,7 @@ import AdminAnalytics from './AdminAnalytics';
 import AdminNews from './AdminNews';
 import AdminAccessControl from './AdminAccessControl';
 import QuizBowlPortal from './admin/QuizBowlPortal';
+import EssayPortal from './admin/EssayPortal';
 import USMapChoropleth from '../components/USMapChoropleth';
 
 function QBStateMap({ stateCountsMap, qbStateFilter, setQbStateFilter }) {
@@ -43,6 +44,7 @@ const ALL_NAV_ITEMS = [
   { label: 'Curriculum', id: 'curriculum', icon: BookOpen },
   { label: 'Registrations', id: 'registrations', icon: ClipboardList },
   { label: 'Quiz Bowl', id: 'qb-teams', icon: Trophy },
+  { label: 'Essay Competition', id: 'essay', icon: FileText },
   { label: 'Applications', id: 'applications', icon: ShieldCheck },
   { label: 'Partner Events', id: 'partner-events', icon: Handshake },
   { label: 'News', id: 'news', icon: Newspaper },
@@ -1129,6 +1131,8 @@ export default function Admin() {
           })()}
 
           {active === 'qb-teams' && <QuizBowlPortal />}
+
+          {active === 'essay' && <EssayPortal />}
 
           {/* â"€â"€ APPLICATIONS â"€â"€ */}
           {active === 'applications' && (
