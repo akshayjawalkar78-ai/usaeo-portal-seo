@@ -322,7 +322,7 @@ export default function Dashboard() {
 
         <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto">
 
-          {/* â”€â”€ OVERVIEW â”€â”€ */}
+          {/* â"€â"€ OVERVIEW â"€â"€ */}
           {active === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -409,7 +409,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ COMPETITION â”€â”€ */}
+          {/* â"€â"€ COMPETITION â"€â"€ */}
           {active === 'competition' && (
             <div className="space-y-6">
               {/* My Registrations */}
@@ -472,7 +472,7 @@ export default function Dashboard() {
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">Fast-paced timed quiz covering microeconomics, macroeconomics, and current events. Open to all registered students.</p>
                   {myRegistrations.some(r => r.event_type === 'quiz-bowl') ? (
-                    <span className="text-xs text-muted-foreground">You're registered âœ“</span>
+                    <span className="text-xs text-muted-foreground">You're registered âœ"</span>
                   ) : (
                     <Link to="/competitions/quiz-bowl" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
                       Register now <ArrowRight className="w-3.5 h-3.5" />
@@ -488,7 +488,7 @@ export default function Dashboard() {
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">Submit a research essay on an economics topic. Judged on economic reasoning, evidence, and clarity of argument.</p>
                   {myRegistrations.some(r => r.event_type === 'essay') ? (
-                    <span className="text-xs text-muted-foreground">You're registered âœ“</span>
+                    <span className="text-xs text-muted-foreground">You're registered âœ"</span>
                   ) : (
                     <Link to="/competitions/essay" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
                       Register now <ArrowRight className="w-3.5 h-3.5" />
@@ -606,7 +606,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* â”€â”€ QUIZ BOWL TEAMS â”€â”€ */}
+              {/* â"€â"€ QUIZ BOWL TEAMS â"€â"€ */}
               {authUser && myRegistrations.some(r => r.event_type === 'quiz-bowl') && (() => {
                 const email = authUser.email;
                 const isCaptain = myQBTeam?.myMembership?.role === 'captain';
@@ -886,34 +886,34 @@ export default function Dashboard() {
 
           {/* ESSAY COMPETITION */}
           {active === 'essay' && (
-            <div className=”space-y-6”>
-              <div className=”bg-white rounded-2xl border border-border p-6”>
-                <div className=”flex items-center gap-3 mb-1”>
-                  <FileText className=”w-5 h-5 text-primary” />
-                  <h2 className=”text-lg font-bold text-foreground”>Essay Competition</h2>
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-3 mb-1">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-bold text-foreground">Essay Competition</h2>
                 </div>
-                <p className=”text-sm text-muted-foreground leading-relaxed”>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Choose one of the five prompts below and submit your essay as a PDF or DOCX. Only one submission is accepted per student.
                 </p>
               </div>
 
-              <div className=”bg-white rounded-2xl border border-border p-6”>
-                <p className=”text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4”>Essay Prompts</p>
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Essay Prompts</p>
                 {essayPrompts.length === 0 ? (
-                  <p className=”text-sm text-muted-foreground”>Prompts will be posted soon. Check back later.</p>
+                  <p className="text-sm text-muted-foreground">Prompts will be posted soon. Check back later.</p>
                 ) : (
-                  <div className=”space-y-3”>
+                  <div className="space-y-3">
                     {essayPrompts.map(p => (
                       <div key={p.id}
                         onClick={() => !myEssaySubmission && setEssaySelectedPrompt(prev => prev === p.id ? null : p.id)}
                         className={`rounded-xl border p-4 transition-colors ${myEssaySubmission ? 'cursor-default' : 'cursor-pointer'} ${essaySelectedPrompt === p.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-muted/30'}`}>
-                        <div className=”flex items-start gap-3”>
-                          <span className=”flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center mt-0.5”>
+                        <div className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center mt-0.5">
                             {p.prompt_number}
                           </span>
                           <div>
-                            <p className=”font-semibold text-sm text-foreground mb-1”>{p.title}</p>
-                            <p className=”text-sm text-muted-foreground leading-relaxed”>{p.body}</p>
+                            <p className="font-semibold text-sm text-foreground mb-1">{p.title}</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
                           </div>
                         </div>
                       </div>
@@ -922,71 +922,71 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className=”bg-white rounded-2xl border border-border p-6”>
-                <p className=”text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4”>Your Submission</p>
+              <div className="bg-white rounded-2xl border border-border p-6">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Your Submission</p>
                 {myEssaySubmission ? (
-                  <div className=”rounded-xl border border-green-200 bg-green-50 p-4 flex items-start gap-3”>
-                    <CheckCircle className=”w-5 h-5 text-green-600 flex-shrink-0 mt-0.5” />
+                  <div className="rounded-xl border border-green-200 bg-green-50 p-4 flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className=”font-semibold text-green-800 text-sm”>Essay submitted</p>
-                      <p className=”text-xs text-green-700 mt-0.5”>
+                      <p className="font-semibold text-green-800 text-sm">Essay submitted</p>
+                      <p className="text-xs text-green-700 mt-0.5">
                         {myEssaySubmission.file_name} &middot; {new Date(myEssaySubmission.submitted_at).toLocaleDateString()}
                       </p>
-                      <p className=”text-xs text-green-700 mt-0.5”>
+                      <p className="text-xs text-green-700 mt-0.5">
                         Prompt #{essayPrompts.find(p => p.id === myEssaySubmission.prompt_id)?.prompt_number ?? '?'} &mdash;{' '}
                         {essayPrompts.find(p => p.id === myEssaySubmission.prompt_id)?.title ?? ''}
                       </p>
                     </div>
                   </div>
                 ) : !authUser ? (
-                  <p className=”text-sm text-muted-foreground”>
-                    <Link to=”/login” className=”text-primary font-semibold hover:underline”>Log in</Link> to submit your essay.
+                  <p className="text-sm text-muted-foreground">
+                    <Link to="/login" className="text-primary font-semibold hover:underline">Log in</Link> to submit your essay.
                   </p>
                 ) : !myRegistrations.some(r => r.event_type === 'essay') ? (
-                  <div className=”rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3”>
-                    <AlertTriangle className=”w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5” />
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className=”font-semibold text-amber-800 text-sm”>Registration required</p>
-                      <p className=”text-xs text-amber-700 mt-1”>
-                        <Link to=”/competitions/essay” className=”underline font-semibold”>Register for the Essay Competition</Link> before submitting.
+                      <p className="font-semibold text-amber-800 text-sm">Registration required</p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        <Link to="/competitions/essay" className="underline font-semibold">Register for the Essay Competition</Link> before submitting.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className=”space-y-4”>
-                    <p className=”text-sm text-muted-foreground”>Select a prompt above, then attach your file below.</p>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Select a prompt above, then attach your file below.</p>
                     {essaySelectedPrompt && (
-                      <div className=”text-xs font-semibold text-primary bg-primary/5 border border-primary/20 rounded-lg px-3 py-2”>
+                      <div className="text-xs font-semibold text-primary bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
                         Selected: Prompt #{essayPrompts.find(p => p.id === essaySelectedPrompt)?.prompt_number} &mdash;{' '}
                         {essayPrompts.find(p => p.id === essaySelectedPrompt)?.title}
                       </div>
                     )}
                     <div>
-                      <label className=”block text-xs text-muted-foreground mb-1.5”>Attach Essay (PDF or DOCX, max 10 MB)</label>
+                      <label className="block text-xs text-muted-foreground mb-1.5">Attach Essay (PDF or DOCX, max 10 MB)</label>
                       <label className={`flex items-center gap-3 border-2 border-dashed rounded-xl px-4 py-5 cursor-pointer transition-colors ${essayFile ? 'border-primary/40 bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-muted/30'}`}>
-                        <Upload className=”w-5 h-5 text-muted-foreground flex-shrink-0” />
-                        <span className=”text-sm text-muted-foreground”>
+                        <Upload className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">
                           {essayFile ? essayFile.name : 'Click to select file…'}
                         </span>
-                        <input type=”file”
-                          accept=”.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document”
-                          className=”hidden”
+                        <input type="file"
+                          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          className="hidden"
                           onChange={e => { setEssayFile(e.target.files[0] || null); setEssayError(''); setEssaySuccess(''); }} />
                       </label>
                     </div>
                     {essayError && (
-                      <p className=”text-xs text-destructive flex items-center gap-1.5”>
-                        <AlertTriangle className=”w-3.5 h-3.5” /> {essayError}
+                      <p className="text-xs text-destructive flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5" /> {essayError}
                       </p>
                     )}
                     {essaySuccess && (
-                      <p className=”text-xs text-green-600 flex items-center gap-1.5”>
-                        <CheckCircle className=”w-3.5 h-3.5” /> {essaySuccess}
+                      <p className="text-xs text-green-600 flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5" /> {essaySuccess}
                       </p>
                     )}
                     <button onClick={handleEssaySubmit} disabled={essayUploading || !essaySelectedPrompt || !essayFile}
-                      className=”inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed”>
-                      <Upload className=”w-4 h-4” />
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                      <Upload className="w-4 h-4" />
                       {essayUploading ? 'Uploading…' : 'Submit Essay'}
                     </button>
                   </div>
@@ -1096,7 +1096,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ RESOURCES â”€â”€ */}
+          {/* â"€â"€ RESOURCES â"€â"€ */}
           {active === 'resources' && (
             <div className="bg-white rounded-2xl border border-border p-8">
               <h2 className="font-semibold text-foreground mb-1">Resources & Downloads</h2>
@@ -1133,7 +1133,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ WORKSHOPS â”€â”€ */}
+          {/* â"€â"€ WORKSHOPS â"€â"€ */}
           {active === 'workshops' && (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl border border-border p-8">
@@ -1195,7 +1195,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ CURRICULUM â”€â”€ */}
+          {/* â"€â"€ CURRICULUM â"€â"€ */}
           {active === 'curriculum' && (
             <div className="bg-white rounded-2xl border border-border p-8">
               <div className="flex items-center gap-3 mb-1">
@@ -1223,7 +1223,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ CHAPTERS â”€â”€ */}
+          {/* â"€â"€ CHAPTERS â"€â"€ */}
           {active === 'chapters' && (
             <div className="space-y-6">
               {/* Join a Chapter */}
@@ -1328,7 +1328,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ CALENDAR â”€â”€ */}
+          {/* â"€â"€ CALENDAR â"€â"€ */}
           {active === 'calendar' && (
             <div className="space-y-6">
               {/* My Registered Events */}
@@ -1417,7 +1417,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* â”€â”€ CHAPTER ADMIN â”€â”€ */}
+          {/* â"€â"€ CHAPTER ADMIN â"€â"€ */}
           {active === 'chapter-admin' && isChapterAdmin && (
             <div className="space-y-6">
               <div>
