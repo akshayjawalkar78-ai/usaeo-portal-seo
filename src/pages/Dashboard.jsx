@@ -957,7 +957,7 @@ export default function Dashboard() {
                       </div>
                     )}
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1.5">Attach Essay (PDF or DOCX, max 10 MB)</label>
+                      <label className="block text-xs text-muted-foreground mb-1.5">Attach Essay (PDF or DOCX, max 300 KB)</label>
                       <label className={`flex items-center gap-3 border-2 border-dashed rounded-xl px-4 py-5 cursor-pointer transition-colors ${essayFile ? 'border-primary/40 bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-muted/30'}`}>
                         <Upload className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                         <span className="text-sm text-muted-foreground">
