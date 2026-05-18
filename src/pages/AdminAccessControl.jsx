@@ -4,7 +4,7 @@ import {
   Plus, Trash2, Pencil, X, Check, ShieldCheck, Users, Lock,
   LayoutDashboard, Bell, Calendar, FileText, School, BarChart2,
   Trophy, BookOpen, ClipboardList, Handshake, Newspaper, AlertTriangle,
-  Search, UserPlus, UserMinus, Eye,
+  Search, UserPlus, UserMinus, Eye, Mail, RefreshCw, Clock,
 } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -102,6 +102,7 @@ export default function AdminAccessControl() {
   const [tab, setTab] = useState('roles');
   const [roles, setRoles] = useState([]);
   const [admins, setAdmins] = useState([]);
+  const [pendingInvites, setPendingInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -120,14 +121,16 @@ export default function AdminAccessControl() {
     setLoading(true);
     setError(null);
     try {
-      const [{ data: rolesData, error: re }, { data: adminsData, error: ae }] = await Promise.all([
+      const [{ data: rolesData, error: re }, { data: adminsData, error: ae }, { data: invitesData }] = await Promise.all([
         supabase.from('admin_roles').select('*').order('name'),
         supabase.from('profiles').select('id, email, full_name, admin_role_id').eq('role', 'admin').order('full_name'),
+        supabase.from('admin_invites').select('*').eq('status', 'pending').order('invited_at', { ascending: false }),
       ]);
       if (re) throw re;
       if (ae) throw ae;
       setRoles(rolesData || []);
       setAdmins(adminsData || []);
+      setPendingInvites(invitesData || []);
     } catch (e) {
       setError(e.message || 'Failed to load data');
     } finally {
@@ -255,13 +258,52 @@ export default function AdminAccessControl() {
     setSaving(true);
     setError(null);
     try {
-      await sendAdminEmail(addEmail.trim(), '', 'admin-invite', addRoleId);
+      const email = addEmail.trim().toLowerCase();
+      // Cancel any existing pending invites for this email before creating a new one
+      await supabase.from('admin_invites').update({ status: 'cancelled' })
+        .eq('email', email).eq('status', 'pending');
+      const { error: insertErr } = await supabase.from('admin_invites').insert({
+        email,
+        role_id: addRoleId || null,
+        invited_by: currentProfile?.full_name || currentProfile?.email || 'An admin',
+      });
+      if (insertErr) throw insertErr;
+      await sendAdminEmail(email, '', 'admin-invite', addRoleId);
       setAddModal(false);
       setAddEmail('');
       setAddRoleId('');
       setAddSearchResult(null);
+      await loadData();
     } catch (e) {
       setError(e.message || 'Failed to send invite');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelInvite = async (inviteId) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('admin_invites').update({ status: 'cancelled' }).eq('id', inviteId);
+      if (error) throw error;
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Failed to cancel invite');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const resendInvite = async (invite) => {
+    setSaving(true);
+    setError(null);
+    try {
+      await sendAdminEmail(invite.email, '', 'admin-invite', invite.role_id);
+      await supabase.from('admin_invites').update({ invited_at: new Date().toISOString() }).eq('id', invite.id);
+      await loadData();
+    } catch (e) {
+      setError(e.message || 'Failed to resend invite');
     } finally {
       setSaving(false);
     }
@@ -320,12 +362,22 @@ export default function AdminAccessControl() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-border">
-        {[{ id: 'roles', label: 'Roles', icon: Lock }, { id: 'users', label: 'Admin Users', icon: Users }].map(t => {
+        {[
+          { id: 'roles', label: 'Roles', icon: Lock },
+          { id: 'users', label: 'Admin Users', icon: Users },
+          { id: 'invites', label: 'Pending Invites', icon: Clock, badge: pendingInvites.length },
+        ].map(t => {
           const Icon = t.icon;
           return (
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === t.id ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
-              <Icon className="w-4 h-4" />{t.label}
+              <Icon className="w-4 h-4" />
+              {t.label}
+              {t.badge > 0 && (
+                <span className="ml-0.5 bg-amber-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5 leading-none">
+                  {t.badge}
+                </span>
+              )}
             </button>
           );
         })}
@@ -397,6 +449,65 @@ export default function AdminAccessControl() {
                           <button onClick={() => setDeleteConfirm(role.id)}
                             className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive">
                             <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pending Invites tab */}
+          {tab === 'invites' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {pendingInvites.length} pending invite{pendingInvites.length !== 1 ? 's' : ''}
+                </p>
+                <button onClick={() => { setAddEmail(''); setAddRoleId(''); setAddSearchResult(null); setAddModal(true); }}
+                  className="flex items-center gap-2 bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors">
+                  <UserPlus className="w-4 h-4" /> Invite Admin
+                </button>
+              </div>
+              {pendingInvites.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border rounded-xl">
+                  No pending invites.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingInvites.map(invite => {
+                    const role = invite.role_id ? roleById(invite.role_id) : null;
+                    const sentAt = new Date(invite.invited_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                    return (
+                      <div key={invite.id} className="bg-white border border-amber-200 rounded-xl p-4 flex items-center gap-4">
+                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                          <Mail className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground text-sm truncate">{invite.email}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Invited by {invite.invited_by} · {sentAt}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${role ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                            {role ? <><Lock className="w-3 h-3" />{role.name}</> : <><ShieldCheck className="w-3 h-3" />Full Access</>}
+                          </span>
+                          <button
+                            onClick={() => resendInvite(invite)}
+                            disabled={saving}
+                            title="Resend invite email"
+                            className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50">
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => cancelInvite(invite.id)}
+                            disabled={saving}
+                            title="Cancel invite"
+                            className="p-2 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive disabled:opacity-50">
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       </div>

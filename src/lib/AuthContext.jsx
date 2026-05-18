@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     }
     setIsProfileLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: rawData, error } = await supabase
         .from('profiles')
         .select('id, email, full_name, role, admin_role_id')
         .eq('id', userId)
@@ -33,7 +33,32 @@ export const AuthProvider = ({ children }) => {
         console.error('[auth] loadProfile error:', JSON.stringify(error));
         setProfile(null);
       } else {
-        console.log('[auth] profile loaded:', data);
+        console.log('[auth] profile loaded:', rawData);
+
+        let data = rawData;
+
+        // Auto-grant admin access if a pending invite exists for this email
+        if (data.role !== 'admin' && data.email) {
+          try {
+            const { data: invite } = await supabase
+              .from('admin_invites')
+              .select('id, role_id')
+              .eq('email', data.email)
+              .eq('status', 'pending')
+              .order('invited_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (invite) {
+              await supabase.from('profiles').update({
+                role: 'admin',
+                admin_role_id: invite.role_id ?? null,
+              }).eq('id', userId);
+              await supabase.from('admin_invites').update({ status: 'accepted' }).eq('id', invite.id);
+              data = { ...data, role: 'admin', admin_role_id: invite.role_id ?? null };
+            }
+          } catch (_) {}
+        }
+
         setProfile(data);
         // Resolve custom admin page permissions
         if (data.role === 'admin' && data.admin_role_id) {
