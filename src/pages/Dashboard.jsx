@@ -16,7 +16,6 @@ import { UPCOMING_PARTNER_EVENTS, UPCOMING_PARTNER_WORKSHOPS } from '@/lib/partn
 const navItems = [
   { label: 'Overview', id: 'overview', icon: LayoutDashboard },
   { label: 'Competition', id: 'competition', icon: Trophy },
-  { label: 'Essay', id: 'essay', icon: FileText },
   { label: 'Rankings', id: 'rankings', icon: BarChart2 },
   { label: 'Calendar', id: 'calendar', icon: CalendarDays },
   { label: 'Resources', id: 'resources', icon: FileText },
@@ -881,12 +880,8 @@ export default function Dashboard() {
                   </div>
                 );
               })()}
-            </div>
-          )}
 
-          {/* ESSAY COMPETITION */}
-          {active === 'essay' && (
-            <div className="space-y-6">
+              {/* Essay Competition section (within Competition tab) */}
               <div className="bg-white rounded-2xl border border-border p-6">
                 <div className="flex items-center gap-3 mb-1">
                   <FileText className="w-5 h-5 text-primary" />
@@ -987,7 +982,7 @@ export default function Dashboard() {
                     <button onClick={handleEssaySubmit} disabled={essayUploading || !essaySelectedPrompt || !essayFile}
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                       <Upload className="w-4 h-4" />
-                      {essayUploading ? 'Uploading…' : 'Submit Essay'}
+                      {essayUploading ? 'Uploading...' : 'Submit Essay'}
                     </button>
                   </div>
                 )}
