@@ -121,15 +121,17 @@ export default function AdminAccessControl() {
     setLoading(true);
     setError(null);
     try {
-      const [{ data: rolesData, error: re }, { data: adminsData, error: ae }, { data: invitesData }] = await Promise.all([
+      const [{ data: rolesData, error: re }, { data: adminsData, error: ae }] = await Promise.all([
         supabase.from('admin_roles').select('*').order('name'),
         supabase.from('profiles').select('id, email, full_name, admin_role_id').eq('role', 'admin').order('full_name'),
-        supabase.from('admin_invites').select('*').eq('status', 'pending').order('invited_at', { ascending: false }),
       ]);
       if (re) throw re;
       if (ae) throw ae;
       setRoles(rolesData || []);
       setAdmins(adminsData || []);
+      // Load pending invites separately so a failure here never blocks roles/admins
+      const { data: invitesData } = await supabase
+        .from('admin_invites').select('*').eq('status', 'pending').order('invited_at', { ascending: false });
       setPendingInvites(invitesData || []);
     } catch (e) {
       setError(e.message || 'Failed to load data');
