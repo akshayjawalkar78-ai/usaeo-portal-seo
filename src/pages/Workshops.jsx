@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Clock, BookOpen, GraduationCap, FileText, User, ExternalLink } from 'lucide-react';
 import PageLayout from '../components/layout/PageLayout';
 import { UPCOMING_PARTNER_WORKSHOPS, PAST_PARTNER_WORKSHOPS } from '@/lib/partnerEventsSeed';
+import { base44 } from '@/api/base44Client';
 import Seo from '@/components/Seo';
 import { PAGE_SEO } from '@/lib/seo-config';
 
@@ -12,6 +13,28 @@ const fadeUp = (delay = 0) => ({
   viewport: { once: true },
   transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1], delay },
 });
+
+function normalizeWorkshop(w) {
+  return {
+    id: w.id,
+    partner: w.partner,
+    partnerShort: w.partner_short || w.partnerShort,
+    partnerLogo: w.partner_logo || w.partnerLogo,
+    partnerUrl: w.partner_url || w.partnerUrl,
+    title: w.title,
+    date: w.date,
+    isoDate: w.iso_date || w.isoDate,
+    status: w.status,
+    time: w.time,
+    instructor: w.instructor,
+    role: w.role,
+    topic: w.topic,
+    desc: w.description || w.desc,
+    zoomUrl: w.zoom_url || w.zoomUrl,
+    openTo: w.open_to || w.openTo,
+    free: w.free,
+  };
+}
 
 const upcoming = [];
 
@@ -28,6 +51,23 @@ const past = [
 ];
 
 export default function Workshops() {
+  const [partnerWorkshops, setPartnerWorkshops] = useState(null); // null = loading
+
+  useEffect(() => {
+    base44.entities.PartnerEvent.filter({ event_type: 'workshop' })
+      .then(rows => {
+        if (rows.length > 0) {
+          setPartnerWorkshops(rows.map(normalizeWorkshop).sort((a, b) => (a.isoDate || '').localeCompare(b.isoDate || '')));
+        } else {
+          setPartnerWorkshops([...UPCOMING_PARTNER_WORKSHOPS, ...PAST_PARTNER_WORKSHOPS].map(normalizeWorkshop));
+        }
+      })
+      .catch(() => setPartnerWorkshops([...UPCOMING_PARTNER_WORKSHOPS, ...PAST_PARTNER_WORKSHOPS].map(normalizeWorkshop)));
+  }, []);
+
+  const upcomingPartner = partnerWorkshops ? partnerWorkshops.filter(w => w.status === 'upcoming') : UPCOMING_PARTNER_WORKSHOPS.map(normalizeWorkshop);
+  const pastPartner = partnerWorkshops ? partnerWorkshops.filter(w => w.status === 'past') : PAST_PARTNER_WORKSHOPS.map(normalizeWorkshop);
+
   return (
     <PageLayout>
       <Seo title={PAGE_SEO['/workshops']?.title} description={PAGE_SEO['/workshops']?.description} canonical="/workshops" />
@@ -114,7 +154,7 @@ export default function Workshops() {
       </section>
 
       {/* Partner Workshops — Upcoming */}
-      {UPCOMING_PARTNER_WORKSHOPS.length > 0 && (
+      {upcomingPartner.length > 0 && (
         <section className="py-20 px-5 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <motion.div {...fadeUp()} className="mb-10">
@@ -123,7 +163,7 @@ export default function Workshops() {
               <p className="text-muted-foreground mt-2 max-w-xl">Free sessions hosted by our partner organizations, open to all students.</p>
             </motion.div>
             <div className="space-y-6">
-              {UPCOMING_PARTNER_WORKSHOPS.map((w, i) => (
+              {upcomingPartner.map((w, i) => (
                 <motion.div key={w.id} {...fadeUp(i * 0.08)} className="grid md:grid-cols-5 border border-green-200 rounded-2xl overflow-hidden hover:shadow-md transition-colors bg-white">
                   <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-between">
                     <div>
@@ -167,7 +207,7 @@ export default function Workshops() {
       )}
 
       {/* Partner Workshops — Past */}
-      {PAST_PARTNER_WORKSHOPS.length > 0 && (
+      {pastPartner.length > 0 && (
         <section className="py-20 px-5 border-t border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
             <motion.div {...fadeUp()} className="mb-10">
@@ -175,7 +215,7 @@ export default function Workshops() {
               <h2 className="font-sans text-3xl text-foreground">Previous partner workshops</h2>
             </motion.div>
             <div className="space-y-3">
-              {PAST_PARTNER_WORKSHOPS.map((w, i) => (
+              {pastPartner.map((w, i) => (
                 <motion.div key={w.id} {...fadeUp(i * 0.05)} className="flex items-start justify-between bg-white border border-border rounded-xl px-6 py-4 gap-4">
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     {w.partnerLogo && (
