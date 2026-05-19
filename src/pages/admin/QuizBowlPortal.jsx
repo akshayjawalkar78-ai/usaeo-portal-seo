@@ -1062,15 +1062,17 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
                             <div>
                               <p className="font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{proposer?.team_name || 'Unknown'} proposed</p>
                               <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                              {h.proposer_note && <p className="text-muted-foreground mt-0.5">"{h.proposer_note}"</p>}
                             </div>
                             {h.counter_proposed_time && (
                               <div>
                                 <p className="font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Counter-proposal</p>
                                 <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                                {h.change_reason && <p className="text-muted-foreground mt-0.5">"{h.change_reason}"</p>}
                               </div>
                             )}
                           </div>
-                          {h.change_reason && <p className="text-xs text-amber-700 mb-1">"{h.change_reason}"</p>}
+                          {!h.counter_proposed_time && h.change_reason && <p className="text-xs text-amber-700 mb-1">"{h.change_reason}"</p>}
                           <p className="text-xs text-muted-foreground mb-1.5">expires {fmt(new Date(h.expires_at))} · {h.status}</p>
                           <div className="flex gap-2 flex-wrap">
                             {!isChangeReq && (

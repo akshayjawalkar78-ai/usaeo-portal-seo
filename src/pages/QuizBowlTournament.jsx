@@ -117,7 +117,7 @@ export default function QuizBowlTournament() {
       })
     : [];
 
-  const proposeHold = async (shift, match, proposedISO) => {
+  const proposeHold = async (shift, match, proposedISO, note = '') => {
     setBusy(true);
     try {
       // Guard: block if opponent already has an active hold for this match
@@ -134,6 +134,7 @@ export default function QuizBowlTournament() {
       await base44.entities.QuizBowlSlotHold.create({
         shift_id: shift.id, match_id: match.id, proposing_team_id: myTeam.id,
         proposed_time: proposedISO, status: 'holding', expires_at: expires,
+        ...(note ? { proposer_note: note } : {}),
       });
       await base44.entities.QuizBowlRefShift.update(shift.id, { status: 'held', match_id: match.id });
       await base44.entities.QuizBowlMatch.update(match.id, {
@@ -151,6 +152,19 @@ export default function QuizBowlTournament() {
         }).catch(() => {});
       }
       setClaimSlot(null);
+      await load();
+    } finally { setBusy(false); }
+  };
+
+  const acceptCounterTime = async (hold) => {
+    setBusy(true);
+    try {
+      await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'claimed' });
+      await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'claimed' });
+      await base44.entities.QuizBowlMatch.update(hold.match_id, {
+        status: 'locked', scheduled_at: hold.counter_proposed_time,
+        last_interaction_at: new Date().toISOString(),
+      });
       await load();
     } finally { setBusy(false); }
   };
@@ -294,15 +308,17 @@ export default function QuizBowlTournament() {
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{opp?.team_name || 'Opponent'}</p>
                         <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                        {h.proposer_note && <p className="text-xs text-muted-foreground mt-0.5">"{h.proposer_note}"</p>}
                       </div>
                       {h.counter_proposed_time && (
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Your counter</p>
                           <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                          {h.change_reason && <p className="text-xs text-muted-foreground mt-0.5">"{h.change_reason}"</p>}
                         </div>
                       )}
                     </div>
-                    {h.change_reason && (
+                    {!h.counter_proposed_time && h.change_reason && (
                       <p className="text-xs text-amber-700">Note: "{h.change_reason}"</p>
                     )}
                     <p className="text-xs text-muted-foreground">Expires {fmt(h.expires_at)}</p>
@@ -390,11 +406,48 @@ export default function QuizBowlTournament() {
             </div>
             {holds.filter((h) => h.status === 'change_requested' &&
               myMatches.some((m) => m.id === h.match_id) &&
-              h.proposing_team_id === myTeam?.id).map((h) => (
-              <div key={h.id} className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
-                Opponent requested a change to your proposal: {h.change_reason || '(no detail)'}
-              </div>
-            ))}
+              h.proposing_team_id === myTeam?.id).map((h) => {
+              const match = myMatches.find((m) => m.id === h.match_id);
+              const opp = teamById(match?.team_a_id === myTeam?.id ? match?.team_b_id : match?.team_a_id);
+              return (
+                <div key={h.id} className="border-2 border-amber-300 rounded-xl p-4 bg-amber-50 space-y-2">
+                  <p className="text-xs font-semibold text-amber-800">{opp?.team_name || 'Opponent'} responded to your proposal</p>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Your time</p>
+                      <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                      {h.proposer_note && <p className="text-xs text-muted-foreground mt-0.5">"{h.proposer_note}"</p>}
+                    </div>
+                    {h.counter_proposed_time && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Their counter</p>
+                        <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                        {h.change_reason && <p className="text-xs text-muted-foreground mt-0.5">"{h.change_reason}"</p>}
+                      </div>
+                    )}
+                    {!h.counter_proposed_time && h.change_reason && (
+                      <p className="text-xs text-amber-700 self-center">Note: "{h.change_reason}"</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button disabled={busy} onClick={() => respondToHold(h, 'claim')}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                      Lock in my time
+                    </button>
+                    {h.counter_proposed_time && (
+                      <button disabled={busy} onClick={() => acceptCounterTime(h)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                        Accept their counter-time
+                      </button>
+                    )}
+                    <button disabled={busy} onClick={() => respondToHold(h, 'decline')}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 hover:bg-destructive/20 disabled:opacity-50">
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
             <p className="text-xs text-muted-foreground">Claiming places a strict 24h hold on the slot and pings the opponent captain to Claim, Decline, or Request a Change.</p>
           </div>
         )}
@@ -510,6 +563,7 @@ export default function QuizBowlTournament() {
 function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) {
   const [matchId, setMatchId] = useState(matches[0]?.id || '');
   const [time, setTime] = useState('');
+  const [note, setNote] = useState('');
   const match = matches.find((m) => m.id === matchId);
   const oppOf = (m) => {
     const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
@@ -544,10 +598,16 @@ function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) 
           <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
             min={min} max={max} value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Note to opponent <span className="font-normal text-muted-foreground">(optional)</span></label>
+          <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={2}
+            value={note} onChange={(e) => setNote(e.target.value)}
+            placeholder="e.g. This works best for us after 7pm" />
+        </div>
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
           <button disabled={busy || !match || !time}
-            onClick={() => onSubmit(shift, match, new Date(time).toISOString())}
+            onClick={() => onSubmit(shift, match, new Date(time).toISOString(), note)}
             className="flex-1 bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
             {busy ? 'Placing hold…' : 'Place 24h hold'}
           </button>
