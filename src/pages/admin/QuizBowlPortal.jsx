@@ -1029,35 +1029,62 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
         </div>
       )}
 
-      {/* Active holds */}
-      {activeHolds.length > 0 && (
-        <div className="bg-white rounded-2xl border border-border p-5">
-          <p className="font-semibold text-foreground mb-3">Negotiating ({activeHolds.length})</p>
-          <div className="space-y-2">
-            {activeHolds.map((h) => {
-              const m = matches.find((x) => x.id === h.match_id);
-              const a = teamById(m?.team_a_id), b = teamById(m?.team_b_id);
-              const exp = new Date(h.expires_at);
-              return (
-                <div key={h.id} className="flex items-center justify-between gap-3 text-sm border border-border rounded-lg p-3">
-                  <div>
-                    <p className="text-foreground">{a?.team_name} vs {b?.team_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Proposed {fmt(h.proposed_time)} · expires {fmt(exp)} · {h.status}
-                      {h.change_reason ? ` · "${h.change_reason}"` : ''}
-                    </p>
+      {/* Active holds — grouped by match to surface conflicts */}
+      {activeHolds.length > 0 && (() => {
+        const byMatch = activeHolds.reduce((acc, h) => {
+          (acc[h.match_id] = acc[h.match_id] || []).push(h);
+          return acc;
+        }, {});
+        return (
+          <div className="bg-white rounded-2xl border border-border p-5">
+            <p className="font-semibold text-foreground mb-3">Negotiating ({activeHolds.length})</p>
+            <div className="space-y-3">
+              {Object.values(byMatch).map((group) => {
+                const hasConflict = group.length > 1;
+                const m = matches.find((x) => x.id === group[0].match_id);
+                const a = teamById(m?.team_a_id), b = teamById(m?.team_b_id);
+                return (
+                  <div key={group[0].match_id} className={`rounded-xl border p-3 space-y-2 ${hasConflict ? 'border-orange-400 bg-orange-50' : 'border-border'}`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-foreground">{a?.team_name} vs {b?.team_name}</p>
+                      {hasConflict && (
+                        <span className="text-xs font-semibold text-orange-700 bg-orange-100 border border-orange-300 px-2 py-0.5 rounded-full">
+                          ⚠ {group.length} conflicting proposals — decline all but one
+                        </span>
+                      )}
+                    </div>
+                    {group.map((h) => {
+                      const proposer = teamById(h.proposing_team_id);
+                      const isChangeReq = h.status === 'change_requested';
+                      return (
+                        <div key={h.id} className={`text-sm rounded-lg p-2.5 space-y-1.5 ${isChangeReq ? 'bg-amber-50 border border-amber-200' : 'bg-muted/30 border border-border/50'}`}>
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">{proposer?.team_name || 'Unknown'}</span> proposed <strong>{fmt(h.proposed_time)}</strong> · expires {fmt(new Date(h.expires_at))} · <em>{h.status}</em>
+                            {isChangeReq && h.change_reason && <span className="text-amber-700"> · wants: "{h.change_reason}"</span>}
+                          </p>
+                          <div className="flex gap-2 flex-wrap">
+                            {!isChangeReq && (
+                              <button disabled={busy} onClick={() => resolveHold(h, 'claim')}
+                                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200">Claim</button>
+                            )}
+                            {isChangeReq && (
+                              <span className="text-xs text-amber-700 italic py-1.5">Opponent wants change — decline or propose new time</span>
+                            )}
+                            <button disabled={busy} onClick={() => setChgFor(h)}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">Re-propose time</button>
+                            <button disabled={busy} onClick={() => resolveHold(h, 'decline')}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200">Decline</button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="flex gap-2">
-                    <button disabled={busy} onClick={() => resolveHold(h, 'claim')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200">Claim</button>
-                    <button disabled={busy} onClick={() => setChgFor(h)} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">Request change</button>
-                    <button disabled={busy} onClick={() => resolveHold(h, 'decline')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200">Decline</button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Calendar + schedule cards */}
       {(() => {

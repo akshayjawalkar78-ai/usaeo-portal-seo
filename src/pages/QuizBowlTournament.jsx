@@ -103,13 +103,32 @@ export default function QuizBowlTournament() {
   };
 
   // Captain claims an open ref slot for one of their unscheduled matches.
+  // Exclude matches where the opponent already has an active hold — captain must respond to that instead.
   const schedulableMatches = myTeam
-    ? myMatches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status))
+    ? myMatches.filter((m) => {
+        if (!['unscheduled', 'negotiating'].includes(m.status)) return false;
+        const oppHold = holds.find((h) =>
+          h.match_id === m.id &&
+          ['holding', 'change_requested'].includes(h.status) &&
+          h.proposing_team_id !== myTeam.id
+        );
+        return !oppHold;
+      })
     : [];
 
   const proposeHold = async (shift, match, proposedISO) => {
     setBusy(true);
     try {
+      // Guard: block if opponent already has an active hold for this match
+      const conflict = holds.find((h) =>
+        h.match_id === match.id &&
+        ['holding', 'change_requested'].includes(h.status) &&
+        h.proposing_team_id !== myTeam.id
+      );
+      if (conflict) {
+        setClaimSlot(null);
+        return; // "Pending proposals" card already surfaced this
+      }
       const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
       await base44.entities.QuizBowlSlotHold.create({
         shift_id: shift.id, match_id: match.id, proposing_team_id: myTeam.id,
