@@ -21,7 +21,7 @@ export default function ProtectedRoute({ requireRole }) {
 
   // Role-gated route: wait until profile fetch has finished at least once
   if (requireRole) {
-    if (!profileAttempted || isProfileLoading) return <Fallback />;
+    if (!profileAttempted) return <Fallback />;
     if (profile?.role !== requireRole) {
       return <Navigate to="/unauthorized" replace />;
     }
