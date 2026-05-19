@@ -26,6 +26,7 @@ const contributionSections = [
       { partner: 'Think Finance', headline: 'Financial markets deep-dives', body: 'Think Finance authored a weekend workshop series on bond pricing and monetary policy that fed directly into finals prep.' },
       { partner: 'CFE', headline: 'Academic oversight', body: 'The Council for Financial Education reviewed judge rubrics and helped calibrate our essay scoring guide.' },
       { partner: 'YIMO', headline: 'IMO-level problems for economics', body: 'YIMO contributors — including IMO participants and USAMO honorable mentions — review and author high-difficulty math problems aligned to economics, raising the technical ceiling of the USAEO.' },
+      { partner: 'International Economics Post', headline: 'Essay competition sponsor', body: 'International Economics Post supports our essay competition by providing editorial guidance and amplifying student submissions to their readership of economics students and professionals.' },
     ],
   },
   {
@@ -40,6 +41,9 @@ const contributionSections = [
       { partner: 'Southeast Asian Economics Project', headline: 'Regional reach', body: 'SEAE organized info-sessions across their international network to extend USAEO visibility.' },
       { partner: 'CFE', headline: 'Newsletter features', body: 'CFE featured the USAEO in their nationwide educator newsletter, twice.' },
       { partner: 'NXTHorizon', headline: 'Sponsorship that lowers the bar', body: 'NXTHorizon brings its sponsor network to the USAEO National Finals, reducing competition costs and making in-person participation accessible to more students.' },
+      { partner: 'Financial Freedom Initiative', headline: 'Financial literacy events', body: 'FFI partners with USAEO to cross-promote financial literacy events, bringing targeted programming to student communities interested in personal finance and investing.' },
+      { partner: 'BizEmpower', headline: 'Community outreach & fundraising', body: 'BizEmpower amplifies USAEO across their network, supports grant outreach, helps raise donations, and recruits volunteers to sustain our programs.' },
+      { partner: 'Empiric Investing', headline: 'Financial literacy advocacy', body: 'Empiric Investing supports our financial literacy initiatives, helping communicate the value of economics education to aspiring investors and students.' },
     ],
   },
   {
@@ -53,6 +57,8 @@ const contributionSections = [
       { partner: 'Synthica', headline: 'Research tooling', body: 'Synthica granted USAEO research fellows free access to their AI-assisted analysis workbench.' },
       { partner: 'Youth Economy Lab', headline: 'Publication track', body: 'YEL offered top essay submissions a fast-track editorial review for publication.' },
       { partner: 'Southeast Asian Economics Project', headline: 'International research', body: 'SEAE connected USAEO researchers to field-work opportunities across Southeast Asia.' },
+      { partner: 'International Economics Post', headline: 'Blog content partnership', body: 'IEP collaborates with USAEO to develop blog content that connects competition economics to real-world policy analysis and research.' },
+      { partner: 'Empiric Investing', headline: 'Blog content & market analysis', body: 'Empiric Investing contributes to USAEO blog content, bringing market analysis and investing perspectives to our student research community.' },
     ],
   },
 ];
