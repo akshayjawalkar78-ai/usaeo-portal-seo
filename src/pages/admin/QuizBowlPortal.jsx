@@ -1197,31 +1197,6 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
               </div>
             )}
 
-            {/* Unscheduled / negotiating — always visible below calendar */}
-            {unscheduled.length > 0 && (
-              <div className="border-t border-border pt-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Unscheduled / Negotiating ({unscheduled.length})</p>
-                <div className="space-y-1.5">
-                  {unscheduled.map((m) => {
-                    const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
-                    return (
-                      <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 py-2">
-                        <div>
-                          <p className="text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}
-                            <span className="text-xs text-muted-foreground"> · {m.stage} R{m.round}</span></p>
-                          <p className="text-xs text-muted-foreground">{m.status}{m.deadline ? ` · due ${fmt(m.deadline)}` : ''}</p>
-                        </div>
-                        {openShifts.length > 0 && (
-                          <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">
-                            Propose slot
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         );
       })()}
@@ -1244,6 +1219,36 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
       <RefToolsTab matches={matches} holds={holds} teamById={teamById}
         protests={protests} config={config} myEmail={myEmail} shifts={shifts}
         isSuperAdmin={isSuperAdmin} reload={reload} setError={setError} />
+
+      {/* Unscheduled / negotiating — below claimed/live match cards */}
+      {(() => {
+        const unscheduled = matches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status));
+        if (unscheduled.length === 0) return null;
+        return (
+          <div className="bg-white rounded-2xl border border-border p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Unscheduled / Negotiating ({unscheduled.length})</p>
+            <div className="space-y-1.5">
+              {unscheduled.map((m) => {
+                const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
+                return (
+                  <div key={m.id} className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 py-2">
+                    <div>
+                      <p className="text-foreground">{a?.team_name || '—'} vs {b?.team_name || '—'}
+                        <span className="text-xs text-muted-foreground"> · {m.stage} R{m.round}</span></p>
+                      <p className="text-xs text-muted-foreground">{m.status}{m.deadline ? ` · due ${fmt(m.deadline)}` : ''}</p>
+                    </div>
+                    {openShifts.length > 0 && (
+                      <button onClick={() => setProposeFor(m)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">
+                        Propose slot
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1548,7 +1553,13 @@ function EditShiftModal({ shift, isSuperAdmin, onSave, onClose }) {
 
 function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail, shifts = [], isSuperAdmin, reload, setError }) {
   const mine = isSuperAdmin ? matches : matches.filter((m) => m.ref_email === myEmail);
-  const live = mine.filter((m) => ['locked', 'live'].includes(m.status));
+  // Only show MatchExecCard when match is within 2 hours or already past scheduled time.
+  const live = mine.filter((m) => {
+    if (!['locked', 'live'].includes(m.status)) return false;
+    if (m.status === 'live') return true;
+    if (!m.scheduled_at) return true;
+    return new Date(m.scheduled_at).getTime() - Date.now() <= 2 * 3600 * 1000;
+  });
   const done = mine.filter((m) => ['completed', 'draw', 'forfeit'].includes(m.status));
   const myShifts = isSuperAdmin ? shifts : shifts.filter((s) => s.ref_email === myEmail);
   const [sf, setSf] = useState({ start_at: '', end_at: '', ref_name: '' });
