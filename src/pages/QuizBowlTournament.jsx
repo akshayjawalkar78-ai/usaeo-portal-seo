@@ -14,6 +14,12 @@ const localDateKey = (d) => {
   return [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, '0'), String(dt.getDate()).padStart(2, '0')].join('-');
 };
 
+const toLocalInput = (d) => {
+  const dt = new Date(d);
+  return localDateKey(dt) + 'T' +
+    [String(dt.getHours()).padStart(2, '0'), String(dt.getMinutes()).padStart(2, '0')].join(':');
+};
+
 // Tournament window: May 17–24, 2026 (day-view agenda).
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
   const dt = new Date(2026, 4, 17 + i);
@@ -469,8 +475,8 @@ function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) 
     const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
     return teams.find((t) => t.id === id)?.team_name || 'TBD';
   };
-  const min = new Date(shift.start_at).toISOString().slice(0, 16);
-  const max = new Date(shift.end_at).toISOString().slice(0, 16);
+  const min = toLocalInput(shift.start_at);
+  const max = toLocalInput(shift.end_at);
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">

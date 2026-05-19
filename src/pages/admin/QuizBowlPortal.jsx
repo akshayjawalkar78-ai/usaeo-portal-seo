@@ -47,6 +47,12 @@ const localDateKey = (d) => {
   return [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, '0'), String(dt.getDate()).padStart(2, '0')].join('-');
 };
 
+const toLocalInput = (d) => {
+  const dt = new Date(d);
+  return localDateKey(dt) + 'T' +
+    [String(dt.getHours()).padStart(2, '0'), String(dt.getMinutes()).padStart(2, '0')].join(':');
+};
+
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
   const dt = new Date(2026, 4, 17 + i);
   return {
@@ -1011,7 +1017,7 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
                     <input className={inputCls + ' flex-1 min-w-32'} value={r.name || ''}
                       placeholder="Round name" onChange={(e) => updateRound(i, { name: e.target.value })} />
                     <input type="datetime-local" className={inputCls}
-                      defaultValue={r.deadline ? new Date(r.deadline).toISOString().slice(0, 16) : ''}
+                      defaultValue={r.deadline ? toLocalInput(r.deadline) : ''}
                       onBlur={(e) => updateRound(i, { deadline: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
                     <button onClick={() => deleteRound(i)} className="p-2 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -1468,8 +1474,8 @@ function ShiftDetailPanel({ shift, match, shiftHolds, teamById, reload, setError
 }
 
 function EditShiftModal({ shift, isSuperAdmin, onSave, onClose }) {
-  const [start, setStart] = useState(shift.start_at ? new Date(shift.start_at).toISOString().slice(0, 16) : '');
-  const [end, setEnd] = useState(shift.end_at ? new Date(shift.end_at).toISOString().slice(0, 16) : '');
+  const [start, setStart] = useState(shift.start_at ? toLocalInput(shift.start_at) : '');
+  const [end, setEnd] = useState(shift.end_at ? toLocalInput(shift.end_at) : '');
   const [name, setName] = useState(shift.ref_name || '');
   const [email, setEmail] = useState(shift.ref_email || '');
   return (
@@ -1545,7 +1551,7 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
               <input type="datetime-local" className={inputCls} value={sf.start_at}
                 onChange={(e) => {
                   const start = e.target.value;
-                  const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
+                  const autoEnd = start ? toLocalInput(new Date(start).getTime() + 30 * 60000) : '';
                   setSf((p) => ({ ...p, start_at: start, end_at: autoEnd }));
                 }} /></div>
             <div><label className="block text-xs text-muted-foreground mb-1">End</label>
@@ -2411,8 +2417,8 @@ function PreviewClaimModal({ shift, matches, teams, myTeam, onClose, onSubmit })
     return teams.find(t => t.id === id)?.team_name || 'TBD';
   };
   const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
-  const min = new Date(shift.start_at).toISOString().slice(0, 16);
-  const max = new Date(shift.end_at).toISOString().slice(0, 16);
+  const min = toLocalInput(shift.start_at);
+  const max = toLocalInput(shift.end_at);
   return (
     <div className="fixed inset-0 bg-black/40 z-60 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
