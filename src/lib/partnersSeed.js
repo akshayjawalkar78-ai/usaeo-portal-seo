@@ -137,6 +137,7 @@ export const PARTNERS = [
     url: 'https://bcinvestments.wixsite.com/financial-freedom--2',
     desc: 'Financial literacy events & cross-promotion',
     logoScale: 1.2,
+    wordmark: { text: 'Financial Freedom\nInitiative', fontFamily: 'Montserrat, Inter, sans-serif', fontWeight: 700, fontSize: '0.8rem', wrap: true },
     tags: ['awareness'],
   },
   {
