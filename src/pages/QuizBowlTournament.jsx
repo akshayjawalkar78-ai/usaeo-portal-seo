@@ -7,14 +7,25 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/supabaseClient';
 
-const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
+const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }) : 'TBD');
+
+const localDateKey = (d) => {
+  const dt = new Date(d);
+  return [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, '0'), String(dt.getDate()).padStart(2, '0')].join('-');
+};
+
+const toLocalInput = (d) => {
+  const dt = new Date(d);
+  return localDateKey(dt) + 'T' +
+    [String(dt.getHours()).padStart(2, '0'), String(dt.getMinutes()).padStart(2, '0')].join(':');
+};
 
 // Tournament window: May 17–24, 2026 (day-view agenda).
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
-  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  const dt = new Date(2026, 4, 17 + i);
   return {
-    key: dt.toISOString().slice(0, 10),
-    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+    key: localDateKey(dt),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
   };
 });
 
@@ -45,6 +56,9 @@ export default function QuizBowlTournament() {
   const [claimSlot, setClaimSlot] = useState(null); // shift being claimed
   const [calDay, setCalDay] = useState(null); // selected calendar day filter
   const [busy, setBusy] = useState(false);
+  const [changeFor, setChangeFor] = useState(null); // hold awaiting counter-propose input
+  const [changeReason, setChangeReason] = useState('');
+  const [counterTime, setCounterTime] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -90,17 +104,37 @@ export default function QuizBowlTournament() {
   };
 
   // Captain claims an open ref slot for one of their unscheduled matches.
+  // Exclude matches where the opponent already has an active hold — captain must respond to that instead.
   const schedulableMatches = myTeam
-    ? myMatches.filter((m) => ['unscheduled', 'negotiating'].includes(m.status))
+    ? myMatches.filter((m) => {
+        if (!['unscheduled', 'negotiating'].includes(m.status)) return false;
+        const oppHold = holds.find((h) =>
+          h.match_id === m.id &&
+          ['holding', 'change_requested'].includes(h.status) &&
+          h.proposing_team_id !== myTeam.id
+        );
+        return !oppHold;
+      })
     : [];
 
-  const proposeHold = async (shift, match, proposedISO) => {
+  const proposeHold = async (shift, match, proposedISO, note = '') => {
     setBusy(true);
     try {
+      // Guard: block if opponent already has an active hold for this match
+      const conflict = holds.find((h) =>
+        h.match_id === match.id &&
+        ['holding', 'change_requested'].includes(h.status) &&
+        h.proposing_team_id !== myTeam.id
+      );
+      if (conflict) {
+        setClaimSlot(null);
+        return; // "Pending proposals" card already surfaced this
+      }
       const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
       await base44.entities.QuizBowlSlotHold.create({
         shift_id: shift.id, match_id: match.id, proposing_team_id: myTeam.id,
         proposed_time: proposedISO, status: 'holding', expires_at: expires,
+        ...(note ? { proposer_note: note } : {}),
       });
       await base44.entities.QuizBowlRefShift.update(shift.id, { status: 'held', match_id: match.id });
       await base44.entities.QuizBowlMatch.update(match.id, {
@@ -122,7 +156,47 @@ export default function QuizBowlTournament() {
     } finally { setBusy(false); }
   };
 
-  const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
+  const acceptCounterTime = async (hold) => {
+    setBusy(true);
+    try {
+      await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'claimed' });
+      await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'claimed' });
+      await base44.entities.QuizBowlMatch.update(hold.match_id, {
+        status: 'locked', scheduled_at: hold.counter_proposed_time,
+        last_interaction_at: new Date().toISOString(),
+      });
+      await load();
+    } finally { setBusy(false); }
+  };
+
+  const respondToHold = async (hold, action, reason) => {
+    setBusy(true);
+    try {
+      if (action === 'claim') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'claimed' });
+        await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'claimed' });
+        await base44.entities.QuizBowlMatch.update(hold.match_id, {
+          status: 'locked', last_interaction_at: new Date().toISOString(),
+        });
+      } else if (action === 'decline') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'declined' });
+        await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'open', match_id: null });
+        await base44.entities.QuizBowlMatch.update(hold.match_id, {
+          status: 'unscheduled', ref_shift_id: null, scheduled_at: null,
+          last_interaction_at: new Date().toISOString(),
+        });
+      } else if (action === 'change') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, {
+          status: 'change_requested', change_reason: reason || '',
+          ...(counterTime ? { counter_proposed_time: new Date(counterTime).toISOString() } : {}),
+        });
+        setChangeFor(null); setChangeReason(''); setCounterTime('');
+      }
+      await load();
+    } finally { setBusy(false); }
+  };
+
+  const dayKey = localDateKey;
   const slotDays = new Set(shifts.map((s) => dayKey(s.start_at)));
   const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
 
@@ -212,6 +286,63 @@ export default function QuizBowlTournament() {
           </div>
         )}
 
+        {/* Pending holds — opponent proposed, captain must respond */}
+        {isCaptain && myTeam && (() => {
+          const pending = holds.filter((h) =>
+            ['holding', 'change_requested'].includes(h.status) &&
+            myMatches.some((m) => m.id === h.match_id) &&
+            h.proposing_team_id !== myTeam.id
+          );
+          if (pending.length === 0) return null;
+          return (
+            <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 space-y-3">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-600" /> Action required — opponent proposals ({pending.length})
+              </h3>
+              {pending.map((h) => {
+                const match = myMatches.find((m) => m.id === h.match_id);
+                const opp = teamById(match?.team_a_id === myTeam.id ? match?.team_b_id : match?.team_a_id);
+                return (
+                  <div key={h.id} className="border border-amber-200 rounded-xl p-4 bg-amber-50 space-y-2">
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{opp?.team_name || 'Opponent'}</p>
+                        <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                        {h.proposer_note && <p className="text-xs text-muted-foreground mt-0.5">"{h.proposer_note}"</p>}
+                      </div>
+                      {h.counter_proposed_time && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Your counter</p>
+                          <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                          {h.change_reason && <p className="text-xs text-muted-foreground mt-0.5">"{h.change_reason}"</p>}
+                        </div>
+                      )}
+                    </div>
+                    {!h.counter_proposed_time && h.change_reason && (
+                      <p className="text-xs text-amber-700">Note: "{h.change_reason}"</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">Expires {fmt(h.expires_at)}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button disabled={busy} onClick={() => respondToHold(h, 'claim')}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                        Accept their time
+                      </button>
+                      <button disabled={busy} onClick={() => { setChangeFor(h); setCounterTime(''); setChangeReason(''); }}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200 disabled:opacity-50">
+                        Counter-propose
+                      </button>
+                      <button disabled={busy} onClick={() => respondToHold(h, 'decline')}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 hover:bg-destructive/20 disabled:opacity-50">
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
         {/* Round deadlines */}
         {myTeam && rounds.length > 0 && (
           <div className="bg-white rounded-2xl border border-border p-6 space-y-2">
@@ -274,11 +405,49 @@ export default function QuizBowlTournament() {
               })()}
             </div>
             {holds.filter((h) => h.status === 'change_requested' &&
-              myMatches.some((m) => m.id === h.match_id)).map((h) => (
-              <div key={h.id} className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
-                Opponent suggested a change: {h.change_reason || '(no detail)'}
-              </div>
-            ))}
+              myMatches.some((m) => m.id === h.match_id) &&
+              h.proposing_team_id === myTeam?.id).map((h) => {
+              const match = myMatches.find((m) => m.id === h.match_id);
+              const opp = teamById(match?.team_a_id === myTeam?.id ? match?.team_b_id : match?.team_a_id);
+              return (
+                <div key={h.id} className="border-2 border-amber-300 rounded-xl p-4 bg-amber-50 space-y-2">
+                  <p className="text-xs font-semibold text-amber-800">{opp?.team_name || 'Opponent'} responded to your proposal</p>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Your time</p>
+                      <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                      {h.proposer_note && <p className="text-xs text-muted-foreground mt-0.5">"{h.proposer_note}"</p>}
+                    </div>
+                    {h.counter_proposed_time && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Their counter</p>
+                        <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                        {h.change_reason && <p className="text-xs text-muted-foreground mt-0.5">"{h.change_reason}"</p>}
+                      </div>
+                    )}
+                    {!h.counter_proposed_time && h.change_reason && (
+                      <p className="text-xs text-amber-700 self-center">Note: "{h.change_reason}"</p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button disabled={busy} onClick={() => respondToHold(h, 'claim')}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                      Lock in my time
+                    </button>
+                    {h.counter_proposed_time && (
+                      <button disabled={busy} onClick={() => acceptCounterTime(h)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                        Accept their counter-time
+                      </button>
+                    )}
+                    <button disabled={busy} onClick={() => respondToHold(h, 'decline')}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 hover:bg-destructive/20 disabled:opacity-50">
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
             <p className="text-xs text-muted-foreground">Claiming places a strict 24h hold on the slot and pings the opponent captain to Claim, Decline, or Request a Change.</p>
           </div>
         )}
@@ -357,6 +526,36 @@ export default function QuizBowlTournament() {
           myTeam={myTeam} busy={busy} onClose={() => setClaimSlot(null)}
           onSubmit={proposeHold} />
       )}
+
+      {changeFor && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <h3 className="font-semibold text-foreground">Counter-propose a time</h3>
+            <div className="bg-muted/40 rounded-lg p-3 text-xs text-muted-foreground">
+              Opponent proposed: <strong className="text-foreground">{fmt(changeFor.proposed_time)}</strong>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Your proposed time <span className="text-muted-foreground font-normal">(required — within the referee's availability window)</span></label>
+              <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
+                value={counterTime} onChange={(e) => setCounterTime(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Note <span className="text-muted-foreground font-normal">(optional)</span></label>
+              <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={2}
+                value={changeReason} onChange={(e) => setChangeReason(e.target.value)}
+                placeholder="e.g. We have a conflict at that time" />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => { setChangeFor(null); setChangeReason(''); setCounterTime(''); }}
+                className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={busy || !counterTime} onClick={() => respondToHold(changeFor, 'change', changeReason)}
+                className="flex-1 bg-amber-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-amber-600 disabled:opacity-50">
+                {busy ? 'Sending…' : 'Send counter-proposal'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -364,13 +563,14 @@ export default function QuizBowlTournament() {
 function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) {
   const [matchId, setMatchId] = useState(matches[0]?.id || '');
   const [time, setTime] = useState('');
+  const [note, setNote] = useState('');
   const match = matches.find((m) => m.id === matchId);
   const oppOf = (m) => {
     const id = m.team_a_id === myTeam.id ? m.team_b_id : m.team_a_id;
     return teams.find((t) => t.id === id)?.team_name || 'TBD';
   };
-  const min = new Date(shift.start_at).toISOString().slice(0, 16);
-  const max = new Date(shift.end_at).toISOString().slice(0, 16);
+  const min = toLocalInput(shift.start_at);
+  const max = toLocalInput(shift.end_at);
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
@@ -398,10 +598,16 @@ function ClaimModal({ shift, matches, teams, myTeam, busy, onClose, onSubmit }) 
           <input type="datetime-local" className="w-full border border-border rounded-lg px-3 py-2 text-sm"
             min={min} max={max} value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Note to opponent <span className="font-normal text-muted-foreground">(optional)</span></label>
+          <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={2}
+            value={note} onChange={(e) => setNote(e.target.value)}
+            placeholder="e.g. This works best for us after 7pm" />
+        </div>
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
           <button disabled={busy || !match || !time}
-            onClick={() => onSubmit(shift, match, new Date(time).toISOString())}
+            onClick={() => onSubmit(shift, match, new Date(time).toISOString(), note)}
             className="flex-1 bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
             {busy ? 'Placing hold…' : 'Place 24h hold'}
           </button>
