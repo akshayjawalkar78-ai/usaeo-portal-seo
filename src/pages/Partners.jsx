@@ -194,7 +194,7 @@ export default function Partners() {
               <motion.div key={p.name} {...fadeUp(i * 0.06)}>
                 <a href={p.url} target="_blank" rel="noopener noreferrer"
                   className="group flex flex-col items-center gap-4 p-8 bg-white border border-border rounded-2xl hover:border-primary/30 hover:shadow-md transition-all duration-200">
-                  <div className="h-10 flex items-center gap-2">
+                  <div className="flex flex-col items-center gap-1">
                     {p.logo ? (
                       p.logoCrop ? (
                         <div style={{ height: 40, width: 100, overflow: 'hidden', position: 'relative' }} className="flex items-center justify-center">
@@ -209,7 +209,7 @@ export default function Partners() {
                       <span className="text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors">{p.shortName || p.name.split(' ').map(w => w[0]).join('').slice(0, 3)}</span>
                     )}
                     {p.wordmark && (
-                      <span style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight, fontSize: p.wordmark.fontSize, whiteSpace: p.wordmark.wrap ? 'pre-line' : 'nowrap', lineHeight: 1.2 }} className="text-xl text-foreground/70 group-hover:text-foreground">
+                      <span style={{ fontFamily: p.wordmark.fontFamily, fontWeight: p.wordmark.fontWeight, fontSize: p.wordmark.fontSize, whiteSpace: p.wordmark.wrap ? 'pre-line' : 'nowrap', lineHeight: 1.2 }} className="text-sm text-center text-foreground/70 group-hover:text-foreground">
                         {p.wordmark.text}
                       </span>
                     )}
