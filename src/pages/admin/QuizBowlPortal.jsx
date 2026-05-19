@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Lock, Unlock, Crown, Trash2, Search, List, MapPin, X, Trophy,
-  Shuffle, CalendarClock, Map as MapIcon, Gavel, Settings as SettingsIcon,
+  Shuffle, CalendarClock, Map as MapIcon, Settings as SettingsIcon,
   Check, AlertTriangle, Clock, Play, ShieldCheck, RefreshCw, Flag, Link2,
   ChevronDown, Eye, Pencil, LogOut, UserPlus, AlertCircle,
 } from 'lucide-react';
@@ -62,7 +62,7 @@ const CONFLICT_STYLE = {
   red: 'bg-destructive/10 text-destructive border-red-300',
 };
 
-const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—');
+const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }) : '—');
 
 export default function QuizBowlPortal() {
   const { isSuperAdmin, profile } = useAuth();
@@ -76,7 +76,6 @@ export default function QuizBowlPortal() {
       { id: 'brackets', label: 'Brackets', icon: Trophy, super: true },
       { id: 'schedule', label: 'Schedule', icon: CalendarClock, super: false },
       { id: 'conflict', label: 'Conflict Map', icon: MapIcon, super: false },
-      { id: 'ref', label: 'Ref Tools', icon: Gavel, super: false },
       { id: 'settings', label: 'Settings', icon: SettingsIcon, super: true },
     ];
     return isSuperAdmin ? all : all.filter((t) => !t.super);
@@ -328,16 +327,11 @@ export default function QuizBowlPortal() {
         <ScheduleTab teams={teams} matches={matches} shifts={shifts} holds={holds}
           config={config} isSuperAdmin={isSuperAdmin} myEmail={myEmail}
           busy={busy} reload={loadAll} proposeHold={proposeHold}
-          resolveHold={resolveHold} teamById={teamById} setError={setError} />
+          resolveHold={resolveHold} teamById={teamById} protests={protests} setError={setError} />
       )}
       {sub === 'conflict' && (
         <ConflictTab matches={matches} holds={holds} shifts={shifts}
           teamById={teamById} isSuperAdmin={isSuperAdmin} reload={loadAll} />
-      )}
-      {sub === 'ref' && (
-        <RefToolsTab matches={matches} teams={teams} teamById={teamById}
-          holds={holds} protests={protests} config={config} myEmail={myEmail} shifts={shifts}
-          isSuperAdmin={isSuperAdmin} reload={loadAll} setError={setError} />
       )}
       {sub === 'settings' && isSuperAdmin && (
         <SettingsTab config={config} teams={teams} busy={busy}
@@ -978,24 +972,10 @@ function MatchResultRow({ match, team, opp, onSet }) {
 }
 
 /* ─────────────────────────  SCHEDULE  ───────────────────────── */
-function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEmail, busy, reload, proposeHold, resolveHold, teamById, setError }) {
-  const [shiftForm, setShiftForm] = useState({ start_at: '', end_at: '', ref_name: '' });
+function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEmail, busy, reload, proposeHold, resolveHold, teamById, protests, setError }) {
   const [proposeFor, setProposeFor] = useState(null); // match
   const [chgFor, setChgFor] = useState(null); // hold
   const [calDay, setCalDay] = useState(null);
-
-  const createShift = async () => {
-    if (!shiftForm.start_at || !shiftForm.end_at) return;
-    try {
-      await base44.entities.QuizBowlRefShift.create({
-        ref_email: myEmail, ref_name: shiftForm.ref_name || myEmail,
-        start_at: new Date(shiftForm.start_at).toISOString(),
-        end_at: new Date(shiftForm.end_at).toISOString(), status: 'open',
-      });
-      setShiftForm({ start_at: '', end_at: '', ref_name: '' });
-      reload();
-    } catch (e) { setError(e.message); }
-  };
 
   const openShifts = shifts.filter((s) => s.status === 'open');
   const activeHolds = holds.filter((h) => ['holding', 'change_requested'].includes(h.status));
@@ -1012,28 +992,6 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
 
   return (
     <div className="space-y-4">
-      {/* Ref shift submission */}
-      <div className="bg-white rounded-2xl border border-border p-5">
-        <p className="font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> Post a referee shift</p>
-        <div className="flex flex-wrap gap-3 items-end">
-          <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
-            <input type="datetime-local" className={inputCls} value={shiftForm.start_at}
-              onChange={(e) => {
-                const start = e.target.value;
-                const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
-                setShiftForm((p) => ({ ...p, start_at: start, end_at: autoEnd }));
-              }} /></div>
-          <div><label className="block text-xs text-muted-foreground mb-1">End</label>
-            <input type="datetime-local" className={inputCls} value={shiftForm.end_at}
-              onChange={(e) => setShiftForm((p) => ({ ...p, end_at: e.target.value }))} /></div>
-          <div><label className="block text-xs text-muted-foreground mb-1">Ref name</label>
-            <input className={inputCls} placeholder="optional" value={shiftForm.ref_name}
-              onChange={(e) => setShiftForm((p) => ({ ...p, ref_name: e.target.value }))} /></div>
-          <button onClick={createShift} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Add shift</button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-3">{openShifts.length} open shift(s) in the pool.</p>
-      </div>
-
       {isSuperAdmin && (
         <div className="bg-white rounded-2xl border border-border p-5">
           <div className="flex items-center justify-between mb-3">
@@ -1222,6 +1180,10 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
           </Modal>
         )}
       </AnimatePresence>
+
+      <RefToolsTab matches={matches} holds={holds} teamById={teamById}
+        protests={protests} config={config} myEmail={myEmail} shifts={shifts}
+        isSuperAdmin={isSuperAdmin} reload={reload} setError={setError} />
     </div>
   );
 }
