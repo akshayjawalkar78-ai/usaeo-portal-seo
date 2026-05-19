@@ -1058,20 +1058,37 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
                       const isChangeReq = h.status === 'change_requested';
                       return (
                         <div key={h.id} className={`text-sm rounded-lg p-2.5 space-y-1.5 ${isChangeReq ? 'bg-amber-50 border border-amber-200' : 'bg-muted/30 border border-border/50'}`}>
-                          <p className="text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">{proposer?.team_name || 'Unknown'}</span> proposed <strong>{fmt(h.proposed_time)}</strong> · expires {fmt(new Date(h.expires_at))} · <em>{h.status}</em>
-                            {isChangeReq && h.change_reason && <span className="text-amber-700"> · wants: "{h.change_reason}"</span>}
-                          </p>
+                          <div className="flex flex-wrap gap-4 text-xs mb-1">
+                            <div>
+                              <p className="font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">{proposer?.team_name || 'Unknown'} proposed</p>
+                              <p className="font-medium text-foreground">{fmt(h.proposed_time)}</p>
+                            </div>
+                            {h.counter_proposed_time && (
+                              <div>
+                                <p className="font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">Counter-proposal</p>
+                                <p className="font-medium text-foreground">{fmt(h.counter_proposed_time)}</p>
+                              </div>
+                            )}
+                          </div>
+                          {h.change_reason && <p className="text-xs text-amber-700 mb-1">"{h.change_reason}"</p>}
+                          <p className="text-xs text-muted-foreground mb-1.5">expires {fmt(new Date(h.expires_at))} · {h.status}</p>
                           <div className="flex gap-2 flex-wrap">
                             {!isChangeReq && (
                               <button disabled={busy} onClick={() => resolveHold(h, 'claim')}
-                                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200">Claim</button>
+                                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200">
+                                Claim {proposer?.team_name}'s time
+                              </button>
                             )}
-                            {isChangeReq && (
-                              <span className="text-xs text-amber-700 italic py-1.5">Opponent wants change — decline or propose new time</span>
+                            {h.counter_proposed_time && (
+                              <button disabled={busy} onClick={async () => {
+                                await base44.entities.QuizBowlMatch.update(h.match_id, { scheduled_at: h.counter_proposed_time });
+                                resolveHold({ ...h, proposed_time: h.counter_proposed_time }, 'claim');
+                              }} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200">
+                                Claim counter-time
+                              </button>
                             )}
                             <button disabled={busy} onClick={() => setChgFor(h)}
-                              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">Re-propose time</button>
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">Re-propose</button>
                             <button disabled={busy} onClick={() => resolveHold(h, 'decline')}
                               className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200">Decline</button>
                           </div>
