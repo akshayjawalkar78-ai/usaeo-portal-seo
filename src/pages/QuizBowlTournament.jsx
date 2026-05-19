@@ -50,6 +50,8 @@ export default function QuizBowlTournament() {
   const [claimSlot, setClaimSlot] = useState(null); // shift being claimed
   const [calDay, setCalDay] = useState(null); // selected calendar day filter
   const [busy, setBusy] = useState(false);
+  const [changeFor, setChangeFor] = useState(null); // hold awaiting change reason input
+  const [changeReason, setChangeReason] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -123,6 +125,32 @@ export default function QuizBowlTournament() {
         }).catch(() => {});
       }
       setClaimSlot(null);
+      await load();
+    } finally { setBusy(false); }
+  };
+
+  const respondToHold = async (hold, action, reason) => {
+    setBusy(true);
+    try {
+      if (action === 'claim') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'claimed' });
+        await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'claimed' });
+        await base44.entities.QuizBowlMatch.update(hold.match_id, {
+          status: 'locked', last_interaction_at: new Date().toISOString(),
+        });
+      } else if (action === 'decline') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, { status: 'declined' });
+        await base44.entities.QuizBowlRefShift.update(hold.shift_id, { status: 'open', match_id: null });
+        await base44.entities.QuizBowlMatch.update(hold.match_id, {
+          status: 'unscheduled', ref_shift_id: null, scheduled_at: null,
+          last_interaction_at: new Date().toISOString(),
+        });
+      } else if (action === 'change') {
+        await base44.entities.QuizBowlSlotHold.update(hold.id, {
+          status: 'change_requested', change_reason: reason || '',
+        });
+        setChangeFor(null); setChangeReason('');
+      }
       await load();
     } finally { setBusy(false); }
   };
@@ -217,6 +245,52 @@ export default function QuizBowlTournament() {
           </div>
         )}
 
+        {/* Pending holds — opponent proposed, captain must respond */}
+        {isCaptain && myTeam && (() => {
+          const pending = holds.filter((h) =>
+            ['holding', 'change_requested'].includes(h.status) &&
+            myMatches.some((m) => m.id === h.match_id) &&
+            h.proposing_team_id !== myTeam.id
+          );
+          if (pending.length === 0) return null;
+          return (
+            <div className="bg-white rounded-2xl border-2 border-amber-300 p-6 space-y-3">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-600" /> Action required — opponent proposals ({pending.length})
+              </h3>
+              {pending.map((h) => {
+                const match = myMatches.find((m) => m.id === h.match_id);
+                const opp = teamById(match?.team_a_id === myTeam.id ? match?.team_b_id : match?.team_a_id);
+                return (
+                  <div key={h.id} className="border border-amber-200 rounded-xl p-4 bg-amber-50 space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      {opp?.team_name || 'Opponent'} proposed <strong>{fmt(h.proposed_time)}</strong>
+                      {h.status === 'change_requested' && h.change_reason && (
+                        <span className="text-xs text-amber-700 ml-2">· change requested: "{h.change_reason}"</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Expires {fmt(h.expires_at)}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button disabled={busy} onClick={() => respondToHold(h, 'claim')}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-success/10 text-success border border-green-200 hover:bg-success/20 disabled:opacity-50">
+                        Accept
+                      </button>
+                      <button disabled={busy} onClick={() => setChangeFor(h)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200 disabled:opacity-50">
+                        Request change
+                      </button>
+                      <button disabled={busy} onClick={() => respondToHold(h, 'decline')}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-red-200 hover:bg-destructive/20 disabled:opacity-50">
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
         {/* Round deadlines */}
         {myTeam && rounds.length > 0 && (
           <div className="bg-white rounded-2xl border border-border p-6 space-y-2">
@@ -279,9 +353,10 @@ export default function QuizBowlTournament() {
               })()}
             </div>
             {holds.filter((h) => h.status === 'change_requested' &&
-              myMatches.some((m) => m.id === h.match_id)).map((h) => (
+              myMatches.some((m) => m.id === h.match_id) &&
+              h.proposing_team_id === myTeam?.id).map((h) => (
               <div key={h.id} className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
-                Opponent suggested a change: {h.change_reason || '(no detail)'}
+                Opponent requested a change to your proposal: {h.change_reason || '(no detail)'}
               </div>
             ))}
             <p className="text-xs text-muted-foreground">Claiming places a strict 24h hold on the slot and pings the opponent captain to Claim, Decline, or Request a Change.</p>
@@ -361,6 +436,26 @@ export default function QuizBowlTournament() {
         <ClaimModal shift={claimSlot} matches={schedulableMatches} teams={teams}
           myTeam={myTeam} busy={busy} onClose={() => setClaimSlot(null)}
           onSubmit={proposeHold} />
+      )}
+
+      {changeFor && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <h3 className="font-semibold text-foreground">Request a different time</h3>
+            <p className="text-xs text-muted-foreground">Explain what time works better for your team. The opponent will see this message.</p>
+            <textarea className="w-full border border-border rounded-lg px-3 py-2 text-sm" rows={3}
+              value={changeReason} onChange={(e) => setChangeReason(e.target.value)}
+              placeholder="e.g. We're unavailable at that time — could we do Saturday morning instead?" />
+            <div className="flex gap-3">
+              <button onClick={() => { setChangeFor(null); setChangeReason(''); }}
+                className="flex-1 border border-border rounded-lg py-2 text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
+              <button disabled={busy || !changeReason.trim()} onClick={() => respondToHold(changeFor, 'change', changeReason)}
+                className="flex-1 bg-amber-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-amber-600 disabled:opacity-50">
+                {busy ? 'Sending…' : 'Send request'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

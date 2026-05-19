@@ -976,6 +976,7 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
   const [proposeFor, setProposeFor] = useState(null); // match
   const [chgFor, setChgFor] = useState(null); // hold
   const [calDay, setCalDay] = useState(null);
+  const [roundsOpen, setRoundsOpen] = useState(true);
 
   const openShifts = shifts.filter((s) => s.status === 'open');
   const activeHolds = holds.filter((h) => ['holding', 'change_requested'].includes(h.status));
@@ -995,23 +996,30 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
       {isSuperAdmin && (
         <div className="bg-white rounded-2xl border border-border p-5">
           <div className="flex items-center justify-between mb-3">
-            <p className="font-semibold text-foreground">Round deadlines</p>
-            <button onClick={addRound} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">+ Add round</button>
+            <button onClick={() => setRoundsOpen((o) => !o)} className="flex items-center gap-2 font-semibold text-foreground hover:text-primary transition-colors">
+              <ChevronDown className={`w-4 h-4 transition-transform ${roundsOpen ? 'rotate-180' : ''}`} />
+              Round deadlines {rounds.length > 0 && <span className="text-xs font-normal text-muted-foreground">({rounds.length})</span>}
+            </button>
+            {roundsOpen && <button onClick={addRound} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border hover:bg-muted">+ Add round</button>}
           </div>
-          {rounds.length === 0 && <p className="text-sm text-muted-foreground">No rounds yet. Add rounds — names and deadlines show on student dashboards.</p>}
-          <div className="space-y-2">
-            {rounds.map((r, i) => (
-              <div key={i} className="flex flex-wrap gap-2 items-center">
-                <input className={inputCls + ' flex-1 min-w-32'} value={r.name || ''}
-                  placeholder="Round name" onChange={(e) => updateRound(i, { name: e.target.value })} />
-                <input type="datetime-local" className={inputCls}
-                  defaultValue={r.deadline ? new Date(r.deadline).toISOString().slice(0, 16) : ''}
-                  onBlur={(e) => updateRound(i, { deadline: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
-                <button onClick={() => deleteRound(i)} className="p-2 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+          {roundsOpen && (
+            <>
+              {rounds.length === 0 && <p className="text-sm text-muted-foreground">No rounds yet. Add rounds — names and deadlines show on student dashboards.</p>}
+              <div className="space-y-2">
+                {rounds.map((r, i) => (
+                  <div key={i} className="flex flex-wrap gap-2 items-center">
+                    <input className={inputCls + ' flex-1 min-w-32'} value={r.name || ''}
+                      placeholder="Round name" onChange={(e) => updateRound(i, { name: e.target.value })} />
+                    <input type="datetime-local" className={inputCls}
+                      defaultValue={r.deadline ? new Date(r.deadline).toISOString().slice(0, 16) : ''}
+                      onBlur={(e) => updateRound(i, { deadline: e.target.value ? new Date(e.target.value).toISOString() : '' })} />
+                    <button onClick={() => deleteRound(i)} className="p-2 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">Unplayed matches at the deadline are auto-marked as draws by the scheduler. Editing names/count here updates the student dashboard.</p>
+              <p className="text-xs text-muted-foreground mt-2">Unplayed matches at the deadline are auto-marked as draws by the scheduler. Editing names/count here updates the student dashboard.</p>
+            </>
+          )}
         </div>
       )}
 
@@ -1494,6 +1502,8 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
   const [sf, setSf] = useState({ start_at: '', end_at: '', ref_name: '' });
   const [editShift, setEditShift] = useState(null);
   const [expanded, setExpanded] = useState(new Set());
+  const [shiftsOpen, setShiftsOpen] = useState(true);
+  const [doneOpen, setDoneOpen] = useState(false);
   const toggleExpand = (id) => setExpanded((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
 
   const createShift = async () => {
@@ -1525,25 +1535,29 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
     <div className="space-y-4">
       {/* Always-visible shift pool */}
       <div className="bg-white rounded-2xl border border-border p-5">
-        <p className="font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> My referee shifts ({myShifts.length})</p>
-        <div className="flex flex-wrap gap-3 items-end mb-3">
-          <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
-            <input type="datetime-local" className={inputCls} value={sf.start_at}
-              onChange={(e) => {
-                const start = e.target.value;
-                const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
-                setSf((p) => ({ ...p, start_at: start, end_at: autoEnd }));
-              }} /></div>
-          <div><label className="block text-xs text-muted-foreground mb-1">End</label>
-            <input type="datetime-local" className={inputCls} value={sf.end_at}
-              onChange={(e) => setSf((p) => ({ ...p, end_at: e.target.value }))} /></div>
-          <div><label className="block text-xs text-muted-foreground mb-1">Ref name</label>
-            <input className={inputCls} placeholder="optional" value={sf.ref_name}
-              onChange={(e) => setSf((p) => ({ ...p, ref_name: e.target.value }))} /></div>
-          <button onClick={createShift} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Add shift</button>
-        </div>
-        {myShifts.length === 0 && <p className="text-sm text-muted-foreground">No shifts yet. Add one above — it appears in the open pool immediately.</p>}
-        <div className="space-y-1">
+        <button onClick={() => setShiftsOpen((o) => !o)} className="flex items-center gap-2 font-semibold text-foreground mb-3 hover:text-primary transition-colors w-full text-left">
+          <ChevronDown className={`w-4 h-4 transition-transform ${shiftsOpen ? 'rotate-180' : ''}`} />
+          <Clock className="w-4 h-4" /> My referee shifts ({myShifts.length})
+        </button>
+        {shiftsOpen && <>
+          <div className="flex flex-wrap gap-3 items-end mb-3">
+            <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
+              <input type="datetime-local" className={inputCls} value={sf.start_at}
+                onChange={(e) => {
+                  const start = e.target.value;
+                  const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
+                  setSf((p) => ({ ...p, start_at: start, end_at: autoEnd }));
+                }} /></div>
+            <div><label className="block text-xs text-muted-foreground mb-1">End</label>
+              <input type="datetime-local" className={inputCls} value={sf.end_at}
+                onChange={(e) => setSf((p) => ({ ...p, end_at: e.target.value }))} /></div>
+            <div><label className="block text-xs text-muted-foreground mb-1">Ref name</label>
+              <input className={inputCls} placeholder="optional" value={sf.ref_name}
+                onChange={(e) => setSf((p) => ({ ...p, ref_name: e.target.value }))} /></div>
+            <button onClick={createShift} className="bg-foreground text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-foreground/90">Add shift</button>
+          </div>
+          {myShifts.length === 0 && <p className="text-sm text-muted-foreground">No shifts yet. Add one above — it appears in the open pool immediately.</p>}
+          <div className="space-y-1">
           {myShifts.map((s) => {
             const canEdit = isSuperAdmin || s.status === 'open';
             const canDelete = isSuperAdmin || s.status === 'open';
@@ -1580,7 +1594,8 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
               </div>
             );
           })}
-        </div>
+          </div>
+        </>}
       </div>
 
       <AnimatePresence>
@@ -1604,8 +1619,11 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
       ))}
       {done.length > 0 && (
         <div className="bg-white rounded-2xl border border-border p-5">
-          <p className="font-semibold text-foreground mb-3">Completed</p>
-          {done.map((m) => {
+          <button onClick={() => setDoneOpen((o) => !o)} className="flex items-center gap-2 font-semibold text-foreground mb-3 hover:text-primary transition-colors w-full text-left">
+            <ChevronDown className={`w-4 h-4 transition-transform ${doneOpen ? 'rotate-180' : ''}`} />
+            Completed ({done.length})
+          </button>
+          {doneOpen && done.map((m) => {
             const a = teamById(m.team_a_id), b = teamById(m.team_b_id);
             return (
               <div key={m.id} className="flex justify-between text-sm py-1.5 border-b border-border/50 last:border-0">
