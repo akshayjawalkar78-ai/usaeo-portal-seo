@@ -120,6 +120,43 @@ export const PARTNERS = [
     wordmark: { text: 'Youth International\nMath Olympiad', fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontWeight: 600, fontSize: '0.75rem', wrap: true },
     tags: ['academic'],
   },
+  {
+    name: 'International Economics Post',
+    shortName: 'IEP',
+    logo: '/logos/International Economics Post.png',
+    url: 'https://www.internationaleconomicspost.com/',
+    desc: 'Economics publication & essay competition support',
+    logoScale: 1.1,
+    wordmark: { text: 'International\nEconomics Post', fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 600, fontSize: '0.8rem', wrap: true },
+    tags: ['academic', 'research'],
+  },
+  {
+    name: 'Financial Freedom Initiative',
+    shortName: 'FFI',
+    logo: '/logos/Financial Freedom Initiative.jpg',
+    url: 'https://bcinvestments.wixsite.com/financial-freedom--2',
+    desc: 'Financial literacy events & cross-promotion',
+    logoScale: 1.2,
+    tags: ['awareness'],
+  },
+  {
+    name: 'BizEmpower',
+    logo: '/logos/BizEmpower.png',
+    url: null,
+    desc: 'Community outreach, grants & volunteer recruitment',
+    logoScale: 1.1,
+    wordmark: { text: 'BizEmpower\nInc.', fontFamily: 'Montserrat, Inter, sans-serif', fontWeight: 800, fontSize: '0.85rem', wrap: true },
+    tags: ['awareness'],
+  },
+  {
+    name: 'Empiric Investing',
+    logo: '/logos/Empiric Investing.png',
+    url: 'https://www.empiricinvesting.me/',
+    desc: 'Financial literacy support & blog content',
+    logoScale: 1.0,
+    wordmark: { text: 'Empiric\nInvesting', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', wrap: true },
+    tags: ['awareness', 'research'],
+  },
 ];
 
 export const PARTNER_BY_NAME = Object.fromEntries(PARTNERS.map(p => [p.name, p]));
