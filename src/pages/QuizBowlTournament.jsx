@@ -9,12 +9,17 @@ import { supabase } from '@/supabaseClient';
 
 const fmt = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
 
+const localDateKey = (d) => {
+  const dt = new Date(d);
+  return [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, '0'), String(dt.getDate()).padStart(2, '0')].join('-');
+};
+
 // Tournament window: May 17–24, 2026 (day-view agenda).
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
-  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  const dt = new Date(2026, 4, 17 + i);
   return {
-    key: dt.toISOString().slice(0, 10),
-    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+    key: localDateKey(dt),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
   };
 });
 
@@ -122,7 +127,7 @@ export default function QuizBowlTournament() {
     } finally { setBusy(false); }
   };
 
-  const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
+  const dayKey = localDateKey;
   const slotDays = new Set(shifts.map((s) => dayKey(s.start_at)));
   const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
 

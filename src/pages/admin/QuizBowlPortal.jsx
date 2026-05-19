@@ -42,11 +42,16 @@ function Modal({ title, onClose, children, wide }) {
   );
 }
 
+const localDateKey = (d) => {
+  const dt = new Date(d);
+  return [dt.getFullYear(), String(dt.getMonth() + 1).padStart(2, '0'), String(dt.getDate()).padStart(2, '0')].join('-');
+};
+
 const TOURNAMENT_DAYS = Array.from({ length: 8 }, (_, i) => {
-  const dt = new Date(Date.UTC(2026, 4, 17 + i));
+  const dt = new Date(2026, 4, 17 + i);
   return {
-    key: dt.toISOString().slice(0, 10),
-    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+    key: localDateKey(dt),
+    label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
   };
 });
 
@@ -1013,7 +1018,11 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
         <div className="flex flex-wrap gap-3 items-end">
           <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
             <input type="datetime-local" className={inputCls} value={shiftForm.start_at}
-              onChange={(e) => setShiftForm((p) => ({ ...p, start_at: e.target.value }))} /></div>
+              onChange={(e) => {
+                const start = e.target.value;
+                const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
+                setShiftForm((p) => ({ ...p, start_at: start, end_at: autoEnd }));
+              }} /></div>
           <div><label className="block text-xs text-muted-foreground mb-1">End</label>
             <input type="datetime-local" className={inputCls} value={shiftForm.end_at}
               onChange={(e) => setShiftForm((p) => ({ ...p, end_at: e.target.value }))} /></div>
@@ -1080,7 +1089,7 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
 
       {/* Calendar + schedule cards */}
       {(() => {
-        const dk = (d) => new Date(d).toISOString().slice(0, 10);
+        const dk = localDateKey;
         // start with the fixed tournament window, union any out-of-range data days
         const extraDaySet = new Set([
           ...shifts.map((s) => dk(s.start_at)),
@@ -1088,7 +1097,7 @@ function ScheduleTab({ teams, matches, shifts, holds, config, isSuperAdmin, myEm
         ]);
         const tournamentKeys = new Set(TOURNAMENT_DAYS.map((d) => d.key));
         const extraDays = [...extraDaySet].filter((d) => !tournamentKeys.has(d)).sort()
-          .map((key) => ({ key, label: new Date(key + 'T12:00:00Z').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }) }));
+          .map((key) => ({ key, label: new Date(key).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) }));
         const allDays = [...TOURNAMENT_DAYS, ...extraDays];
         const selectedDay = calDay || allDays[0]?.key || null;
         const dayShifts = selectedDay ? shifts.filter((s) => dk(s.start_at) === selectedDay).sort((a, b) => new Date(a.start_at) - new Date(b.start_at)) : [];
@@ -1558,7 +1567,11 @@ function RefToolsTab({ matches, holds = [], teamById, protests, config, myEmail,
         <div className="flex flex-wrap gap-3 items-end mb-3">
           <div><label className="block text-xs text-muted-foreground mb-1">Start</label>
             <input type="datetime-local" className={inputCls} value={sf.start_at}
-              onChange={(e) => setSf((p) => ({ ...p, start_at: e.target.value }))} /></div>
+              onChange={(e) => {
+                const start = e.target.value;
+                const autoEnd = start ? new Date(new Date(start).getTime() + 30 * 60000).toISOString().slice(0, 16) : '';
+                setSf((p) => ({ ...p, start_at: start, end_at: autoEnd }));
+              }} /></div>
           <div><label className="block text-xs text-muted-foreground mb-1">End</label>
             <input type="datetime-local" className={inputCls} value={sf.end_at}
               onChange={(e) => setSf((p) => ({ ...p, end_at: e.target.value }))} /></div>
