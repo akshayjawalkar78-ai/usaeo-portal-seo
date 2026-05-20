@@ -141,7 +141,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10">
             {[
-              { value: '600+', label: 'Registered students', sub: `From ${CHAPTER_STATE_COUNT}+ states` },
+              { value: '1100+', label: 'Registered students', sub: `From ${CHAPTER_STATE_COUNT}+ states` },
               { value: '100%', label: 'Free to participate', sub: 'No fees at any stage' },
               { value: `${CHAPTERS_SEED.length}`, label: 'Active school chapters', sub: `Across ${CHAPTER_STATE_COUNT} states` },
               { value: '4', label: 'Competition stages', sub: 'Qualifiers to Finals' },
