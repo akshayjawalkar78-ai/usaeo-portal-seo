@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         // Auto-grant admin access if a pending invite exists for this email
         if (data.role !== 'admin' && data.email) {
           try {
-            const { data: invite } = await supabase
+            const { data: invite, error: inviteErr } = await supabase
               .from('admin_invites')
               .select('id, role_id')
               .eq('email', data.email)
@@ -48,15 +48,23 @@ export const AuthProvider = ({ children }) => {
               .order('invited_at', { ascending: false })
               .limit(1)
               .maybeSingle();
-            if (invite) {
-              await supabase.from('profiles').update({
+            if (inviteErr) {
+              console.error('[auth] admin_invites lookup failed:', inviteErr);
+            } else if (invite) {
+              const { error: profileUpdateErr } = await supabase.from('profiles').update({
                 role: 'admin',
                 admin_role_id: invite.role_id ?? null,
               }).eq('id', userId);
-              await supabase.from('admin_invites').update({ status: 'accepted' }).eq('id', invite.id);
-              data = { ...data, role: 'admin', admin_role_id: invite.role_id ?? null };
+              if (profileUpdateErr) {
+                console.error('[auth] admin invite grant failed (profiles update):', profileUpdateErr);
+              } else {
+                await supabase.from('admin_invites').update({ status: 'accepted' }).eq('id', invite.id);
+                data = { ...data, role: 'admin', admin_role_id: invite.role_id ?? null };
+              }
             }
-          } catch (_) {}
+          } catch (e) {
+            console.error('[auth] admin invite grant threw:', e);
+          }
         }
 
         setProfile(data);

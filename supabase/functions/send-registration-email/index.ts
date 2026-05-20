@@ -107,11 +107,11 @@ serve(async (req) => {
               <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
                 <tr>
                   <td style="border-radius:50px;background:#f97316;">
-                    <a href="${isAdminInvite ? `${siteUrl}/register-account` : `${siteUrl}/login`}" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:50px;">${isAdminInvite ? 'Create Account →' : 'Sign In to Dashboard →'}</a>
+                    <a href="${isAdminInvite ? `${siteUrl}/register` : `${siteUrl}/login`}" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:50px;">${isAdminInvite ? 'Create Account →' : 'Sign In to Dashboard →'}</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin:0;font-size:13px;color:#9ca3af;">${isAdminInvite ? `Already have an account? <a href="${siteUrl}/login" style="color:#f97316;font-weight:600;text-decoration:none;">Sign in here</a>.` : `Don't have an account yet? <a href="${siteUrl}/register-account" style="color:#f97316;font-weight:600;text-decoration:none;">Create one here</a> — it's free.`}</p>
+              <p style="margin:0;font-size:13px;color:#9ca3af;">${isAdminInvite ? `Already have an account? <a href="${siteUrl}/login" style="color:#f97316;font-weight:600;text-decoration:none;">Sign in here</a>.` : `Don't have an account yet? <a href="${siteUrl}/register" style="color:#f97316;font-weight:600;text-decoration:none;">Create one here</a> — it's free.`}</p>
             </td>
           </tr>
           <!-- Footer -->
