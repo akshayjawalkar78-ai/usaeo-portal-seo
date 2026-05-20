@@ -43,6 +43,12 @@ export default function Seo({
           {JSON.stringify(jsonLd)}
         </script>
       )}
+
+      {(!jsonLd && ORG_JSON_LD) && (
+        <script type="application/ld+json">
+          {JSON.stringify(ORG_JSON_LD)}
+        </script>
+      )}
     </Helmet>
   );
 }
