@@ -1989,7 +1989,7 @@ function QBTeamPreviewModal({ team, members, allMatches, teams, brackets, shifts
   const invitedMembers = members.filter(m => m.status === 'invited');
   const rounds = Array.isArray(config?.round_deadlines) ? config.round_deadlines : [];
   const fmtDate = (d) => (d ? new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'TBD');
-  const dayKey = (d) => new Date(d).toISOString().slice(0, 10);
+  const dayKey = localDateKey;
   const slotDays = new Set(shifts.map(s => dayKey(s.start_at)));
   const teamById = (id) => teams.find(t => t.id === id);
   const myBracket = team.bracket_id ? brackets.find(b => b.id === team.bracket_id) : null;
@@ -1997,8 +1997,8 @@ function QBTeamPreviewModal({ team, members, allMatches, teams, brackets, shifts
     teams.filter(t => t.bracket_id === bracketId)
       .sort((a, b) => (b.cumulative_score || 0) - (a.cumulative_score || 0));
   const TOURNAMENT_DAYS_PREVIEW = Array.from({ length: 8 }, (_, i) => {
-    const dt = new Date(Date.UTC(2026, 4, 17 + i));
-    return { key: dt.toISOString().slice(0, 10), label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }) };
+    const dt = new Date(2026, 4, 17 + i);
+    return { key: localDateKey(dt), label: dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) };
   });
 
   return (
