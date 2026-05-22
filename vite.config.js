@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import base44 from "@base44/vite-plugin"
-import react from '@vitejs/plugin-react'
+import react from "@vitejs/plugin-react"
 import { defineConfig } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

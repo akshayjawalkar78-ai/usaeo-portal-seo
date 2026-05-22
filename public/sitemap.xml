@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://usaeo.org/</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/"/>
@@ -11,7 +11,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/about</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/about"/>
@@ -19,7 +19,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions"/>
@@ -27,7 +27,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions/quiz-bowl</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions/quiz-bowl"/>
@@ -35,7 +35,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions/essay</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions/essay"/>
@@ -43,7 +43,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions/qualifiers</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions/qualifiers"/>
@@ -51,7 +51,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions/finals</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions/finals"/>
@@ -59,7 +59,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/competitions/partner-competitions</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/competitions/partner-competitions"/>
@@ -67,7 +67,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/partner-programs</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/partner-programs"/>
@@ -75,7 +75,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/news</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/news"/>
@@ -83,7 +83,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/workshops</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/workshops"/>
@@ -91,7 +91,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/curriculum</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/curriculum"/>
@@ -99,7 +99,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/research</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/research"/>
@@ -107,7 +107,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/chapters</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/chapters"/>
@@ -115,7 +115,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/team</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/team"/>
@@ -123,7 +123,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/partners</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/partners"/>
@@ -131,7 +131,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/careers/apply</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/careers/apply"/>
@@ -139,7 +139,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/legal</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/legal"/>
@@ -147,7 +147,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/register/quiz-bowl</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/register/quiz-bowl"/>
@@ -155,7 +155,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/register/essay</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/register/essay"/>
@@ -163,7 +163,7 @@
   </url>
   <url>
     <loc>https://usaeo.org/register/chapter</loc>
-    <lastmod>2026-05-07</lastmod>
+    <lastmod>2026-05-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en-us" href="https://usaeo.org/register/chapter"/>
